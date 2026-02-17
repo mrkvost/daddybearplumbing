@@ -43,24 +43,34 @@
 </head>
 
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
-<!-- Sticky Header -->
-  <header class="sticky top-0 z-50 w-full bg-primary text-white shadow-md">
+  <!-- Sticky Header -->
+
+  <nav class="sticky top-0 z-50 w-full bg-primary text-white shadow-md">
     <div class="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
-      <button class="flex items-center justify-center p-2 hover:bg-white/10 rounded-lg transition-colors">
+      <button class="flex items-center justify-center p-2 hover:bg-white/10 rounded-lg transition-colors" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
         <span class="material-symbols-outlined text-2xl">menu</span>
       </button>
-  
+
       <div class="flex flex-col items-center">
         <h1 class="text-lg font-black tracking-tight leading-none uppercase">Daddy Bear</h1>
         <p class="text-[10px] tracking-[0.2em] uppercase font-bold text-accent">Plumbing</p>
       </div>
-  
+
       <a class="bg-accent hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all shadow-lg active:scale-95" href="tel:7085550199">
         <span class="material-symbols-outlined text-sm">call</span>
         <span class="font-black text-lg sm:text-sm">(708) 555-2222</span>
       </a>
+
+      <div class="hidden absolute top-full left-0 w-full bg-primary text-white shadow-md border-b border-slate-200 dark:border-slate-800 p-4" id="mobile-menu">
+        <div class="flex flex-col gap-4 font-bold text-slate-700">
+          <a style="color:white" class="hover:bg-white/10" href="#">Home</a>
+          <a style="color:white" class="hover:bg-white/10" href="#">Gallery</a>
+          <a style="color:white" class="hover:bg-white/10" href="#">About Us</a>
+          <a style="color:white" class="hover:bg-white/10" href="#">Reviews</a>
+        </div>
+      </div>
     </div>
-  </header>
+  </nav>
 
   <!-- Hero Section -->
   <section class="relative bg-primary overflow-hidden">
@@ -76,35 +86,28 @@
           La Grange &amp; Villa Park's Most Trusted Plumbing Experts
         </h2>
         <p class="text-white/80 text-lg md:text-xl max-w-2xl mb-10">
-          Professional plumbing services for the Western Suburbs. Licensed, insured, and locally owned. 24/7 Emergency support available.
+          Professional plumbing services for the Western Suburbs. Licensed, insured, and locally owned. Emergency support available within working hours.
         </p>
-      <div class="flex flex-col sm:flex-row gap-4 w-full max-w-md">
-        <button class="flex-1 bg-white/10 backdrop-blur-md text-white border border-white/20 py-4 rounded-xl font-bold text-lg hover:bg-white/20 transition-colors">
-          View Services
-        </button>
-      </div>
     </div>
   </section>
 
   <!-- Trust Stats -->
-  <!--
   <div class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
     <div class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-3 gap-4">
       <div class="text-center">
-      <p class="text-accent text-2xl font-black">24/7</p>
-      <p class="text-slate-500 text-[10px] uppercase font-bold tracking-wider">Emergency</p>
-      </div>
-      <div class="text-center border-x border-slate-200 dark:border-slate-800">
-      <p class="text-accent text-2xl font-black">15+</p>
-      <p class="text-slate-500 text-[10px] uppercase font-bold tracking-wider">Years Exp.</p>
+        <p class="text-accent text-2xl font-black">MON-FRI</p>
+        <p class="text-slate-500 text-[10px] uppercase font-bold tracking-wider">08:00-17:00</p>
       </div>
       <div class="text-center">
-      <p class="text-accent text-2xl font-black">5.0</p>
-      <p class="text-slate-500 text-[10px] uppercase font-bold tracking-wider">Rating</p>
+        <p class="text-accent text-2xl font-black">SAT</p>
+        <p class="text-slate-500 text-[10px] uppercase font-bold tracking-wider">08:00-13:00</p>
+      </div>
+      <div class="text-center border-x border-slate-200 dark:border-slate-800">
+        <p class="text-accent text-2xl font-black">12+</p>
+        <p class="text-slate-500 text-[10px] uppercase font-bold tracking-wider">Years Exp.</p>
       </div>
     </div>
   </div>
-  -->
 
   <!-- Quick Links Grid -->
   <section class="max-w-7xl mx-auto px-4 py-12">
