@@ -1,0 +1,58 @@
+<!-- ServiceAreaComponent: Google Map + service location list -->
+
+<section class="bg-slate-50 dark:bg-slate-800/50 py-16">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+
+      <!-- Left: heading, description, location list -->
+      <div>
+        <h2 class="text-primary dark:text-white text-3xl font-black mb-4">
+          Serving the Western Suburbs
+        </h2>
+        <p class="text-slate-600 dark:text-slate-400 mb-8 text-lg">
+          We are proud to provide top-tier plumbing services across the Western Suburbs.
+          From emergency leaks in Villa Park to water heater installs in La Grange.
+        </p>
+
+        <!--
+          @for iterates over the locations array from the TypeScript class.
+          "track loc" uses the string value itself as the tracking key.
+        -->
+        <div class="grid grid-cols-2 gap-y-3">
+          @for (loc of locations; track loc) {
+            <div class="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-bold">
+              <span class="material-symbols-outlined text-primary">location_on</span>
+              {{ loc }}
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Right: embedded Google Map -->
+      <div class="relative">
+        <div class="w-full aspect-square rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-slate-700">
+          <!--
+            [src] is a property binding — Angular evaluates embedUrl from the
+            TypeScript class and sets it as the iframe's src attribute.
+
+            loading="lazy" tells the browser to defer loading the iframe until
+            it is near the viewport, improving initial page load time.
+
+            To update the map location, change embedUrl in the .ts file.
+          -->
+          <iframe
+            [src]="safeEmbedUrl"
+            width="100%"
+            height="100%"
+            style="border: 0;"
+            allowfullscreen
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Daddy Bear Plumbing service area map"
+          ></iframe>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>

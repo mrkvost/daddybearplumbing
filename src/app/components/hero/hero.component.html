@@ -1,0 +1,36 @@
+<!-- HeroComponent: full-width banner with headline, subtext, and badge -->
+
+<section class="relative bg-primary overflow-hidden">
+
+  <!-- Background image, dimmed with opacity so text stays readable -->
+  <div class="absolute inset-0 opacity-20 pointer-events-none">
+    <div
+      class="w-full h-full bg-center bg-cover"
+      style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCXUKNqfV8hTk52gMXuzXDYgTkHxM8WvXT2Emasm3Og6MUyoEK9-6vatmXMn7jI3iFgpZr2kK6M_8B42Vu0IhDqq-JXTfBtF16E-vBSfxa379nb0PcBUf_uqIOYdy9GIReQqOaE9wAGZkSFnNHjEOhxqZbjkCE1nDxFD15H2S2LbrhsRdoHkFIDIDvSZ9r1o3H3zc6foxdJoa3Qi9bnFikpACCLlUPtDTQfTTg4T4iv5ZQQLsIBF6vjG7RmKmjcp10uBCgz0w7oM3Q');"
+      role="img"
+      aria-label="Professional plumber working on a pipe in a kitchen"
+    ></div>
+  </div>
+
+  <!-- Content — sits above the background image via relative positioning -->
+  <div class="relative max-w-7xl mx-auto px-4 py-12 md:py-20 flex flex-col items-center text-center">
+
+    <!-- Trust badge -->
+    <div class="inline-flex items-center gap-2 bg-accent/20 border border-accent/30 text-accent px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6">
+      <span class="material-symbols-outlined text-sm">verified</span>
+      Serving La Grange &amp; Villa Park
+    </div>
+
+    <!-- Main heading — this is the page's <h1> for SEO -->
+    <h1 class="text-white text-4xl md:text-6xl font-black leading-[1.1] mb-6 max-w-3xl">
+      La Grange &amp; Villa Park's Most Trusted Plumbing Experts
+    </h1>
+
+    <!-- Supporting description -->
+    <p class="text-white/80 text-lg md:text-xl max-w-2xl mb-10">
+      Professional plumbing services for the Western Suburbs. Licensed, insured,
+      and locally owned. Emergency support available within working hours.
+    </p>
+
+  </div>
+</section>

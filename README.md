@@ -1,7 +1,7 @@
 # Daddy Bear Plumbing
 
 Website for a plumbing company serving Chicago's Western Suburbs.
-Built with Angular 18+, Tailwind CSS, deployed to AWS via Terraform.
+Built with Angular 21, Tailwind CSS v3, deployed to AWS via Terraform.
 
 ---
 
@@ -103,7 +103,7 @@ ng serve
 ng build
 ```
 
-Output is written to `dist/daddybearplumbing/browser/`.
+Output is written to `dist/daddy-bear-plumbing/`.
 This is what gets deployed to S3.
 
 ---
@@ -134,7 +134,7 @@ daddybearplumbing/
       components/     # Reusable UI pieces (navbar, footer, etc.)
       pages/          # One folder per route (home, gallery, reviews)
       app.routes.ts   # URL routing configuration
-      app.component.* # Root layout shell (navbar + page content + footer)
+      app.ts / app.html # Root layout shell (navbar + page content + footer)
   infrastructure/
     main.tf           # All AWS resource definitions
     outputs.tf        # Values printed after terraform apply

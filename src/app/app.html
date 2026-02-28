@@ -1,0 +1,19 @@
+<!--
+  AppComponent template — the layout shell rendered on every page.
+
+  <app-navbar> and <app-footer> are always present.
+  <router-outlet> is a placeholder that Angular replaces with the component
+  matching the current URL (defined in app.routes.ts).
+-->
+<app-navbar />
+
+<main class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
+  <!--
+    router-outlet: when the URL is "/",        HomeComponent renders here.
+                   when the URL is "/gallery", GalleryComponent renders here.
+                   when the URL is "/reviews", ReviewsComponent renders here.
+  -->
+  <router-outlet />
+</main>
+
+<app-footer />

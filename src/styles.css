@@ -1,0 +1,22 @@
+/*
+ * Global stylesheet — loaded once for the entire Angular app.
+ *
+ * Tailwind v3 works by scanning source files (configured in tailwind.config.js)
+ * and generating only the CSS classes your templates actually use.
+ *
+ * These three directives are replaced by Tailwind's generated CSS at build time:
+ *   @tailwind base       — browser reset / normalisation styles
+ *   @tailwind components — (reserved for component classes, empty by default)
+ *   @tailwind utilities  — all the utility classes (bg-*, text-*, flex, etc.)
+ *
+ * Custom theme values (colors, fonts, borderRadius) live in tailwind.config.js.
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Base styles ─────────────────────────────────────────────────────────── */
+body {
+  font-family: 'Public Sans', sans-serif;
+  min-height: max(884px, 100dvh);
+}

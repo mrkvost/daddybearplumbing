@@ -1,0 +1,11 @@
+# Vim swap files
+*.sw?
+
+# Compiled output
+# /dist
+
+# Node
+/node_modules
+
+# Miscellaneous
+/.angular/cache
