@@ -1,4 +1,4 @@
-<!-- GalleryComponent: filterable project showcase with lightbox -->
+<!-- GalleryComponent: image gallery loaded from S3 with filename-based metadata -->
 
 <!-- Page header -->
 <section class="bg-primary overflow-hidden">
@@ -17,82 +17,115 @@
   </div>
 </section>
 
-<!-- Category filter bar -->
-<div class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[60px] z-40">
-  <div class="max-w-7xl mx-auto px-4 py-3 flex gap-2 overflow-x-auto">
-    @for (category of categories; track category) {
-      <button
-        (click)="setCategory(category)"
-        [class]="activeCategory === category
-          ? 'bg-accent text-white shadow-md'
-          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'"
-        class="px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all"
-      >
-        {{ category }}
-      </button>
-    }
+<!-- Category filter bar (only shown once images are loaded) -->
+@if (!loading && !error && categories.length > 1) {
+  <div class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[60px] z-40">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex gap-2 overflow-x-auto">
+      @for (category of categories; track category) {
+        <button
+          (click)="setCategory(category)"
+          [class]="activeCategory === category
+            ? 'bg-accent text-white shadow-md'
+            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'"
+          class="px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all"
+        >
+          {{ category }}
+        </button>
+      }
+    </div>
   </div>
-</div>
+}
 
-<!-- Project grid -->
-<section class="max-w-7xl mx-auto px-4 py-12">
+<!-- Loading state -->
+@if (loading) {
+  <div class="max-w-7xl mx-auto px-4 py-24 text-center">
+    <span class="material-symbols-outlined text-5xl text-slate-300 dark:text-slate-600 animate-pulse block mb-4">photo_library</span>
+    <p class="text-slate-500 text-lg">Loading gallery...</p>
+  </div>
+}
 
-  <!-- Results count -->
-  <p class="text-slate-500 text-sm font-medium mb-6">
-    {{ filteredProjects.length }} project{{ filteredProjects.length !== 1 ? 's' : '' }}
-    @if (activeCategory !== 'All') {
-      <span> in <span class="text-primary dark:text-accent font-bold">{{ activeCategory }}</span></span>
-    }
-  </p>
+<!-- Error state -->
+@if (error) {
+  <div class="max-w-7xl mx-auto px-4 py-24 text-center">
+    <span class="material-symbols-outlined text-6xl text-slate-300 dark:text-slate-600 block mb-4">cloud_off</span>
+    <p class="text-slate-500 text-lg font-medium mb-2">Gallery not available yet.</p>
+    <p class="text-slate-400 text-sm">Upload images to <code class="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">s3://kvaking/gallery-photos/</code> to get started.</p>
+  </div>
+}
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-    @for (project of filteredProjects; track project.id) {
-      <div
-        (click)="openLightbox(project)"
-        class="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-accent hover:shadow-lg transition-all cursor-pointer"
-      >
-        <!-- Placeholder image area — replace with real <img> tags when photos are available -->
-        <div class="relative aspect-[4/3] bg-gradient-to-br {{ project.gradient }} flex items-center justify-center overflow-hidden">
-          <span class="material-symbols-outlined text-white/30 text-[80px] group-hover:scale-110 transition-transform duration-300">
-            {{ project.icon }}
-          </span>
-          <!-- Category badge -->
-          <div class="absolute top-3 left-3 bg-black/40 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full">
-            {{ project.category }}
+<!-- Image grid -->
+@if (!loading && !error) {
+  <section class="max-w-7xl mx-auto px-4 py-12">
+
+    <!-- Results count -->
+    <p class="text-slate-500 text-sm font-medium mb-6">
+      {{ filteredImages.length }} photo{{ filteredImages.length !== 1 ? 's' : '' }}
+      @if (activeCategory !== 'All') {
+        <span> in <span class="text-primary dark:text-accent font-bold">{{ activeCategory }}</span></span>
+      }
+    </p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (image of visibleImages; track image.filename) {
+        <div
+          (click)="openLightbox(image)"
+          class="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-accent hover:shadow-lg transition-all cursor-pointer"
+        >
+          <!-- Image -->
+          <div class="relative aspect-[4/3] overflow-hidden bg-slate-100 dark:bg-slate-800">
+            <img
+              [src]="image.url"
+              [alt]="image.categoryLabel + ' project photo'"
+              loading="lazy"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            >
+            <!-- Category badge -->
+            <div class="absolute top-3 left-3 bg-black/40 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full">
+              {{ image.categoryLabel }}
+            </div>
+            <!-- Zoom overlay on hover -->
+            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+              <span class="material-symbols-outlined text-white text-4xl opacity-0 group-hover:opacity-100 transition-opacity">
+                zoom_in
+              </span>
+            </div>
           </div>
-          <!-- View prompt -->
-          <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-            <span class="material-symbols-outlined text-white text-4xl opacity-0 group-hover:opacity-100 transition-opacity">
-              zoom_in
-            </span>
+
+          <!-- Card body -->
+          <div class="p-4">
+            <p class="text-slate-400 text-xs">
+              {{ image.date | date:'mediumDate' }}
+            </p>
           </div>
         </div>
+      }
+    </div>
 
-        <!-- Card body -->
-        <div class="p-5">
-          <h2 class="font-bold text-slate-900 dark:text-white text-lg mb-1 group-hover:text-accent transition-colors">
-            {{ project.title }}
-          </h2>
-          <div class="flex items-center gap-1 text-slate-400 text-sm">
-            <span class="material-symbols-outlined text-sm">location_on</span>
-            {{ project.location }}
-          </div>
-        </div>
+    <!-- Load more button -->
+    @if (hasMore) {
+      <div class="text-center mt-10">
+        <button
+          (click)="loadMore()"
+          class="inline-flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 px-6 py-3 rounded-lg font-bold hover:border-accent hover:text-accent transition-all"
+        >
+          <span class="material-symbols-outlined text-sm">expand_more</span>
+          Load more photos
+        </button>
       </div>
     }
-  </div>
 
-  <!-- Empty state when a filter has no matches -->
-  @if (filteredProjects.length === 0) {
-    <div class="text-center py-16">
-      <span class="material-symbols-outlined text-6xl text-slate-300 dark:text-slate-600 mb-4 block">filter_alt_off</span>
-      <p class="text-slate-500 text-lg font-medium">No projects in this category yet.</p>
-      <button (click)="setCategory('All')" class="mt-4 text-accent font-bold hover:underline">
-        View all projects
-      </button>
-    </div>
-  }
-</section>
+    <!-- Empty state for a filter with no matches -->
+    @if (filteredImages.length === 0) {
+      <div class="text-center py-16">
+        <span class="material-symbols-outlined text-6xl text-slate-300 dark:text-slate-600 mb-4 block">filter_alt_off</span>
+        <p class="text-slate-500 text-lg font-medium">No photos in this category yet.</p>
+        <button (click)="setCategory('All')" class="mt-4 text-accent font-bold hover:underline">
+          View all photos
+        </button>
+      </div>
+    }
+  </section>
+}
 
 <!-- CTA section -->
 <section class="bg-slate-50 dark:bg-slate-800/50 py-16">
@@ -113,46 +146,54 @@
 </section>
 
 <!-- Lightbox modal -->
-@if (selectedProject) {
+@if (selectedImage) {
   <div
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90"
     (click)="closeLightbox()"
   >
+    <!-- Previous button -->
+    <button
+      (click)="$event.stopPropagation(); prevImage()"
+      class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white p-3 rounded-full transition-colors z-10"
+    >
+      <span class="material-symbols-outlined text-2xl">chevron_left</span>
+    </button>
+
+    <!-- Image -->
     <div
-      class="bg-white dark:bg-slate-900 rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl"
+      class="max-w-4xl max-h-[85vh] w-full flex flex-col items-center"
       (click)="$event.stopPropagation()"
     >
-      <!-- Modal image area -->
-      <div class="relative aspect-[16/9] bg-gradient-to-br {{ selectedProject.gradient }} flex items-center justify-center">
-        <span class="material-symbols-outlined text-white/30 text-[100px]">
-          {{ selectedProject.icon }}
+      <img
+        [src]="selectedImage.url"
+        [alt]="selectedImage.categoryLabel + ' project photo'"
+        class="max-h-[75vh] w-auto rounded-lg shadow-2xl object-contain"
+      >
+      <!-- Caption -->
+      <div class="mt-4 text-center">
+        <span class="bg-accent/20 text-accent text-xs font-bold px-3 py-1 rounded-full">
+          {{ selectedImage.categoryLabel }}
         </span>
-        <button
-          (click)="closeLightbox()"
-          class="absolute top-3 right-3 bg-black/40 backdrop-blur-sm text-white p-2 rounded-full hover:bg-black/60 transition-colors"
-        >
-          <span class="material-symbols-outlined">close</span>
-        </button>
-      </div>
-
-      <!-- Modal body -->
-      <div class="p-6">
-        <div class="flex items-center gap-2 mb-3">
-          <span class="bg-accent/10 text-accent text-xs font-bold px-3 py-1 rounded-full">
-            {{ selectedProject.category }}
-          </span>
-          <span class="flex items-center gap-1 text-slate-400 text-sm">
-            <span class="material-symbols-outlined text-sm">location_on</span>
-            {{ selectedProject.location }}
-          </span>
-        </div>
-        <h2 class="font-black text-slate-900 dark:text-white text-2xl mb-3">
-          {{ selectedProject.title }}
-        </h2>
-        <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
-          {{ selectedProject.description }}
+        <p class="text-white/50 text-sm mt-2">
+          {{ selectedImage.date | date:'mediumDate' }}
         </p>
       </div>
     </div>
+
+    <!-- Next button -->
+    <button
+      (click)="$event.stopPropagation(); nextImage()"
+      class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white p-3 rounded-full transition-colors z-10"
+    >
+      <span class="material-symbols-outlined text-2xl">chevron_right</span>
+    </button>
+
+    <!-- Close button -->
+    <button
+      (click)="closeLightbox()"
+      class="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition-colors"
+    >
+      <span class="material-symbols-outlined">close</span>
+    </button>
   </div>
 }
