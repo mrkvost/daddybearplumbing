@@ -40,13 +40,6 @@
     max-width: 1100px;
     margin: 0 auto 64px;
   }
-
-  /* ========== ARCHITECTURE DIAGRAM ========== */
-  .arch-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
   .arch-layer {
     background: #1a1f2e;
     border: 1px solid #2d3548;
@@ -82,223 +75,49 @@
     flex: 1;
     max-width: 240px;
   }
-  .arch-box.highlight {
-    border-color: #f97316;
-    box-shadow: 0 0 12px rgba(249, 115, 22, 0.15);
-  }
-  .arch-box.green {
-    border-color: #22c55e;
-    box-shadow: 0 0 12px rgba(34, 197, 94, 0.1);
-  }
-  .arch-box.blue {
-    border-color: #3b82f6;
-    box-shadow: 0 0 12px rgba(59, 130, 246, 0.1);
-  }
-  .arch-box.purple {
-    border-color: #a855f7;
-    box-shadow: 0 0 12px rgba(168, 85, 247, 0.1);
-  }
-  .arch-box.gray {
-    border-color: #475569;
-    opacity: 0.5;
-  }
-  .arch-box-title {
-    font-weight: 600;
-    font-size: 14px;
-    margin-bottom: 4px;
-  }
-  .arch-box-detail {
-    font-size: 11px;
-    color: #94a3b8;
-  }
-  .arrow-down {
-    text-align: center;
-    color: #475569;
-    font-size: 24px;
-    padding: 4px 0;
-    line-height: 1;
-  }
-  .status-badge {
-    display: inline-block;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 10px;
-    margin-top: 6px;
-  }
+  .arch-box.highlight { border-color: #f97316; box-shadow: 0 0 12px rgba(249, 115, 22, 0.15); }
+  .arch-box.green { border-color: #22c55e; box-shadow: 0 0 12px rgba(34, 197, 94, 0.1); }
+  .arch-box.blue { border-color: #3b82f6; box-shadow: 0 0 12px rgba(59, 130, 246, 0.1); }
+  .arch-box.purple { border-color: #a855f7; box-shadow: 0 0 12px rgba(168, 85, 247, 0.1); }
+  .arch-box.red { border-color: #ef4444; box-shadow: 0 0 12px rgba(239, 68, 68, 0.1); }
+  .arch-box-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .arch-box-detail { font-size: 11px; color: #94a3b8; }
+  .arrow-down { text-align: center; color: #475569; font-size: 24px; padding: 4px 0; line-height: 1; }
+  .status-badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; margin-top: 6px; }
   .status-done { background: #14532d; color: #4ade80; }
   .status-planned { background: #1e1b4b; color: #a78bfa; }
 
-  /* ========== COMPONENT DIAGRAM ========== */
-  .comp-tree {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0;
-  }
+  .comp-tree { display: flex; flex-direction: column; align-items: center; }
   .comp-node {
     background: #1a1f2e;
     border: 2px solid #334155;
     border-radius: 10px;
     padding: 14px 24px;
     text-align: center;
-    position: relative;
     min-width: 180px;
   }
-  .comp-node.root {
-    border-color: #f97316;
-    box-shadow: 0 0 16px rgba(249, 115, 22, 0.2);
-  }
-  .comp-node.layout {
-    border-color: #22c55e;
-  }
-  .comp-node.page {
-    border-color: #3b82f6;
-  }
-  .comp-node.section {
-    border-color: #a855f7;
-  }
-  .comp-node.placeholder {
-    border-color: #475569;
-    opacity: 0.55;
-  }
-  .comp-name {
-    font-weight: 600;
-    font-size: 14px;
-  }
-  .comp-selector {
-    font-size: 11px;
-    color: #94a3b8;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-  }
-  .comp-desc {
-    font-size: 11px;
-    color: #64748b;
-    margin-top: 4px;
-  }
-  .comp-level {
-    display: flex;
-    gap: 16px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  .connector {
-    width: 2px;
-    height: 28px;
-    background: #334155;
-    margin: 0 auto;
-  }
-  .connector-h-group {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    position: relative;
-    padding-top: 0;
-  }
-  .branch-container {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0;
-  }
-  .h-line {
-    height: 2px;
-    background: #334155;
-    margin: 0 auto;
-  }
-  .spread-bar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    margin: 0 auto;
-    height: 28px;
-  }
-  .spread-bar::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: #334155;
-  }
-  .spread-bar-leg {
-    width: 2px;
-    height: 28px;
-    background: #334155;
-  }
+  .comp-node.root { border-color: #f97316; box-shadow: 0 0 16px rgba(249, 115, 22, 0.2); }
+  .comp-node.layout { border-color: #22c55e; }
+  .comp-node.page { border-color: #3b82f6; }
+  .comp-node.section { border-color: #a855f7; }
+  .comp-node.admin { border-color: #ef4444; }
+  .comp-node.placeholder { border-color: #475569; opacity: 0.55; }
+  .comp-name { font-weight: 600; font-size: 14px; }
+  .comp-selector { font-size: 11px; color: #94a3b8; font-family: 'SF Mono', 'Fira Code', monospace; }
+  .comp-desc { font-size: 11px; color: #64748b; margin-top: 4px; }
+  .connector { width: 2px; height: 28px; background: #334155; margin: 0 auto; }
+  .flex-col-center { display: flex; flex-direction: column; align-items: center; }
 
-  /* Layout helpers */
-  .flex-col-center {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  .gap-0 { gap: 0; }
-  .mb-8 { margin-bottom: 8px; }
+  .legend { display: flex; gap: 24px; justify-content: center; margin-bottom: 32px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #94a3b8; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; border: 2px solid; }
 
-  /* Legend */
-  .legend {
-    display: flex;
-    gap: 24px;
-    justify-content: center;
-    margin-bottom: 32px;
-    flex-wrap: wrap;
-  }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    color: #94a3b8;
-  }
-  .legend-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 3px;
-    border: 2px solid;
-  }
-
-  /* Routing table */
-  .route-table {
-    margin: 24px auto 0;
-    border-collapse: collapse;
-    font-size: 13px;
-    max-width: 600px;
-    width: 100%;
-  }
-  .route-table th {
-    text-align: left;
-    padding: 8px 16px;
-    border-bottom: 2px solid #334155;
-    color: #94a3b8;
-    font-weight: 600;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-  .route-table td {
-    padding: 8px 16px;
-    border-bottom: 1px solid #1e293b;
-  }
-  .route-table code {
-    background: #1e293b;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    color: #e2e8f0;
-  }
-  .lazy-tag {
-    display: inline-block;
-    font-size: 10px;
-    background: #1e3a5f;
-    color: #60a5fa;
-    padding: 1px 6px;
-    border-radius: 4px;
-    font-weight: 600;
-  }
+  .route-table { margin: 24px auto 0; border-collapse: collapse; font-size: 13px; max-width: 700px; width: 100%; }
+  .route-table th { text-align: left; padding: 8px 16px; border-bottom: 2px solid #334155; color: #94a3b8; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+  .route-table td { padding: 8px 16px; border-bottom: 1px solid #1e293b; }
+  .route-table code { background: #1e293b; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #e2e8f0; }
+  .lazy-tag { display: inline-block; font-size: 10px; background: #1e3a5f; color: #60a5fa; padding: 1px 6px; border-radius: 4px; font-weight: 600; }
+  .guard-tag { display: inline-block; font-size: 10px; background: #3b1219; color: #f87171; padding: 1px 6px; border-radius: 4px; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -328,19 +147,16 @@
     <span class="arch-layer-label">Local Development</span>
     <div class="arch-row">
       <div class="arch-box green">
-        <div class="arch-box-title">ng serve</div>
-        <div class="arch-box-detail">Dev server :4200<br>Hot reload<br>Source maps</div>
-        <span class="status-badge status-done">Active</span>
-      </div>
-      <div class="arch-box green">
         <div class="arch-box-title">Docker Build</div>
         <div class="arch-box-detail">docker_build.sh<br>node:22-alpine<br>Bind mount &rarr; dist/</div>
-        <span class="status-badge status-done">Active</span>
       </div>
       <div class="arch-box green">
         <div class="arch-box-title">Docker Serve</div>
         <div class="arch-box-detail">docker_serve.sh<br>nginx:alpine :8080<br>SPA fallback routing</div>
-        <span class="status-badge status-done">Active</span>
+      </div>
+      <div class="arch-box green">
+        <div class="arch-box-title">deploy.sh</div>
+        <div class="arch-box-detail">S3 sync + CloudFront<br>cache invalidation</div>
       </div>
     </div>
   </div>
@@ -366,21 +182,15 @@
     </div>
   </div>
 
-  <div class="arrow-down">&darr; dist/daddy-bear-plumbing/browser/</div>
+  <div class="arrow-down">&darr;</div>
 
-  <!-- Deployment Layer -->
+  <!-- Terraform Layer -->
   <div class="arch-layer" style="margin-bottom: 8px;">
-    <span class="arch-layer-label">Deployment (Planned)</span>
+    <span class="arch-layer-label">Infrastructure (Terraform)</span>
     <div class="arch-row">
-      <div class="arch-box gray">
-        <div class="arch-box-title">deploy.sh</div>
-        <div class="arch-box-detail">Build + sync S3<br>Invalidate CDN cache</div>
-        <span class="status-badge status-planned">Goal 2</span>
-      </div>
-      <div class="arch-box gray">
+      <div class="arch-box purple">
         <div class="arch-box-title">Terraform</div>
-        <div class="arch-box-detail">Infrastructure as Code<br>Remote state (S3+DDB)</div>
-        <span class="status-badge status-planned">Goal 2</span>
+        <div class="arch-box-detail">All resources in main.tf<br>Remote state (S3+DDB)<br>Parameterized via .tfvars</div>
       </div>
     </div>
   </div>
@@ -388,28 +198,58 @@
   <div class="arrow-down">&darr;</div>
 
   <!-- AWS Layer -->
-  <div class="arch-layer">
-    <span class="arch-layer-label">AWS Infrastructure (Planned)</span>
+  <div class="arch-layer" style="margin-bottom: 8px;">
+    <span class="arch-layer-label">AWS — CDN & DNS</span>
     <div class="arch-row">
-      <div class="arch-box gray">
+      <div class="arch-box green">
         <div class="arch-box-title">Route 53</div>
-        <div class="arch-box-detail">DNS<br>kvaking.com<br>A + AAAA records</div>
-        <span class="status-badge status-planned">Goal 2</span>
+        <div class="arch-box-detail">DNS<br>A + AAAA alias records<br>&rarr; CloudFront</div>
       </div>
-      <div class="arch-box gray">
-        <div class="arch-box-title">CloudFront</div>
-        <div class="arch-box-detail">CDN + HTTPS<br>OAC auth to S3<br>Gzip + Brotli</div>
-        <span class="status-badge status-planned">Goal 2</span>
-      </div>
-      <div class="arch-box gray">
-        <div class="arch-box-title">S3 Bucket</div>
-        <div class="arch-box-detail">Static hosting<br>Private + versioned<br>Build artifacts</div>
-        <span class="status-badge status-planned">Goal 2</span>
-      </div>
-      <div class="arch-box gray">
+      <div class="arch-box green">
         <div class="arch-box-title">ACM</div>
-        <div class="arch-box-detail">TLS Certificate<br>DNS validation<br>Auto-renewal</div>
-        <span class="status-badge status-planned">Goal 2</span>
+        <div class="arch-box-detail">TLS Certificate<br>*.domain + domain<br>DNS validation</div>
+      </div>
+      <div class="arch-box green">
+        <div class="arch-box-title">CloudFront</div>
+        <div class="arch-box-detail">CDN + HTTPS + WAF<br>OAC &rarr; S3<br>SPA error pages (403/404)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-down">&darr; 3 origins with path behaviors</div>
+
+  <!-- S3 Layer -->
+  <div class="arch-layer" style="margin-bottom: 8px;">
+    <span class="arch-layer-label">AWS — S3 Storage (all private, OAC only)</span>
+    <div class="arch-row">
+      <div class="arch-box green">
+        <div class="arch-box-title">Site Bucket</div>
+        <div class="arch-box-detail">Angular build output<br>Default behavior: /*<br>deploy.sh &rarr; sync</div>
+      </div>
+      <div class="arch-box green">
+        <div class="arch-box-title">Gallery Bucket</div>
+        <div class="arch-box-detail">Photos + gallery.json<br>/gallery-images/*<br>Admin uploads via Cognito</div>
+      </div>
+      <div class="arch-box green">
+        <div class="arch-box-title">Reviews Bucket</div>
+        <div class="arch-box-detail">Review data<br>/reviews-data/*<br>Admin manages via Cognito</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-down">&darr;</div>
+
+  <!-- Auth Layer -->
+  <div class="arch-layer">
+    <span class="arch-layer-label">AWS — Authentication (Admin)</span>
+    <div class="arch-row">
+      <div class="arch-box red">
+        <div class="arch-box-title">Cognito User Pool</div>
+        <div class="arch-box-detail">Admin accounts<br>No self-signup<br>Password auth flow</div>
+      </div>
+      <div class="arch-box red">
+        <div class="arch-box-title">Cognito Identity Pool</div>
+        <div class="arch-box-detail">JWT &rarr; temp AWS creds<br>Scoped to gallery +<br>reviews buckets only</div>
       </div>
     </div>
   </div>
@@ -424,23 +264,23 @@
     <div class="legend-item"><div class="legend-dot" style="border-color: #22c55e;"></div> Layout (always visible)</div>
     <div class="legend-item"><div class="legend-dot" style="border-color: #3b82f6;"></div> Page (routed)</div>
     <div class="legend-item"><div class="legend-dot" style="border-color: #a855f7;"></div> Section component</div>
+    <div class="legend-item"><div class="legend-dot" style="border-color: #ef4444;"></div> Admin (auth guarded)</div>
     <div class="legend-item"><div class="legend-dot" style="border-color: #475569; opacity: 0.55;"></div> Placeholder</div>
   </div>
 
   <div class="comp-tree">
 
-    <!-- Root: AppComponent -->
+    <!-- Root -->
     <div class="comp-node root">
       <div class="comp-name">AppComponent</div>
       <div class="comp-selector">&lt;app-root&gt;</div>
-      <div class="comp-desc">Master layout shell</div>
+      <div class="comp-desc">Layout shell: navbar + router-outlet + footer</div>
     </div>
 
     <div class="connector"></div>
 
-    <!-- AppComponent children: Navbar, RouterOutlet, Footer -->
     <div style="display: flex; gap: 0; align-items: flex-start; justify-content: center; width: 100%;">
-      <!-- Left branch: Navbar -->
+      <!-- Navbar -->
       <div class="flex-col-center" style="flex: 0 0 200px;">
         <svg width="200" height="28" style="display: block;">
           <line x1="100" y1="0" x2="100" y2="28" stroke="#334155" stroke-width="2"/>
@@ -448,19 +288,17 @@
         <div class="comp-node layout">
           <div class="comp-name">NavbarComponent</div>
           <div class="comp-selector">&lt;app-navbar&gt;</div>
-          <div class="comp-desc">Sticky header + mobile menu<br>Logo, nav links, CTA call btn</div>
+          <div class="comp-desc">Fixed header + dropdown menu<br>Logo, nav links, call CTA</div>
         </div>
       </div>
 
-      <!-- Center branch: Router Outlet -->
-      <div class="flex-col-center" style="flex: 0 0 auto; min-width: 520px;">
-        <svg width="520" height="28" style="display: block;">
-          <!-- horizontal bar connecting all three -->
-          <line x1="100" y1="0" x2="420" y2="0" stroke="#334155" stroke-width="2"/>
-          <!-- vertical legs -->
+      <!-- Router Outlet -->
+      <div class="flex-col-center" style="flex: 0 0 auto; min-width: 780px;">
+        <svg width="780" height="28" style="display: block;">
+          <line x1="100" y1="0" x2="680" y2="0" stroke="#334155" stroke-width="2"/>
           <line x1="100" y1="0" x2="100" y2="28" stroke="#334155" stroke-width="2"/>
-          <line x1="260" y1="0" x2="260" y2="28" stroke="#334155" stroke-width="2"/>
-          <line x1="420" y1="0" x2="420" y2="28" stroke="#334155" stroke-width="2"/>
+          <line x1="390" y1="0" x2="390" y2="28" stroke="#334155" stroke-width="2"/>
+          <line x1="680" y1="0" x2="680" y2="28" stroke="#334155" stroke-width="2"/>
         </svg>
 
         <div style="background: #1a1f2e; border: 2px dashed #475569; border-radius: 10px; padding: 14px 24px; text-align: center; min-width: 200px;">
@@ -470,8 +308,9 @@
 
         <div class="connector"></div>
 
-        <!-- Three page routes -->
+        <!-- Pages -->
         <div style="display: flex; gap: 16px; justify-content: center; width: 100%;">
+
           <!-- Home -->
           <div class="flex-col-center">
             <div class="comp-node page" style="min-width: 160px;">
@@ -480,26 +319,21 @@
               <div class="comp-desc">Composition of sections</div>
             </div>
             <div class="connector"></div>
-            <!-- Home's children -->
             <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
               <div class="comp-node section" style="min-width: 140px; padding: 10px 16px;">
                 <div class="comp-name" style="font-size: 12px;">HeroComponent</div>
-                <div class="comp-selector">&lt;app-hero&gt;</div>
-                <div class="comp-desc">Full-width banner + CTA</div>
+                <div class="comp-desc">Grayscale hero + headline</div>
               </div>
               <div class="comp-node section" style="min-width: 140px; padding: 10px 16px;">
                 <div class="comp-name" style="font-size: 12px;">TrustStatsComponent</div>
-                <div class="comp-selector">&lt;app-trust-stats&gt;</div>
-                <div class="comp-desc">Hours + experience bar</div>
+                <div class="comp-desc">Operational hours</div>
               </div>
               <div class="comp-node section" style="min-width: 140px; padding: 10px 16px;">
                 <div class="comp-name" style="font-size: 12px;">ServicesGridComponent</div>
-                <div class="comp-selector">&lt;app-services-grid&gt;</div>
-                <div class="comp-desc">4 service cards</div>
+                <div class="comp-desc">4 service cards + hover</div>
               </div>
               <div class="comp-node section" style="min-width: 140px; padding: 10px 16px;">
                 <div class="comp-name" style="font-size: 12px;">ServiceAreaComponent</div>
-                <div class="comp-selector">&lt;app-service-area&gt;</div>
                 <div class="comp-desc">Google Maps + locations</div>
               </div>
             </div>
@@ -507,10 +341,10 @@
 
           <!-- Gallery -->
           <div class="flex-col-center">
-            <div class="comp-node placeholder" style="min-width: 160px;">
+            <div class="comp-node page" style="min-width: 160px;">
               <div class="comp-name">GalleryComponent</div>
               <div class="comp-selector">/gallery</div>
-              <div class="comp-desc">Placeholder - "Coming soon"</div>
+              <div class="comp-desc">S3 image grid + tags<br>Lightbox + load more</div>
             </div>
           </div>
 
@@ -519,13 +353,28 @@
             <div class="comp-node placeholder" style="min-width: 160px;">
               <div class="comp-name">ReviewsComponent</div>
               <div class="comp-selector">/reviews</div>
-              <div class="comp-desc">Placeholder - "Coming soon"</div>
+              <div class="comp-desc">Placeholder</div>
+            </div>
+          </div>
+
+          <!-- Admin -->
+          <div class="flex-col-center">
+            <div class="comp-node admin" style="min-width: 160px;">
+              <div class="comp-name">AdminComponent</div>
+              <div class="comp-selector">/admin</div>
+              <div class="comp-desc">Gallery management<br>Upload, delete, reorder</div>
+            </div>
+            <div class="connector"></div>
+            <div class="comp-node admin" style="min-width: 160px; padding: 10px 16px;">
+              <div class="comp-name" style="font-size: 12px;">LoginComponent</div>
+              <div class="comp-selector">/admin/login</div>
+              <div class="comp-desc">Cognito auth</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Right branch: Footer -->
+      <!-- Footer -->
       <div class="flex-col-center" style="flex: 0 0 200px;">
         <svg width="200" height="28" style="display: block;">
           <line x1="100" y1="0" x2="100" y2="28" stroke="#334155" stroke-width="2"/>
@@ -533,11 +382,28 @@
         <div class="comp-node layout">
           <div class="comp-name">FooterComponent</div>
           <div class="comp-selector">&lt;app-footer&gt;</div>
-          <div class="comp-desc">Copyright + service area</div>
+          <div class="comp-desc">Copyright + links</div>
         </div>
       </div>
     </div>
 
+  </div>
+
+  <!-- Services -->
+  <h2 style="font-size: 18px; margin-top: 48px;">Services</h2>
+  <div class="arch-row" style="margin-bottom: 32px;">
+    <div class="arch-box purple" style="max-width: 200px;">
+      <div class="arch-box-title">AuthService</div>
+      <div class="arch-box-detail">Cognito sign-in<br>Get temp AWS credentials</div>
+    </div>
+    <div class="arch-box purple" style="max-width: 200px;">
+      <div class="arch-box-title">UploadService</div>
+      <div class="arch-box-detail">S3 upload/delete/copy<br>SigV4 signing</div>
+    </div>
+    <div class="arch-box purple" style="max-width: 200px;">
+      <div class="arch-box-title">GalleryService</div>
+      <div class="arch-box-detail">Load gallery.json<br>Parse filenames to images</div>
+    </div>
   </div>
 
   <!-- Routing Table -->
@@ -548,6 +414,7 @@
         <th>Path</th>
         <th>Component</th>
         <th>Loading</th>
+        <th>Guard</th>
         <th>Status</th>
       </tr>
     </thead>
@@ -556,23 +423,41 @@
         <td><code>/</code></td>
         <td>HomeComponent</td>
         <td><span class="lazy-tag">Lazy</span></td>
+        <td>&mdash;</td>
         <td><span class="status-badge status-done">Complete</span></td>
       </tr>
       <tr>
         <td><code>/gallery</code></td>
         <td>GalleryComponent</td>
         <td><span class="lazy-tag">Lazy</span></td>
-        <td><span class="status-badge status-planned">Placeholder</span></td>
+        <td>&mdash;</td>
+        <td><span class="status-badge status-done">Complete</span></td>
       </tr>
       <tr>
         <td><code>/reviews</code></td>
         <td>ReviewsComponent</td>
         <td><span class="lazy-tag">Lazy</span></td>
+        <td>&mdash;</td>
         <td><span class="status-badge status-planned">Placeholder</span></td>
+      </tr>
+      <tr>
+        <td><code>/admin</code></td>
+        <td>AdminComponent</td>
+        <td><span class="lazy-tag">Lazy</span></td>
+        <td><span class="guard-tag">authGuard</span></td>
+        <td><span class="status-badge status-done">Complete</span></td>
+      </tr>
+      <tr>
+        <td><code>/admin/login</code></td>
+        <td>LoginComponent</td>
+        <td><span class="lazy-tag">Lazy</span></td>
+        <td>&mdash;</td>
+        <td><span class="status-badge status-done">Complete</span></td>
       </tr>
       <tr>
         <td><code>**</code></td>
         <td>Redirect &rarr; <code>/</code></td>
+        <td>&mdash;</td>
         <td>&mdash;</td>
         <td><span class="status-badge status-done">Complete</span></td>
       </tr>
