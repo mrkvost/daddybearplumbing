@@ -42,7 +42,7 @@ export class ServiceAreaComponent {
    * Replace the URL string below with your actual Google Maps embed URL.
    */
   safeEmbedUrl: SafeResourceUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-    'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d23819.37!2d-87.8698!3d41.8081!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x880e4e4a2a2a2a2b%3A0x0!2sLa+Grange%2C+IL!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus'
+    'https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=26+Calendar+Ave,+La+Grange,+IL+60525&zoom=13'
   );
 
   /* Service area towns displayed in the location list */
