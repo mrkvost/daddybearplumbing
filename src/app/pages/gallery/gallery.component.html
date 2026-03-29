@@ -1,33 +1,27 @@
-<!-- GalleryComponent: image gallery loaded from S3 with filename-based metadata -->
-
 <!-- Page header -->
-<section class="bg-primary overflow-hidden">
-  <div class="max-w-7xl mx-auto px-4 py-12 md:py-16 text-center">
-    <div class="inline-flex items-center gap-2 bg-accent/20 border border-accent/30 text-accent px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6">
-      <span class="material-symbols-outlined text-sm">photo_library</span>
-      Our Work
-    </div>
-    <h1 class="text-white text-4xl md:text-5xl font-black leading-[1.1] mb-4">
+<section class="relative h-[300px] flex items-end overflow-hidden bg-black">
+  <div class="absolute inset-0 z-0">
+    <div class="w-full h-full bg-surface-container-high opacity-20"></div>
+  </div>
+  <div class="relative z-10 w-full max-w-7xl mx-auto px-6 pb-12">
+    <p class="text-white/50 text-[0.7rem] font-bold tracking-[0.3em] uppercase mb-4">Documentation</p>
+    <h1 class="font-headline font-black text-5xl md:text-7xl text-white leading-[0.9] tracking-tighter uppercase">
       Project Gallery
     </h1>
-    <p class="text-white/70 text-lg max-w-2xl mx-auto">
-      Browse photos from our recent plumbing projects across the Western Suburbs.
-      Every job is completed to code with a satisfaction guarantee.
-    </p>
   </div>
 </section>
 
-<!-- Category filter bar (only shown once images are loaded) -->
+<!-- Category filter bar -->
 @if (!loading && !error && categories.length > 1) {
-  <div class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[60px] z-40">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex gap-2 overflow-x-auto">
+  <div class="bg-surface-container-lowest border-b border-outline-variant/20 sticky top-[60px] z-40">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex gap-3 overflow-x-auto">
       @for (category of categories; track category) {
         <button
           (click)="setCategory(category)"
           [class]="activeCategory === category
-            ? 'bg-accent text-white shadow-md'
-            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'"
-          class="px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all"
+            ? 'bg-primary text-white'
+            : 'bg-surface-container-low text-secondary hover:bg-surface-container-high'"
+          class="px-4 py-2 text-xs font-headline font-bold uppercase tracking-widest whitespace-nowrap transition-all"
         >
           {{ category }}
         </button>
@@ -38,62 +32,51 @@
 
 <!-- Loading state -->
 @if (loading) {
-  <div class="max-w-7xl mx-auto px-4 py-24 text-center">
-    <span class="material-symbols-outlined text-5xl text-slate-300 dark:text-slate-600 animate-pulse block mb-4">photo_library</span>
-    <p class="text-slate-500 text-lg">Loading gallery...</p>
+  <div class="max-w-7xl mx-auto px-6 py-24 text-center">
+    <span class="material-symbols-outlined text-5xl text-outline-variant animate-pulse block mb-4">photo_library</span>
+    <p class="text-secondary text-sm uppercase tracking-widest">Loading gallery...</p>
   </div>
 }
 
 <!-- Error state -->
 @if (error) {
-  <div class="max-w-7xl mx-auto px-4 py-24 text-center">
-    <span class="material-symbols-outlined text-6xl text-slate-300 dark:text-slate-600 block mb-4">cloud_off</span>
-    <p class="text-slate-500 text-lg font-medium mb-2">Gallery not available yet.</p>
-    <p class="text-slate-400 text-sm">Upload images to <code class="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">s3://kvaking/gallery-photos/</code> to get started.</p>
+  <div class="max-w-7xl mx-auto px-6 py-24 text-center">
+    <span class="material-symbols-outlined text-6xl text-outline-variant block mb-4">cloud_off</span>
+    <p class="text-on-surface font-headline font-bold text-lg uppercase mb-2">Gallery not available yet</p>
+    <p class="text-secondary text-sm">Upload images to <code class="bg-surface-container-low px-2 py-0.5">s3://kvaking/gallery-photos/</code> to get started.</p>
   </div>
 }
 
 <!-- Image grid -->
 @if (!loading && !error) {
-  <section class="max-w-7xl mx-auto px-4 py-12">
-
-    <!-- Results count -->
-    <p class="text-slate-500 text-sm font-medium mb-6">
+  <section class="max-w-7xl mx-auto px-6 py-16">
+    <p class="text-secondary text-[0.7rem] font-bold tracking-[0.3em] uppercase mb-8">
       {{ filteredImages.length }} photo{{ filteredImages.length !== 1 ? 's' : '' }}
       @if (activeCategory !== 'All') {
-        <span> in <span class="text-primary dark:text-accent font-bold">{{ activeCategory }}</span></span>
+        <span> — {{ activeCategory }}</span>
       }
     </p>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0 ghost-border">
       @for (image of visibleImages; track image.filename) {
         <div
           (click)="openLightbox(image)"
-          class="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-accent hover:shadow-lg transition-all cursor-pointer"
+          class="group border-r border-b border-outline-variant/20 overflow-hidden cursor-pointer last:border-r-0"
         >
-          <!-- Image -->
-          <div class="relative aspect-[4/3] overflow-hidden bg-slate-100 dark:bg-slate-800">
+          <div class="relative aspect-[4/3] overflow-hidden bg-surface-container-low">
             <img
               [src]="image.url"
               [alt]="image.categoryLabel + ' project photo'"
               loading="lazy"
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              class="w-full h-full object-cover grayscale-filter group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
             >
-            <!-- Category badge -->
-            <div class="absolute top-3 left-3 bg-black/40 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full">
+            <div class="absolute top-0 left-0 bg-black/60 text-white text-[0.65rem] font-headline font-bold uppercase tracking-widest px-4 py-2">
               {{ image.categoryLabel }}
             </div>
-            <!-- Zoom overlay on hover -->
-            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-              <span class="material-symbols-outlined text-white text-4xl opacity-0 group-hover:opacity-100 transition-opacity">
-                zoom_in
-              </span>
-            </div>
+            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
           </div>
-
-          <!-- Card body -->
-          <div class="p-4">
-            <p class="text-slate-400 text-xs">
+          <div class="p-4 bg-surface-container-low group-hover:bg-surface-container-lowest transition-colors">
+            <p class="text-secondary text-xs font-body">
               {{ image.date | date:'mediumDate' }}
             </p>
           </div>
@@ -101,25 +84,22 @@
       }
     </div>
 
-    <!-- Load more button -->
     @if (hasMore) {
-      <div class="text-center mt-10">
+      <div class="text-center mt-16">
         <button
           (click)="loadMore()"
-          class="inline-flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 px-6 py-3 rounded-lg font-bold hover:border-accent hover:text-accent transition-all"
+          class="bg-primary text-white px-8 py-3 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all"
         >
-          <span class="material-symbols-outlined text-sm">expand_more</span>
           Load more photos
         </button>
       </div>
     }
 
-    <!-- Empty state for a filter with no matches -->
     @if (filteredImages.length === 0) {
       <div class="text-center py-16">
-        <span class="material-symbols-outlined text-6xl text-slate-300 dark:text-slate-600 mb-4 block">filter_alt_off</span>
-        <p class="text-slate-500 text-lg font-medium">No photos in this category yet.</p>
-        <button (click)="setCategory('All')" class="mt-4 text-accent font-bold hover:underline">
+        <span class="material-symbols-outlined text-6xl text-outline-variant mb-4 block">filter_alt_off</span>
+        <p class="text-on-surface font-headline font-bold uppercase mb-4">No photos in this category</p>
+        <button (click)="setCategory('All')" class="text-primary-fixed font-headline font-bold text-sm uppercase tracking-widest hover:underline">
           View all photos
         </button>
       </div>
@@ -128,19 +108,19 @@
 }
 
 <!-- CTA section -->
-<section class="bg-slate-50 dark:bg-slate-800/50 py-16">
-  <div class="max-w-3xl mx-auto px-4 text-center">
-    <h2 class="text-primary dark:text-white text-2xl font-black mb-4">Want Your Project Featured Here?</h2>
-    <p class="text-slate-500 mb-6">
+<section class="py-24 px-6 bg-surface-container-low border-t border-outline-variant/20">
+  <div class="max-w-3xl mx-auto text-center">
+    <h2 class="font-headline font-black text-3xl tracking-tighter uppercase mb-6">Want Your Project Featured Here?</h2>
+    <p class="text-secondary text-sm leading-relaxed mb-8">
       Every project we complete is a testament to our quality craftsmanship.
       Call us today to get started on your next plumbing project.
     </p>
     <a
       href="tel:7085552222"
-      class="inline-flex items-center gap-2 bg-accent hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-lg active:scale-95"
+      class="inline-flex items-center gap-2 bg-primary-fixed text-white px-6 py-3 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all"
     >
-      <span class="material-symbols-outlined text-sm">call</span>
-      (708) 555-2222
+      <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">call</span>
+      CALL (708) 555-2222
     </a>
   </div>
 </section>
@@ -151,15 +131,13 @@
     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90"
     (click)="closeLightbox()"
   >
-    <!-- Previous button -->
     <button
       (click)="$event.stopPropagation(); prevImage()"
-      class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white p-3 rounded-full transition-colors z-10"
+      class="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-3 transition-colors z-10"
     >
-      <span class="material-symbols-outlined text-2xl">chevron_left</span>
+      <span class="material-symbols-outlined text-3xl">chevron_left</span>
     </button>
 
-    <!-- Image -->
     <div
       class="max-w-4xl max-h-[85vh] w-full flex flex-col items-center"
       (click)="$event.stopPropagation()"
@@ -167,31 +145,28 @@
       <img
         [src]="selectedImage.url"
         [alt]="selectedImage.categoryLabel + ' project photo'"
-        class="max-h-[75vh] w-auto rounded-lg shadow-2xl object-contain"
+        class="max-h-[75vh] w-auto object-contain"
       >
-      <!-- Caption -->
-      <div class="mt-4 text-center">
-        <span class="bg-accent/20 text-accent text-xs font-bold px-3 py-1 rounded-full">
+      <div class="mt-6 text-center">
+        <span class="bg-white/10 text-white text-[0.65rem] font-headline font-bold uppercase tracking-widest px-4 py-2">
           {{ selectedImage.categoryLabel }}
         </span>
-        <p class="text-white/50 text-sm mt-2">
+        <p class="text-white/40 text-xs mt-3 font-body">
           {{ selectedImage.date | date:'mediumDate' }}
         </p>
       </div>
     </div>
 
-    <!-- Next button -->
     <button
       (click)="$event.stopPropagation(); nextImage()"
-      class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white p-3 rounded-full transition-colors z-10"
+      class="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-3 transition-colors z-10"
     >
-      <span class="material-symbols-outlined text-2xl">chevron_right</span>
+      <span class="material-symbols-outlined text-3xl">chevron_right</span>
     </button>
 
-    <!-- Close button -->
     <button
       (click)="closeLightbox()"
-      class="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition-colors"
+      class="absolute top-4 right-4 text-white/50 hover:text-white p-2 transition-colors"
     >
       <span class="material-symbols-outlined">close</span>
     </button>

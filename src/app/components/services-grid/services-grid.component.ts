@@ -1,16 +1,4 @@
-/*
- * ServicesGridComponent
- *
- * A 2×2 (mobile) / 4-column (desktop) grid of service cards.
- *
- * The services array is defined as component data here and iterated
- * in the template with @for — Angular's built-in looping syntax.
- * Keeping the data in the TypeScript class makes it easy to add,
- * remove, or reorder cards without touching HTML structure.
- */
 import { Component } from '@angular/core';
-
-// NgFor equivalent in modern Angular — imported so the template can use @for
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -20,30 +8,26 @@ import { CommonModule } from '@angular/common';
   templateUrl: './services-grid.component.html',
 })
 export class ServicesGridComponent {
-  /*
-   * Each service is an object with an icon name (from Material Symbols),
-   * a title, and a short subtitle. Add more objects here to add more cards.
-   */
   services = [
     {
-      icon: 'build',
+      icon: 'emergency_home',
       title: 'Emergency Repairs',
-      subtitle: 'Fast localized support',
+      subtitle: 'Rapid response for structural leaks and mechanical failures. Available for critical interventions.',
     },
     {
-      icon: 'thermostat',
+      icon: 'hot_tub',
       title: 'Water Heaters',
-      subtitle: 'Install & Repair',
+      subtitle: 'High-efficiency boiler installation and maintenance. Precision calibration for optimal thermal output.',
     },
     {
-      icon: 'water_drop',
+      icon: 'water_damage',
       title: 'Drain Cleaning',
-      subtitle: 'Clog removal experts',
+      subtitle: 'Hydro-jetting and mechanical clearance of obstruction points within residential mainlines.',
     },
     {
-      icon: 'home_repair_service',
-      title: 'Pipe Relining',
-      subtitle: 'Modern trenchless tech',
+      icon: 'videocam',
+      title: 'Pipe Inspection',
+      subtitle: 'Non-invasive diagnostic imaging using high-resolution specialized fiber optic camera systems.',
     },
   ];
 }

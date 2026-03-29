@@ -1,16 +1,14 @@
-<!-- FooterComponent: site-wide footer, shown on every page -->
-
-<footer class="bg-primary text-white py-3 px-4">
-  <div class="mt-4 text-center border-t border-white/10 pt-8 max-w-7xl mx-auto">
-
-    <!-- {{ currentYear }} inserts the value from the TypeScript class -->
-    <p class="text-xs text-white/40 uppercase tracking-[0.3em] font-bold">
-      Daddy Bear Plumbing &copy; {{ currentYear }}
-    </p>
-    <p class="text-[10px] text-white/30 mt-2">
-      Serving La Grange, Villa Park, and the surrounding Western Suburbs.
-      Licensed Plumbing Contractor.
-    </p>
-
+<footer class="bg-surface-container-low w-full border-t border-outline-variant/20">
+  <div class="flex flex-col md:flex-row justify-between items-center px-8 py-12 w-full max-w-7xl mx-auto">
+    <div class="mb-8 md:mb-0">
+      <span class="font-headline font-bold text-primary text-xl tracking-tighter uppercase">DADDY BEAR PLUMBING</span>
+      <p class="font-body text-[0.75rem] tracking-tight leading-relaxed uppercase text-secondary mt-2">
+        &copy; {{ currentYear }} DADDY BEAR PLUMBING. PRECISION ENGINEERING.
+      </p>
+    </div>
+    <nav class="flex gap-8">
+      <a class="font-body text-[0.75rem] tracking-tight uppercase text-secondary hover:text-primary underline transition-colors" href="#">Privacy Policy</a>
+      <a class="font-body text-[0.75rem] tracking-tight uppercase text-secondary hover:text-primary underline transition-colors" href="#">Terms of Service</a>
+    </nav>
   </div>
 </footer>

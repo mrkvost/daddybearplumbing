@@ -1,41 +1,27 @@
-<!-- ServicesGridComponent: card grid of offered services -->
+<section class="bg-surface py-24 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex justify-between items-end mb-16 border-b border-outline-variant/20 pb-8">
+      <div>
+        <p class="text-secondary text-[0.7rem] font-bold tracking-[0.3em] uppercase mb-4">Core Disciplines</p>
+        <h2 class="font-headline font-black text-4xl tracking-tighter uppercase">Specialized Solutions</h2>
+      </div>
+      <div class="hidden md:block text-right">
+        <p class="text-secondary font-body text-[0.7rem]">ISO 9001 COMPLIANT</p>
+        <p class="text-secondary font-body text-[0.7rem]">LICENSED &amp; BONDED</p>
+      </div>
+    </div>
 
-<section class="max-w-7xl mx-auto px-4 py-12">
-
-  <div class="flex items-end justify-between mb-8">
-    <div>
-      <h2 class="text-primary dark:text-white text-2xl font-black leading-tight">Our Services</h2>
-      <p class="text-slate-500 font-medium">Expert solutions for every plumbing need.</p>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-0 ghost-border">
+      @for (service of services; track service.title) {
+        <div class="group p-8 border-r border-b md:border-b-0 border-outline-variant/20 bg-surface-container-low hover:bg-surface-container-lowest transition-all last:border-r-0">
+          <div class="mb-12">
+            <span class="material-symbols-outlined text-4xl text-primary">{{ service.icon }}</span>
+          </div>
+          <h3 class="font-headline font-bold text-lg mb-4 uppercase tracking-tight">{{ service.title }}</h3>
+          <p class="text-secondary text-sm leading-relaxed mb-8">{{ service.subtitle }}</p>
+          <div class="h-1 w-0 group-hover:w-full bg-primary-fixed transition-all duration-500"></div>
+        </div>
+      }
     </div>
   </div>
-
-  <!--
-    @for is Angular's template loop syntax (introduced in Angular 17).
-    It iterates over the services array defined in the TypeScript class.
-    "track service.title" tells Angular how to identify each item for
-    efficient DOM updates when the list changes.
-  -->
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-    @for (service of services; track service.title) {
-      <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col items-center text-center group hover:border-accent transition-all cursor-pointer">
-
-        <!--
-          [class] binding: the icon wrapper changes colors on hover.
-          Angular evaluates the expression and updates the class list reactively.
-        -->
-        <div class="bg-primary/10 text-primary p-4 rounded-xl mb-4 group-hover:bg-accent group-hover:text-white transition-colors">
-          <!--
-            {{ service.icon }} is Angular's interpolation syntax —
-            it inserts the value of the expression as text into the DOM.
-          -->
-          <span class="material-symbols-outlined text-3xl">{{ service.icon }}</span>
-        </div>
-
-        <h3 class="font-bold text-slate-900 dark:text-white mb-1">{{ service.title }}</h3>
-        <p class="text-xs text-slate-500">{{ service.subtitle }}</p>
-
-      </div>
-    }
-  </div>
-
 </section>

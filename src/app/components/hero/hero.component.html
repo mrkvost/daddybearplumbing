@@ -1,36 +1,34 @@
-<!-- HeroComponent: full-width banner with headline, subtext, and badge -->
-
-<section class="relative bg-primary overflow-hidden">
-
-  <!-- Background image, dimmed with opacity so text stays readable -->
-  <div class="absolute inset-0 opacity-20 pointer-events-none">
-    <div
-      class="w-full h-full bg-center bg-cover"
-      style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCXUKNqfV8hTk52gMXuzXDYgTkHxM8WvXT2Emasm3Og6MUyoEK9-6vatmXMn7jI3iFgpZr2kK6M_8B42Vu0IhDqq-JXTfBtF16E-vBSfxa379nb0PcBUf_uqIOYdy9GIReQqOaE9wAGZkSFnNHjEOhxqZbjkCE1nDxFD15H2S2LbrhsRdoHkFIDIDvSZ9r1o3H3zc6foxdJoa3Qi9bnFikpACCLlUPtDTQfTTg4T4iv5ZQQLsIBF6vjG7RmKmjcp10uBCgz0w7oM3Q');"
-      role="img"
-      aria-label="Professional plumber working on a pipe in a kitchen"
-    ></div>
+<section class="relative h-[600px] flex items-center overflow-hidden bg-black">
+  <div class="absolute inset-0 z-0">
+    <img
+      alt="Professional plumber at work"
+      class="w-full h-full object-cover grayscale-filter opacity-60"
+      src="https://lh3.googleusercontent.com/aida-public/AB6AXuBB1CVCW0ees4gCvQVw6g9M63Hd-DF_wrpl_SCSlTcwdKbwGU1GZPo4x7JT22yL7KgsQXDJTM7Bt-LAQDG_M6FVyHUXBmmcW9-XMVG74oO4mc-MrVWHTs7XRQs0uugwCnrUen9CMM661HJqis3Gk81bebLyo-7zLjMJ4K6JjFNZaN_js2GL1X6BwcCrnO7b6MLbnGoPylfxPrUkG7pFoBl_fKZwbo11sA3Tovap9eZUjHfobZ_rrk6FqePIUhmF4WdU5oly_saQY80"
+    />
   </div>
-
-  <!-- Content — sits above the background image via relative positioning -->
-  <div class="relative max-w-7xl mx-auto px-4 py-12 md:py-20 flex flex-col items-center text-center">
-
-    <!-- Trust badge -->
-    <div class="inline-flex items-center gap-2 bg-accent/20 border border-accent/30 text-accent px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6">
-      <span class="material-symbols-outlined text-sm">verified</span>
-      Serving La Grange &amp; Villa Park
+  <div class="relative z-10 w-full max-w-7xl mx-auto px-6">
+    <div class="max-w-3xl">
+      <h1 class="font-headline font-black text-5xl md:text-8xl text-white leading-[0.9] tracking-tighter uppercase mb-8">
+        Honest Plumbing for La Grange &amp; Villa Park
+      </h1>
+      <p class="text-white/80 text-lg max-w-xl font-light leading-relaxed mb-12">
+        Precision engineering meets old-school integrity. We resolve complex mechanical failures
+        with surgical accuracy and transparent pricing.
+      </p>
+      <div class="flex flex-col md:flex-row gap-6">
+        <div class="flex items-center gap-4 border-l border-white/20 pl-6">
+          <div class="text-white">
+            <p class="text-[0.65rem] uppercase tracking-widest text-white/50 mb-1">Status</p>
+            <p class="font-bold text-sm uppercase">On-Call During Working Hours</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 border-l border-white/20 pl-6">
+          <div class="text-white">
+            <p class="text-[0.65rem] uppercase tracking-widest text-white/50 mb-1">Area</p>
+            <p class="font-bold text-sm">CHICAGO WEST SUBURBS</p>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <!-- Main heading — this is the page's <h1> for SEO -->
-    <h1 class="text-white text-4xl md:text-6xl font-black leading-[1.1] mb-6 max-w-3xl">
-      La Grange &amp; Villa Park's Most Trusted Plumbing Experts
-    </h1>
-
-    <!-- Supporting description -->
-    <p class="text-white/80 text-lg md:text-xl max-w-2xl mb-10">
-      Professional plumbing services for the Western Suburbs. Licensed, insured,
-      and locally owned. Emergency support available within working hours.
-    </p>
-
   </div>
 </section>

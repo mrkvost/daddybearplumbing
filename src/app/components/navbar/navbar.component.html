@@ -1,56 +1,34 @@
-<!--
-  NavbarComponent template.
+<header class="fixed top-0 w-full z-50 bg-surface-container-lowest border-b border-outline-variant/20">
+  <div class="flex flex-row justify-between items-center px-4 py-3 w-full max-w-7xl mx-auto gap-4">
+    <div class="flex items-center gap-2">
+      <button
+        (click)="toggleMenu()"
+        class="p-2 hover:bg-surface-container-high transition-colors shrink-0"
+      >
+        <span class="material-symbols-outlined text-primary">menu</span>
+      </button>
+      <a routerLink="/" class="font-headline tracking-tighter uppercase font-bold text-lg text-primary leading-tight">
+        DADDY BEAR PLUMBING
+      </a>
+    </div>
 
-  Angular template syntax used here:
-    (click)="toggleMenu()"   → calls the component method on click event
-    [class.hidden]="..."     → adds/removes the CSS class based on a boolean
-    routerLink="/"           → navigates to a route without a full page reload
--->
-
-<nav class="sticky top-0 z-50 w-full bg-primary text-white shadow-md">
-  <div class="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
-
-    <!-- Hamburger button — calls toggleMenu() on each click -->
-    <button
-      class="flex items-center justify-center p-2 hover:bg-white/10 rounded-lg transition-colors"
-      (click)="toggleMenu()"
-      aria-label="Toggle navigation menu"
-    >
-      <span class="material-symbols-outlined text-2xl">menu</span>
-    </button>
-
-    <!-- Brand name — clicking navigates to the home page -->
-    <a routerLink="/" class="flex flex-col items-center no-underline">
-      <h1 class="text-lg font-black tracking-tight leading-none uppercase text-white">Daddy Bear</h1>
-      <p class="text-[10px] tracking-[0.2em] uppercase font-bold text-accent">Plumbing</p>
-    </a>
-
-    <!-- Call button — tel: links open the phone dialer on mobile -->
     <a
-      class="bg-accent hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all shadow-lg active:scale-95"
       href="tel:7085552222"
+      class="bg-primary-fixed text-white px-4 py-3 font-headline font-bold text-xs tracking-tight flex items-center justify-center gap-2 hover:opacity-90 transition-all shrink-0 min-w-[140px]"
     >
-      <span class="material-symbols-outlined text-sm">call</span>
-      <span class="font-black text-lg sm:text-sm">(708) 555-2222</span>
+      <span class="material-symbols-outlined text-sm shrink-0" style="font-variation-settings: 'FILL' 1;">call</span>
+      <span class="text-center leading-tight">CALL (708) 555-2222</span>
     </a>
-
   </div>
 
-  <!--
-    Mobile dropdown menu.
-    [class.hidden]="!isMenuOpen" adds the Tailwind "hidden" class (display:none)
-    when isMenuOpen is false, and removes it when isMenuOpen is true.
-  -->
   <div
     [class.hidden]="!isMenuOpen"
-    class="absolute top-full left-0 w-full bg-primary text-white shadow-md border-b border-white/10 p-4"
+    class="absolute top-full left-0 w-full bg-surface-container-lowest border-b border-outline-variant/20"
   >
-    <div class="flex flex-col gap-4 font-bold max-w-7xl mx-auto">
-      <!-- routerLink navigates to the named route defined in app.routes.ts -->
-      <a routerLink="/"        class="hover:bg-white/10 px-2 py-1 rounded" (click)="toggleMenu()">Home</a>
-      <a routerLink="/gallery" class="hover:bg-white/10 px-2 py-1 rounded" (click)="toggleMenu()">Gallery</a>
-      <a routerLink="/reviews" class="hover:bg-white/10 px-2 py-1 rounded" (click)="toggleMenu()">Reviews</a>
-    </div>
+    <nav class="flex flex-col max-w-7xl mx-auto px-6 py-4 gap-1">
+      <a routerLink="/" (click)="closeMenu()" class="font-headline font-bold text-sm uppercase tracking-widest py-3 px-2 hover:bg-surface-container-low transition-colors">Home</a>
+      <a routerLink="/gallery" (click)="closeMenu()" class="font-headline font-bold text-sm uppercase tracking-widest py-3 px-2 hover:bg-surface-container-low transition-colors">Gallery</a>
+      <a routerLink="/reviews" (click)="closeMenu()" class="font-headline font-bold text-sm uppercase tracking-widest py-3 px-2 hover:bg-surface-container-low transition-colors">Reviews</a>
+    </nav>
   </div>
-
-</nav>
+</header>
