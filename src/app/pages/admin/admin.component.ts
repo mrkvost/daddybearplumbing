@@ -11,7 +11,6 @@ import { environment } from '../../../environments/environment';
 
 interface AdminGalleryImage extends GalleryImage {
   deleting?: boolean;
-  moving?: boolean;
 }
 
 interface AdminReview extends Review {
@@ -78,9 +77,22 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.loadingImages = true;
     this.cdr.detectChanges();
     try {
-      const filenames = await this.listS3(GALLERY_BUCKET, 'gallery-images/');
-      this.images = filenames.map(f => this.galleryService.parseFilename(f) as AdminGalleryImage)
-        .sort((a, b) => a.sortNumber - b.sortNumber);
+      // Try loading from manifest first (preserves admin-defined order)
+      // Fall back to S3 listing if manifest doesn't exist yet
+      try {
+        const response = await fetch(`/gallery-images/gallery.json?t=${Date.now()}`);
+        if (response.ok) {
+          const filenames: string[] = await response.json();
+          this.images = filenames
+            .filter(f => /\.(jpg|jpeg|png|webp)$/i.test(f))
+            .map(f => this.galleryService.parseFilename(f) as AdminGalleryImage);
+        } else {
+          throw new Error('no manifest');
+        }
+      } catch {
+        const filenames = await this.listS3(GALLERY_BUCKET, 'gallery-images/');
+        this.images = filenames.map(f => this.galleryService.parseFilename(f) as AdminGalleryImage);
+      }
     } catch {
       this.images = [];
     }
@@ -89,9 +101,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   private async saveGalleryManifest(): Promise<void> {
-    const filenames = this.images
-      .sort((a, b) => a.sortNumber - b.sortNumber)
-      .map(img => img.filename);
+    const filenames = this.images.map(img => img.filename);
     await this.uploadService.putJson('gallery-images/gallery.json', filenames, GALLERY_BUCKET);
   }
 
@@ -99,36 +109,21 @@ export class AdminComponent implements OnInit, OnDestroy {
     const targetIndex = index + direction;
     if (targetIndex < 0 || targetIndex >= this.images.length) return;
 
-    const a = this.images[index];
-    const b = this.images[targetIndex];
-    a.moving = true;
-    b.moving = true;
+    // Swap positions in the array — no S3 operations needed
+    const temp = this.images[index];
+    this.images[index] = this.images[targetIndex];
+    this.images[targetIndex] = temp;
     this.cdr.detectChanges();
 
     try {
-      const newA = this.replaceNumber(a.filename, b.sortNumber);
-      const newB = this.replaceNumber(b.filename, a.sortNumber);
-
-      await this.uploadService.copy(`gallery-images/${a.filename}`, `gallery-images/${newA}`, GALLERY_BUCKET);
-      await this.uploadService.copy(`gallery-images/${b.filename}`, `gallery-images/${newB}`, GALLERY_BUCKET);
-      await this.uploadService.delete(`gallery-images/${a.filename}`, GALLERY_BUCKET);
-      await this.uploadService.delete(`gallery-images/${b.filename}`, GALLERY_BUCKET);
-
-      const oldSortA = a.sortNumber;
-      a.filename = newA; a.url = `/gallery-images/${newA}`; a.sortNumber = b.sortNumber;
-      b.filename = newB; b.url = `/gallery-images/${newB}`; b.sortNumber = oldSortA;
-      this.images.sort((x, y) => x.sortNumber - y.sortNumber);
       await this.saveGalleryManifest();
     } catch (e: any) {
+      // Revert on failure
+      this.images[targetIndex] = this.images[index];
+      this.images[index] = temp;
       alert(`Move failed: ${e.message}`);
     }
-    a.moving = false;
-    b.moving = false;
     this.cdr.detectChanges();
-  }
-
-  private replaceNumber(filename: string, newNumber: number): string {
-    return filename.replace(/^\d+/, String(newNumber).padStart(4, '0'));
   }
 
   async deleteImage(image: AdminGalleryImage): Promise<void> {
@@ -187,8 +182,14 @@ export class AdminComponent implements OnInit, OnDestroy {
       this.cdr.detectChanges();
     }
     this.uploading = false;
+    const done = this.uploads.filter(u => u.status === 'done');
+    const newFilenames = done.map(u => u.filename);
     this.uploads = this.uploads.filter(u => u.status !== 'done');
-    await this.loadImages();
+
+    // Append new uploads to existing order and save manifest
+    for (const fn of newFilenames) {
+      this.images.push(this.galleryService.parseFilename(fn) as AdminGalleryImage);
+    }
     await this.saveGalleryManifest();
     this.cdr.detectChanges();
   }

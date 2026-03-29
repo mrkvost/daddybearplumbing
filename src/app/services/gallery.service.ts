@@ -32,8 +32,8 @@ export class GalleryService {
 
     return filenames
       .filter(f => IMAGE_EXTENSIONS.test(f))
-      .map(f => this.parseFilename(f))
-      .sort((a, b) => a.sortNumber - b.sortNumber);
+      .map(f => this.parseFilename(f));
+    // Order preserved from gallery.json — no sorting needed
   }
 
   parseFilename(filename: string): GalleryImage {

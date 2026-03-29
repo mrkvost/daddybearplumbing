@@ -219,6 +219,16 @@ resource "aws_acm_certificate_validation" "site" {
   validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
 }
 
+# ---------- CloudFront Cache Policies ----------
+
+data "aws_cloudfront_cache_policy" "caching_optimized" {
+  name = "Managed-CachingOptimized"
+}
+
+data "aws_cloudfront_cache_policy" "caching_disabled" {
+  name = "Managed-CachingDisabled"
+}
+
 # ---------- CloudFront Distribution ----------
 
 resource "aws_cloudfront_distribution" "site" {
@@ -258,10 +268,32 @@ resource "aws_cloudfront_distribution" "site" {
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
     compress               = true
-    cache_policy_id        = "658327ea-f89d-4fab-a63d-7e88639e58f6" # CachingOptimized managed policy
+    cache_policy_id        = data.aws_cloudfront_cache_policy.caching_optimized.id
   }
 
-  # Gallery images: /gallery-images/* → gallery bucket
+  # Gallery manifest: no cache so changes are instant
+  ordered_cache_behavior {
+    path_pattern           = "/gallery-images/gallery.json"
+    target_origin_id       = "s3-${var.project}-gallery"
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    compress               = true
+    cache_policy_id        = data.aws_cloudfront_cache_policy.caching_disabled.id
+  }
+
+  # Reviews manifest: no cache so changes are instant
+  ordered_cache_behavior {
+    path_pattern           = "/reviews-data/reviews.json"
+    target_origin_id       = "s3-${var.project}-reviews"
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    compress               = true
+    cache_policy_id        = data.aws_cloudfront_cache_policy.caching_disabled.id
+  }
+
+  # Gallery images: cached normally (images don't change)
   ordered_cache_behavior {
     path_pattern           = "/gallery-images/*"
     target_origin_id       = "s3-${var.project}-gallery"
@@ -269,10 +301,10 @@ resource "aws_cloudfront_distribution" "site" {
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
     compress               = true
-    cache_policy_id        = "658327ea-f89d-4fab-a63d-7e88639e58f6"
+    cache_policy_id        = data.aws_cloudfront_cache_policy.caching_optimized.id
   }
 
-  # Reviews data: /reviews-data/* → reviews bucket
+  # Reviews data: cached normally
   ordered_cache_behavior {
     path_pattern           = "/reviews-data/*"
     target_origin_id       = "s3-${var.project}-reviews"
@@ -280,7 +312,7 @@ resource "aws_cloudfront_distribution" "site" {
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
     compress               = true
-    cache_policy_id        = "658327ea-f89d-4fab-a63d-7e88639e58f6"
+    cache_policy_id        = data.aws_cloudfront_cache_policy.caching_optimized.id
   }
 
   # SPA routing — serve index.html for 403/404

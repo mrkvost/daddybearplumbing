@@ -102,7 +102,7 @@
         @if (!loadingImages && images.length > 0) {
           <div class="space-y-2">
             @for (image of images; track image.filename; let i = $index; let first = $first; let last = $last) {
-              <div class="flex items-center gap-4 px-4 py-3 ghost-border bg-surface-container-low" [class.opacity-50]="image.deleting || image.moving">
+              <div class="flex items-center gap-4 px-4 py-3 ghost-border bg-surface-container-low" [class.opacity-50]="image.deleting">
                 <div class="w-16 h-12 shrink-0 overflow-hidden bg-surface-container-high">
                   <img [src]="image.url" [alt]="image.tagLabel" class="w-full h-full object-cover" loading="lazy" />
                 </div>
@@ -111,11 +111,10 @@
                   <p class="text-[0.65rem] text-secondary">{{ image.date | date:'mediumDate' }} &middot; {{ image.filename }}</p>
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
-                  <button (click)="moveImage(i, -1)" [disabled]="first || image.moving" class="p-1 text-secondary hover:text-primary disabled:text-outline-variant disabled:cursor-default transition-colors" title="Move up">
+                  <button (click)="moveImage(i, -1)" [disabled]="first" class="p-1 text-secondary hover:text-primary disabled:text-outline-variant disabled:cursor-default transition-colors" title="Move up">
                     <span class="material-symbols-outlined text-lg">arrow_upward</span>
                   </button>
-                  <span class="text-xs text-outline w-8 text-center font-body">{{ image.sortNumber }}</span>
-                  <button (click)="moveImage(i, 1)" [disabled]="last || image.moving" class="p-1 text-secondary hover:text-primary disabled:text-outline-variant disabled:cursor-default transition-colors" title="Move down">
+                  <button (click)="moveImage(i, 1)" [disabled]="last" class="p-1 text-secondary hover:text-primary disabled:text-outline-variant disabled:cursor-default transition-colors" title="Move down">
                     <span class="material-symbols-outlined text-lg">arrow_downward</span>
                   </button>
                 </div>
