@@ -58,8 +58,8 @@ export class AuthService {
 
     const data = await response.json();
 
-    if (data.__type) {
-      throw new Error(data.message || 'Authentication failed');
+    if (!response.ok || data.__type) {
+      throw new Error(data.message || 'Incorrect username or password');
     }
 
     if (data.ChallengeName === 'NEW_PASSWORD_REQUIRED') {

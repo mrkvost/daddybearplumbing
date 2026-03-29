@@ -10,6 +10,14 @@ output "s3_bucket_name" {
   value = aws_s3_bucket.site.bucket
 }
 
+output "gallery_bucket_name" {
+  value = aws_s3_bucket.gallery.bucket
+}
+
+output "reviews_bucket_name" {
+  value = aws_s3_bucket.reviews.bucket
+}
+
 output "site_url" {
   value = "https://${var.domain}"
 }

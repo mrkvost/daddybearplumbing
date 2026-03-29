@@ -21,10 +21,10 @@
 
       <div class="grid md:grid-cols-[1fr_2fr] gap-6 mb-6">
         <div>
-          <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Category</label>
+          <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Tag</label>
           <input
             type="text"
-            [(ngModel)]="category"
+            [(ngModel)]="tag"
             placeholder="e.g. water-heaters"
             class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
           />
@@ -115,12 +115,12 @@
                  [class.opacity-50]="image.deleting || image.moving">
               <!-- Thumbnail -->
               <div class="w-16 h-12 shrink-0 overflow-hidden bg-surface-container-high">
-                <img [src]="image.url" [alt]="image.category" class="w-full h-full object-cover" loading="lazy" />
+                <img [src]="image.url" [alt]="image.tagLabel" class="w-full h-full object-cover" loading="lazy" />
               </div>
 
               <!-- Info -->
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate">{{ image.category }}</p>
+                <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate">{{ image.tagLabel }}</p>
                 <p class="text-[0.65rem] text-secondary">{{ image.date | date:'mediumDate' }} &middot; {{ image.filename }}</p>
               </div>
 

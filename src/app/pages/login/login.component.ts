@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -15,6 +15,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   private auth = inject(AuthService);
   private router = inject(Router);
   private meta = inject(Meta);
+  private cdr = inject(ChangeDetectorRef);
 
   username = '';
   password = '';
@@ -58,6 +59,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       }
     } finally {
       this.loading = false;
+      this.cdr.detectChanges();
     }
   }
 }

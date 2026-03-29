@@ -1,8 +1,6 @@
 /**
- * UploadService — uploads images directly to S3 using temporary Cognito credentials.
- *
- * Uses AWS Signature V4 via the S3 PutObject REST API.
- * No AWS SDK needed — signs requests manually with the temp credentials.
+ * UploadService — uploads/deletes/copies files in S3 using temporary Cognito credentials.
+ * Uses AWS Signature V4 signed requests directly — no AWS SDK needed.
  */
 import { Injectable, inject } from '@angular/core';
 import { AuthService } from './auth.service';
@@ -11,203 +9,129 @@ import { environment } from '../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class UploadService {
   private auth = inject(AuthService);
+  private region = environment.aws.region;
 
-  /**
-   * Upload a file to S3 gallery-photos/ prefix.
-   * Returns the S3 key of the uploaded file.
-   */
-  async upload(file: File, filename: string): Promise<string> {
+  async upload(file: File, filename: string, bucket: string): Promise<string> {
     const credentials = await this.auth.getCredentials();
-    const key = `gallery-photos/${filename}`;
-    const bucket = environment.aws.bucketName;
-    const region = environment.aws.region;
-    const host = `${bucket}.s3.${region}.amazonaws.com`;
-    const url = `https://${host}/${key}`;
+    const host = `${bucket}.s3.${this.region}.amazonaws.com`;
+    const url = `https://${host}/${filename}`;
 
-    const now = new Date();
-    const dateStamp = now.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    const shortDate = dateStamp.substring(0, 8);
-
-    // Read file as ArrayBuffer for hashing
     const body = await file.arrayBuffer();
     const bodyHash = await this.sha256Hex(new Uint8Array(body));
 
     const headers: Record<string, string> = {
       'host': host,
       'x-amz-content-sha256': bodyHash,
-      'x-amz-date': dateStamp,
+      'x-amz-date': this.amzDate(),
       'x-amz-security-token': credentials.sessionToken,
       'content-type': file.type || 'application/octet-stream',
     };
 
-    // Create canonical request
-    const signedHeaderKeys = Object.keys(headers).sort();
-    const signedHeaders = signedHeaderKeys.join(';');
-    const canonicalHeaders = signedHeaderKeys.map(k => `${k}:${headers[k]}\n`).join('');
-
-    const canonicalRequest = [
-      'PUT',
-      `/${key}`,
-      '',
-      canonicalHeaders,
-      signedHeaders,
-      bodyHash,
-    ].join('\n');
-
-    const scope = `${shortDate}/${region}/s3/aws4_request`;
-    const stringToSign = [
-      'AWS4-HMAC-SHA256',
-      dateStamp,
-      scope,
-      await this.sha256Hex(new TextEncoder().encode(canonicalRequest)),
-    ].join('\n');
-
-    // Derive signing key
-    const kDate = await this.hmac(`AWS4${credentials.secretAccessKey}`, shortDate);
-    const kRegion = await this.hmacBinary(kDate, region);
-    const kService = await this.hmacBinary(kRegion, 's3');
-    const kSigning = await this.hmacBinary(kService, 'aws4_request');
-
-    const signature = await this.hmacHex(kSigning, stringToSign);
-
-    const authorization = `AWS4-HMAC-SHA256 Credential=${credentials.accessKeyId}/${scope}, SignedHeaders=${signedHeaders}, Signature=${signature}`;
-
-    const response = await fetch(url, {
-      method: 'PUT',
-      headers: {
-        ...headers,
-        'Authorization': authorization,
-      },
-      body: body,
-    });
-
+    const response = await this.signedRequest('PUT', host, filename, headers, bodyHash, credentials, body);
     if (!response.ok) {
-      const text = await response.text();
-      throw new Error(`Upload failed: ${response.status} ${text}`);
+      throw new Error(`Upload failed: ${response.status} ${await response.text()}`);
     }
-
-    return key;
+    return filename;
   }
 
-  /**
-   * Server-side copy within S3 (no data transfer through browser).
-   * Used for reordering — copies to new key, then caller deletes the old key.
-   */
-  async copy(sourceFilename: string, destFilename: string): Promise<void> {
+  async copy(sourceFilename: string, destFilename: string, bucket: string): Promise<void> {
     const credentials = await this.auth.getCredentials();
-    const destKey = `gallery-photos/${destFilename}`;
-    const bucket = environment.aws.bucketName;
-    const region = environment.aws.region;
-    const host = `${bucket}.s3.${region}.amazonaws.com`;
-    const url = `https://${host}/${destKey}`;
-    const copySource = `/${bucket}/gallery-photos/${sourceFilename}`;
-
-    const now = new Date();
-    const dateStamp = now.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    const shortDate = dateStamp.substring(0, 8);
-
+    const host = `${bucket}.s3.${this.region}.amazonaws.com`;
     const bodyHash = await this.sha256Hex(new Uint8Array(0));
 
     const headers: Record<string, string> = {
       'host': host,
       'x-amz-content-sha256': bodyHash,
-      'x-amz-copy-source': copySource,
-      'x-amz-date': dateStamp,
+      'x-amz-copy-source': `/${bucket}/${sourceFilename}`,
+      'x-amz-date': this.amzDate(),
       'x-amz-security-token': credentials.sessionToken,
     };
 
-    const signedHeaderKeys = Object.keys(headers).sort();
-    const signedHeaders = signedHeaderKeys.join(';');
-    const canonicalHeaders = signedHeaderKeys.map(k => `${k}:${headers[k]}\n`).join('');
-
-    const canonicalRequest = ['PUT', `/${destKey}`, '', canonicalHeaders, signedHeaders, bodyHash].join('\n');
-
-    const scope = `${shortDate}/${region}/s3/aws4_request`;
-    const stringToSign = ['AWS4-HMAC-SHA256', dateStamp, scope, await this.sha256Hex(new TextEncoder().encode(canonicalRequest))].join('\n');
-
-    const kDate = await this.hmac(`AWS4${credentials.secretAccessKey}`, shortDate);
-    const kRegion = await this.hmacBinary(kDate, region);
-    const kService = await this.hmacBinary(kRegion, 's3');
-    const kSigning = await this.hmacBinary(kService, 'aws4_request');
-    const signature = await this.hmacHex(kSigning, stringToSign);
-    const authorization = `AWS4-HMAC-SHA256 Credential=${credentials.accessKeyId}/${scope}, SignedHeaders=${signedHeaders}, Signature=${signature}`;
-
-    const response = await fetch(url, {
-      method: 'PUT',
-      headers: { ...headers, 'Authorization': authorization },
-    });
-
+    const response = await this.signedRequest('PUT', host, destFilename, headers, bodyHash, credentials);
     if (!response.ok) {
-      const text = await response.text();
-      throw new Error(`Copy failed: ${response.status} ${text}`);
+      throw new Error(`Copy failed: ${response.status} ${await response.text()}`);
     }
   }
 
-  /**
-   * Delete a file from S3 gallery-photos/ prefix.
-   */
-  async delete(filename: string): Promise<void> {
+  async delete(filename: string, bucket: string): Promise<void> {
     const credentials = await this.auth.getCredentials();
-    const key = `gallery-photos/${filename}`;
-    const bucket = environment.aws.bucketName;
-    const region = environment.aws.region;
-    const host = `${bucket}.s3.${region}.amazonaws.com`;
-    const url = `https://${host}/${key}`;
-
-    const now = new Date();
-    const dateStamp = now.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    const shortDate = dateStamp.substring(0, 8);
-
+    const host = `${bucket}.s3.${this.region}.amazonaws.com`;
     const bodyHash = await this.sha256Hex(new Uint8Array(0));
 
     const headers: Record<string, string> = {
       'host': host,
       'x-amz-content-sha256': bodyHash,
-      'x-amz-date': dateStamp,
+      'x-amz-date': this.amzDate(),
       'x-amz-security-token': credentials.sessionToken,
     };
 
-    const signedHeaderKeys = Object.keys(headers).sort();
-    const signedHeaders = signedHeaderKeys.join(';');
-    const canonicalHeaders = signedHeaderKeys.map(k => `${k}:${headers[k]}\n`).join('');
-
-    const canonicalRequest = [
-      'DELETE',
-      `/${key}`,
-      '',
-      canonicalHeaders,
-      signedHeaders,
-      bodyHash,
-    ].join('\n');
-
-    const scope = `${shortDate}/${region}/s3/aws4_request`;
-    const stringToSign = [
-      'AWS4-HMAC-SHA256',
-      dateStamp,
-      scope,
-      await this.sha256Hex(new TextEncoder().encode(canonicalRequest)),
-    ].join('\n');
-
-    const kDate = await this.hmac(`AWS4${credentials.secretAccessKey}`, shortDate);
-    const kRegion = await this.hmacBinary(kDate, region);
-    const kService = await this.hmacBinary(kRegion, 's3');
-    const kSigning = await this.hmacBinary(kService, 'aws4_request');
-
-    const signature = await this.hmacHex(kSigning, stringToSign);
-    const authorization = `AWS4-HMAC-SHA256 Credential=${credentials.accessKeyId}/${scope}, SignedHeaders=${signedHeaders}, Signature=${signature}`;
-
-    const response = await fetch(url, {
-      method: 'DELETE',
-      headers: {
-        ...headers,
-        'Authorization': authorization,
-      },
-    });
-
+    const response = await this.signedRequest('DELETE', host, filename, headers, bodyHash, credentials);
     if (!response.ok && response.status !== 204) {
-      const text = await response.text();
-      throw new Error(`Delete failed: ${response.status} ${text}`);
+      throw new Error(`Delete failed: ${response.status} ${await response.text()}`);
     }
+  }
+
+  async putJson(filename: string, data: unknown, bucket: string): Promise<void> {
+    const credentials = await this.auth.getCredentials();
+    const host = `${bucket}.s3.${this.region}.amazonaws.com`;
+    const encoded = new TextEncoder().encode(JSON.stringify(data));
+    const body = encoded.buffer as ArrayBuffer;
+    const bodyHash = await this.sha256Hex(encoded);
+
+    const headers: Record<string, string> = {
+      'content-type': 'application/json',
+      'host': host,
+      'x-amz-content-sha256': bodyHash,
+      'x-amz-date': this.amzDate(),
+      'x-amz-security-token': credentials.sessionToken,
+    };
+
+    const response = await this.signedRequest('PUT', host, filename, headers, bodyHash, credentials, body);
+    if (!response.ok) {
+      throw new Error(`Put failed: ${response.status} ${await response.text()}`);
+    }
+  }
+
+  /* ---------- SigV4 internals ---------- */
+
+  private async signedRequest(
+    method: string, host: string, key: string,
+    headers: Record<string, string>, bodyHash: string,
+    credentials: { accessKeyId: string; secretAccessKey: string; sessionToken: string },
+    body?: ArrayBuffer,
+  ): Promise<Response> {
+    const dateStamp = headers['x-amz-date'];
+    const shortDate = dateStamp.substring(0, 8);
+
+    const signedHeaderKeys = Object.keys(headers).sort();
+    const signedHeaders = signedHeaderKeys.join(';');
+    const canonicalHeaders = signedHeaderKeys.map(k => `${k}:${headers[k]}\n`).join('');
+
+    const canonicalRequest = [method, `/${key}`, '', canonicalHeaders, signedHeaders, bodyHash].join('\n');
+
+    const scope = `${shortDate}/${this.region}/s3/aws4_request`;
+    const stringToSign = [
+      'AWS4-HMAC-SHA256', dateStamp, scope,
+      await this.sha256Hex(new TextEncoder().encode(canonicalRequest)),
+    ].join('\n');
+
+    const kDate = await this.hmac(`AWS4${credentials.secretAccessKey}`, shortDate);
+    const kRegion = await this.hmacBinary(kDate, this.region);
+    const kService = await this.hmacBinary(kRegion, 's3');
+    const kSigning = await this.hmacBinary(kService, 'aws4_request');
+    const signature = await this.hmacHex(kSigning, stringToSign);
+
+    const authorization = `AWS4-HMAC-SHA256 Credential=${credentials.accessKeyId}/${scope}, SignedHeaders=${signedHeaders}, Signature=${signature}`;
+
+    return fetch(`https://${host}/${key}`, {
+      method,
+      headers: { ...headers, 'Authorization': authorization },
+      body: body ?? undefined,
+    });
+  }
+
+  private amzDate(): string {
+    return new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
   }
 
   private async sha256Hex(data: Uint8Array): Promise<string> {

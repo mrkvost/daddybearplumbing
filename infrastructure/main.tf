@@ -65,13 +65,99 @@ resource "aws_s3_bucket_policy" "site" {
   })
 }
 
-# CORS configuration — allows browser-based uploads from the admin page
-resource "aws_s3_bucket_cors_configuration" "site" {
-  bucket = aws_s3_bucket.site.id
+
+# ---------- S3 Bucket: Gallery ----------
+
+resource "aws_s3_bucket" "gallery" {
+  bucket = "${var.bucket_name}-gallery"
+}
+
+resource "aws_s3_bucket_public_access_block" "gallery" {
+  bucket = aws_s3_bucket.gallery.id
+
+  block_public_acls       = true
+  ignore_public_acls      = true
+  block_public_policy     = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_policy" "gallery" {
+  bucket = aws_s3_bucket.gallery.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "AllowCloudFrontRead"
+        Effect    = "Allow"
+        Principal = { Service = "cloudfront.amazonaws.com" }
+        Action    = "s3:GetObject"
+        Resource  = "${aws_s3_bucket.gallery.arn}/*"
+        Condition = {
+          ArnLike = {
+            "AWS:SourceArn" = aws_cloudfront_distribution.site.arn
+          }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_s3_bucket_cors_configuration" "gallery" {
+  bucket = aws_s3_bucket.gallery.id
 
   cors_rule {
     allowed_headers = ["*"]
-    allowed_methods = ["PUT", "POST", "DELETE"]
+    allowed_methods = ["GET", "PUT", "DELETE"]
+    allowed_origins = ["https://${var.domain}"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3600
+  }
+}
+
+# ---------- S3 Bucket: Reviews ----------
+
+resource "aws_s3_bucket" "reviews" {
+  bucket = "${var.bucket_name}-reviews"
+}
+
+resource "aws_s3_bucket_public_access_block" "reviews" {
+  bucket = aws_s3_bucket.reviews.id
+
+  block_public_acls       = true
+  ignore_public_acls      = true
+  block_public_policy     = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_policy" "reviews" {
+  bucket = aws_s3_bucket.reviews.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "AllowCloudFrontServicePrincipal"
+        Effect    = "Allow"
+        Principal = { Service = "cloudfront.amazonaws.com" }
+        Action    = "s3:GetObject"
+        Resource  = "${aws_s3_bucket.reviews.arn}/*"
+        Condition = {
+          ArnLike = {
+            "AWS:SourceArn" = aws_cloudfront_distribution.site.arn
+          }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_s3_bucket_cors_configuration" "reviews" {
+  bucket = aws_s3_bucket.reviews.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "PUT", "DELETE"]
     allowed_origins = ["https://${var.domain}"]
     expose_headers  = ["ETag"]
     max_age_seconds = 3600
@@ -154,6 +240,18 @@ resource "aws_cloudfront_distribution" "site" {
     origin_access_control_id = aws_cloudfront_origin_access_control.site.id
   }
 
+  origin {
+    domain_name              = aws_s3_bucket.gallery.bucket_regional_domain_name
+    origin_id                = "s3-${var.project}-gallery"
+    origin_access_control_id = aws_cloudfront_origin_access_control.site.id
+  }
+
+  origin {
+    domain_name              = aws_s3_bucket.reviews.bucket_regional_domain_name
+    origin_id                = "s3-${var.project}-reviews"
+    origin_access_control_id = aws_cloudfront_origin_access_control.site.id
+  }
+
   default_cache_behavior {
     target_origin_id       = "s3-${var.project}"
     viewer_protocol_policy = "redirect-to-https"
@@ -161,6 +259,28 @@ resource "aws_cloudfront_distribution" "site" {
     cached_methods         = ["GET", "HEAD"]
     compress               = true
     cache_policy_id        = "658327ea-f89d-4fab-a63d-7e88639e58f6" # CachingOptimized managed policy
+  }
+
+  # Gallery images: /gallery-images/* → gallery bucket
+  ordered_cache_behavior {
+    path_pattern           = "/gallery-images/*"
+    target_origin_id       = "s3-${var.project}-gallery"
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    compress               = true
+    cache_policy_id        = "658327ea-f89d-4fab-a63d-7e88639e58f6"
+  }
+
+  # Reviews data: /reviews-data/* → reviews bucket
+  ordered_cache_behavior {
+    path_pattern           = "/reviews-data/*"
+    target_origin_id       = "s3-${var.project}-reviews"
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    compress               = true
+    cache_policy_id        = "658327ea-f89d-4fab-a63d-7e88639e58f6"
   }
 
   # SPA routing — serve index.html for 403/404
@@ -296,8 +416,8 @@ resource "aws_iam_role" "cognito_authenticated" {
   })
 }
 
-resource "aws_iam_role_policy" "cognito_s3_upload" {
-  name = "${var.project}-s3-gallery-upload"
+resource "aws_iam_role_policy" "cognito_s3_admin" {
+  name = "${var.project}-s3-admin"
   role = aws_iam_role.cognito_authenticated.id
 
   policy = jsonencode({
@@ -310,17 +430,18 @@ resource "aws_iam_role_policy" "cognito_s3_upload" {
           "s3:DeleteObject",
           "s3:GetObject",
         ]
-        Resource = "${aws_s3_bucket.site.arn}/gallery-photos/*"
+        Resource = [
+          "${aws_s3_bucket.gallery.arn}/gallery-images/*",
+          "${aws_s3_bucket.reviews.arn}/reviews-data/*",
+        ]
       },
       {
         Effect   = "Allow"
         Action   = "s3:ListBucket"
-        Resource = aws_s3_bucket.site.arn
-        Condition = {
-          StringLike = {
-            "s3:prefix" = "gallery-photos/*"
-          }
-        }
+        Resource = [
+          aws_s3_bucket.gallery.arn,
+          aws_s3_bucket.reviews.arn,
+        ]
       }
     ]
   })
@@ -334,115 +455,3 @@ resource "aws_cognito_identity_pool_roles_attachment" "admin" {
   }
 }
 
-# ---------- Lambda: Gallery Manifest Generator ----------
-
-data "archive_file" "gallery_manifest" {
-  type        = "zip"
-  source_file = "${path.module}/lambda/gallery_manifest.py"
-  output_path = "${path.module}/lambda/gallery_manifest.zip"
-}
-
-resource "aws_iam_role" "gallery_lambda" {
-  name = "${var.project}-gallery-manifest-lambda"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect    = "Allow"
-        Principal = { Service = "lambda.amazonaws.com" }
-        Action    = "sts:AssumeRole"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy" "gallery_lambda_s3" {
-  name = "${var.project}-gallery-lambda-s3"
-  role = aws_iam_role.gallery_lambda.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect   = "Allow"
-        Action   = "s3:ListBucket"
-        Resource = aws_s3_bucket.site.arn
-        Condition = {
-          StringLike = {
-            "s3:prefix" = "gallery-photos/*"
-          }
-        }
-      },
-      {
-        Effect   = "Allow"
-        Action   = "s3:PutObject"
-        Resource = "${aws_s3_bucket.site.arn}/gallery-photos/gallery.json"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "gallery_lambda_logs" {
-  role       = aws_iam_role.gallery_lambda.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
-
-resource "aws_lambda_function" "gallery_manifest" {
-  function_name    = "${var.project}-gallery-manifest"
-  role             = aws_iam_role.gallery_lambda.arn
-  handler          = "gallery_manifest.handler"
-  runtime          = "python3.12"
-  timeout          = 30
-  filename         = data.archive_file.gallery_manifest.output_path
-  source_code_hash = data.archive_file.gallery_manifest.output_base64sha256
-
-  environment {
-    variables = {
-      BUCKET_NAME = var.bucket_name
-      PREFIX      = "gallery-photos/"
-    }
-  }
-}
-
-resource "aws_lambda_permission" "s3_invoke" {
-  statement_id  = "AllowS3Invoke"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.gallery_manifest.function_name
-  principal     = "s3.amazonaws.com"
-  source_arn    = aws_s3_bucket.site.arn
-}
-
-resource "aws_s3_bucket_notification" "gallery_upload" {
-  bucket = aws_s3_bucket.site.id
-
-  lambda_function {
-    lambda_function_arn = aws_lambda_function.gallery_manifest.arn
-    events              = ["s3:ObjectCreated:*", "s3:ObjectRemoved:*"]
-    filter_prefix       = "gallery-photos/"
-    filter_suffix       = ".jpg"
-  }
-
-  lambda_function {
-    lambda_function_arn = aws_lambda_function.gallery_manifest.arn
-    events              = ["s3:ObjectCreated:*", "s3:ObjectRemoved:*"]
-    filter_prefix       = "gallery-photos/"
-    filter_suffix       = ".jpeg"
-  }
-
-  lambda_function {
-    lambda_function_arn = aws_lambda_function.gallery_manifest.arn
-    events              = ["s3:ObjectCreated:*", "s3:ObjectRemoved:*"]
-    filter_prefix       = "gallery-photos/"
-    filter_suffix       = ".png"
-  }
-
-  lambda_function {
-    lambda_function_arn = aws_lambda_function.gallery_manifest.arn
-    events              = ["s3:ObjectCreated:*", "s3:ObjectRemoved:*"]
-    filter_prefix       = "gallery-photos/"
-    filter_suffix       = ".webp"
-  }
-
-  depends_on = [aws_lambda_permission.s3_invoke]
-}

@@ -13,11 +13,11 @@
     </div>
 
     <a
-      href="tel:7085552222"
+      [href]="'tel:' + phone"
       class="bg-primary-fixed text-white px-4 py-3 font-headline font-bold text-xs tracking-tight flex items-center justify-center gap-2 hover:opacity-90 transition-all shrink-0 min-w-[140px]"
     >
       <span class="material-symbols-outlined text-sm shrink-0" style="font-variation-settings: 'FILL' 1;">call</span>
-      <span class="text-center leading-tight">CALL (708) 555-2222</span>
+      <span class="text-center leading-tight">CALL {{ phoneDisplay }}</span>
     </a>
   </div>
 

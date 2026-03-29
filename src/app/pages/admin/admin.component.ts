@@ -5,13 +5,10 @@ import { Router } from '@angular/router';
 import { Meta } from '@angular/platform-browser';
 import { AuthService } from '../../services/auth.service';
 import { UploadService } from '../../services/upload.service';
+import { GalleryService, GalleryImage } from '../../services/gallery.service';
+import { environment } from '../../../environments/environment';
 
-interface GalleryImage {
-  filename: string;
-  url: string;
-  sortNumber: number;
-  category: string;
-  date: Date;
+interface AdminGalleryImage extends GalleryImage {
   deleting?: boolean;
   moving?: boolean;
 }
@@ -23,6 +20,9 @@ interface UploadItem {
   error?: string;
 }
 
+const GALLERY_BUCKET = environment.aws.galleryBucket;
+const REGION = environment.aws.region;
+
 @Component({
   selector: 'app-admin',
   standalone: true,
@@ -32,13 +32,14 @@ interface UploadItem {
 export class AdminComponent implements OnInit, OnDestroy {
   private auth = inject(AuthService);
   private uploadService = inject(UploadService);
+  private galleryService = inject(GalleryService);
   private router = inject(Router);
   private meta = inject(Meta);
   private cdr = inject(ChangeDetectorRef);
 
-  images: GalleryImage[] = [];
+  images: AdminGalleryImage[] = [];
   uploads: UploadItem[] = [];
-  category = '';
+  tag = '';
   loadingImages = true;
   uploading = false;
 
@@ -51,19 +52,14 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.meta.removeTag('name="robots"');
   }
 
-  /* ---------- Load existing images ---------- */
+  /* ---------- List images from S3 directly ---------- */
 
   async loadImages(): Promise<void> {
     this.loadingImages = true;
     this.cdr.detectChanges();
     try {
-      const response = await fetch('/gallery-photos/gallery.json');
-      if (!response.ok) throw new Error('Failed to load');
-      const filenames: string[] = await response.json();
-
-      this.images = filenames
-        .filter(f => /\.(jpg|jpeg|png|webp)$/i.test(f))
-        .map(f => this.parseFilename(f))
+      const filenames = await this.listS3();
+      this.images = filenames.map(f => this.galleryService.parseFilename(f) as AdminGalleryImage)
         .sort((a, b) => a.sortNumber - b.sortNumber);
     } catch {
       this.images = [];
@@ -72,17 +68,85 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  private parseFilename(filename: string): GalleryImage {
-    const parts = filename.replace(/\.[^.]+$/, '').split('_');
-    const sortNumber = parseInt(parts[0], 10) || 0;
-    let date = new Date();
-    if (parts[1]) {
-      const [y, mo, d, h, mi, s] = parts[1].split('-').map(Number);
-      date = new Date(y, (mo || 1) - 1, d || 1, h || 0, mi || 0, s || 0);
-    }
-    const slug = parts.slice(2).join('_') || 'uncategorized';
-    const category = slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-    return { filename, url: `/gallery-photos/${filename}`, sortNumber, category, date };
+  /** List image files in the gallery bucket using Cognito credentials */
+  private async listS3(): Promise<string[]> {
+    const credentials = await this.auth.getCredentials();
+    const host = `${GALLERY_BUCKET}.s3.${REGION}.amazonaws.com`;
+    const filenames: string[] = [];
+    let continuationToken: string | null = null;
+
+    do {
+      const params = new URLSearchParams({ 'list-type': '2', 'prefix': 'gallery-images/' });
+      if (continuationToken) params.set('continuation-token', continuationToken);
+
+      const dateStamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+      const shortDate = dateStamp.substring(0, 8);
+      const bodyHash = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'; // empty body
+
+      const headers: Record<string, string> = {
+        'host': host,
+        'x-amz-content-sha256': bodyHash,
+        'x-amz-date': dateStamp,
+        'x-amz-security-token': credentials.sessionToken,
+      };
+
+      const signedHeaderKeys = Object.keys(headers).sort();
+      const signedHeaders = signedHeaderKeys.join(';');
+      const canonicalHeaders = signedHeaderKeys.map(k => `${k}:${headers[k]}\n`).join('');
+      const canonicalRequest = ['GET', '/', params.toString(), canonicalHeaders, signedHeaders, bodyHash].join('\n');
+
+      const scope = `${shortDate}/${REGION}/s3/aws4_request`;
+      const encoder = new TextEncoder();
+      const crHash = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', encoder.encode(canonicalRequest)))).map(b => b.toString(16).padStart(2, '0')).join('');
+      const stringToSign = ['AWS4-HMAC-SHA256', dateStamp, scope, crHash].join('\n');
+
+      const sign = async (key: ArrayBuffer | string, data: string) => {
+        const k = typeof key === 'string' ? encoder.encode(key) : key;
+        const ck = await crypto.subtle.importKey('raw', k, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+        return crypto.subtle.sign('HMAC', ck, encoder.encode(data));
+      };
+
+      const kDate = await sign(`AWS4${credentials.secretAccessKey}`, shortDate);
+      const kRegion = await sign(kDate, REGION);
+      const kService = await sign(kRegion, 's3');
+      const kSigning = await sign(kService, 'aws4_request');
+      const sig = Array.from(new Uint8Array(await sign(kSigning, stringToSign))).map(b => b.toString(16).padStart(2, '0')).join('');
+
+      const authorization = `AWS4-HMAC-SHA256 Credential=${credentials.accessKeyId}/${scope}, SignedHeaders=${signedHeaders}, Signature=${sig}`;
+
+      const response = await fetch(`https://${host}/?${params}`, {
+        headers: { ...headers, 'Authorization': authorization },
+      });
+
+      const xml = await response.text();
+      const doc = new DOMParser().parseFromString(xml, 'application/xml');
+
+      for (const item of doc.querySelectorAll('Contents')) {
+        const key = item.querySelector('Key')?.textContent || '';
+        const name = key.replace(/^gallery-images\//, '');
+        if (name && /\.(jpg|jpeg|png|webp)$/i.test(name)) {
+          filenames.push(name);
+        }
+      }
+
+      const isTruncated = doc.querySelector('IsTruncated')?.textContent === 'true';
+      continuationToken = isTruncated
+        ? doc.querySelector('NextContinuationToken')?.textContent || null
+        : null;
+    } while (continuationToken);
+
+    return filenames.sort();
+  }
+
+  /* ---------- Write gallery.json manifest ---------- */
+
+  private async saveManifest(): Promise<void> {
+    const filenames = this.images.map(img => img.filename).sort((a, b) => {
+      const numA = parseInt(a, 10) || 0;
+      const numB = parseInt(b, 10) || 0;
+      return numA - numB;
+    });
+    await this.uploadService.putJson('gallery-images/gallery.json', filenames, GALLERY_BUCKET);
   }
 
   /* ---------- Reorder ---------- */
@@ -98,28 +162,25 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
 
     try {
-      // Build new filenames by swapping sort numbers
       const newFilenameA = this.replaceNumber(a.filename, b.sortNumber);
       const newFilenameB = this.replaceNumber(b.filename, a.sortNumber);
 
-      // Copy both to new names, then delete originals
-      await this.uploadService.copy(a.filename, newFilenameA);
-      await this.uploadService.copy(b.filename, newFilenameB);
-      await this.uploadService.delete(a.filename);
-      await this.uploadService.delete(b.filename);
+      await this.uploadService.copy(`gallery-images/${a.filename}`, `gallery-images/${newFilenameA}`, GALLERY_BUCKET);
+      await this.uploadService.copy(`gallery-images/${b.filename}`, `gallery-images/${newFilenameB}`, GALLERY_BUCKET);
+      await this.uploadService.delete(`gallery-images/${a.filename}`, GALLERY_BUCKET);
+      await this.uploadService.delete(`gallery-images/${b.filename}`, GALLERY_BUCKET);
 
-      // Update local state
       a.filename = newFilenameA;
-      a.url = `/gallery-photos/${newFilenameA}`;
+      a.url = `/gallery-images/${newFilenameA}`;
       const oldSortA = a.sortNumber;
       a.sortNumber = b.sortNumber;
 
       b.filename = newFilenameB;
-      b.url = `/gallery-photos/${newFilenameB}`;
+      b.url = `/gallery-images/${newFilenameB}`;
       b.sortNumber = oldSortA;
 
-      // Re-sort
       this.images.sort((x, y) => x.sortNumber - y.sortNumber);
+      await this.saveManifest();
     } catch (e: any) {
       alert(`Move failed: ${e.message}`);
     }
@@ -135,12 +196,13 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   /* ---------- Delete ---------- */
 
-  async deleteImage(image: GalleryImage): Promise<void> {
+  async deleteImage(image: AdminGalleryImage): Promise<void> {
     image.deleting = true;
     this.cdr.detectChanges();
     try {
-      await this.uploadService.delete(image.filename);
+      await this.uploadService.delete(`gallery-images/${image.filename}`, GALLERY_BUCKET);
       this.images = this.images.filter(i => i !== image);
+      await this.saveManifest();
     } catch (e: any) {
       image.deleting = false;
       alert(`Delete failed: ${e.message}`);
@@ -164,14 +226,13 @@ export class AdminComponent implements OnInit, OnDestroy {
       String(now.getSeconds()).padStart(2, '0'),
     ].join('-');
 
-    // Next sort number = max existing + 1
     const maxSort = this.images.reduce((max, img) => Math.max(max, img.sortNumber), 0);
     let nextNum = maxSort + 1;
 
     for (const file of Array.from(input.files)) {
       const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
       const num = String(nextNum++).padStart(4, '0');
-      const slug = this.category || 'uncategorized';
+      const slug = this.tag || 'uncategorized';
       const filename = `${num}_${dateStr}_${slug}.${ext}`;
       this.uploads.push({ file, filename, status: 'pending' });
     }
@@ -191,7 +252,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       item.status = 'uploading';
       this.cdr.detectChanges();
       try {
-        await this.uploadService.upload(item.file, item.filename);
+        await this.uploadService.upload(item.file, `gallery-images/${item.filename}`, GALLERY_BUCKET);
         item.status = 'done';
       } catch (e: any) {
         item.status = 'error';
@@ -202,8 +263,9 @@ export class AdminComponent implements OnInit, OnDestroy {
 
     this.uploading = false;
     this.uploads = this.uploads.filter(u => u.status !== 'done');
-    // Wait a moment for Lambda to regenerate manifest, then refresh
-    setTimeout(() => this.loadImages(), 2000);
+    await this.loadImages();
+    await this.saveManifest();
+    this.cdr.detectChanges();
   }
 
   signOut(): void {

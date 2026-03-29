@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-navbar',
@@ -8,6 +9,8 @@ import { RouterLink } from '@angular/router';
   templateUrl: './navbar.component.html',
 })
 export class NavbarComponent {
+  phone = environment.phone;
+  phoneDisplay = environment.phoneDisplay;
   isMenuOpen = false;
 
   toggleMenu(): void {

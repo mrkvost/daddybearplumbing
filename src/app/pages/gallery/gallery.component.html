@@ -11,19 +11,19 @@
   </div>
 </section>
 
-<!-- Category filter bar -->
-@if (!loading && !error && categories.length > 1) {
+<!-- Tag filter bar -->
+@if (!loading && !error && tags.length > 1) {
   <div class="bg-surface-container-lowest border-b border-outline-variant/20 sticky top-[60px] z-40">
     <div class="max-w-7xl mx-auto px-6 py-4 flex gap-3 overflow-x-auto">
-      @for (category of categories; track category) {
+      @for (tag of tags; track tag) {
         <button
-          (click)="setCategory(category)"
-          [class]="activeCategory === category
+          (click)="setTag(tag)"
+          [class]="activeTag === tag
             ? 'bg-primary text-white'
             : 'bg-surface-container-low text-secondary hover:bg-surface-container-high'"
           class="px-4 py-2 text-xs font-headline font-bold uppercase tracking-widest whitespace-nowrap transition-all"
         >
-          {{ category }}
+          {{ tag }}
         </button>
       }
     </div>
@@ -43,7 +43,7 @@
   <div class="max-w-7xl mx-auto px-6 py-24 text-center">
     <span class="material-symbols-outlined text-6xl text-outline-variant block mb-4">cloud_off</span>
     <p class="text-on-surface font-headline font-bold text-lg uppercase mb-2">Gallery not available yet</p>
-    <p class="text-secondary text-sm">Upload images to <code class="bg-surface-container-low px-2 py-0.5">s3://kvaking/gallery-photos/</code> to get started.</p>
+    <p class="text-secondary text-sm">No photos have been uploaded.</p>
   </div>
 }
 
@@ -52,8 +52,8 @@
   <section class="max-w-7xl mx-auto px-6 py-16">
     <p class="text-secondary text-[0.7rem] font-bold tracking-[0.3em] uppercase mb-8">
       {{ filteredImages.length }} photo{{ filteredImages.length !== 1 ? 's' : '' }}
-      @if (activeCategory !== 'All') {
-        <span> — {{ activeCategory }}</span>
+      @if (activeTag !== 'All') {
+        <span> — {{ activeTag }}</span>
       }
     </p>
 
@@ -66,13 +66,15 @@
           <div class="relative aspect-[4/3] overflow-hidden bg-surface-container-low">
             <img
               [src]="image.url"
-              [alt]="image.categoryLabel + ' project photo'"
+              [alt]="image.tagLabel + ' project photo'"
               loading="lazy"
               class="w-full h-full object-cover grayscale-filter group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
             >
-            <div class="absolute top-0 left-0 bg-black/60 text-white text-[0.65rem] font-headline font-bold uppercase tracking-widest px-4 py-2">
-              {{ image.categoryLabel }}
-            </div>
+            @if (image.tag !== 'uncategorized') {
+              <div class="absolute top-0 left-0 bg-black/60 text-white text-[0.65rem] font-headline font-bold uppercase tracking-widest px-4 py-2">
+                {{ image.tagLabel }}
+              </div>
+            }
             <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
           </div>
           <div class="p-4 bg-surface-container-low group-hover:bg-surface-container-lowest transition-colors">
@@ -98,8 +100,8 @@
     @if (filteredImages.length === 0) {
       <div class="text-center py-16">
         <span class="material-symbols-outlined text-6xl text-outline-variant mb-4 block">filter_alt_off</span>
-        <p class="text-on-surface font-headline font-bold uppercase mb-4">No photos in this category</p>
-        <button (click)="setCategory('All')" class="text-primary-fixed font-headline font-bold text-sm uppercase tracking-widest hover:underline">
+        <p class="text-on-surface font-headline font-bold uppercase mb-4">No photos with this tag</p>
+        <button (click)="setTag('All')" class="text-primary-fixed font-headline font-bold text-sm uppercase tracking-widest hover:underline">
           View all photos
         </button>
       </div>
@@ -116,11 +118,11 @@
       Call us today to get started on your next plumbing project.
     </p>
     <a
-      href="tel:7085552222"
+      [href]="'tel:' + phone"
       class="inline-flex items-center gap-2 bg-primary-fixed text-white px-6 py-3 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all"
     >
       <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">call</span>
-      CALL (708) 555-2222
+      CALL {{ phoneDisplay }}
     </a>
   </div>
 </section>
@@ -144,13 +146,15 @@
     >
       <img
         [src]="selectedImage.url"
-        [alt]="selectedImage.categoryLabel + ' project photo'"
+        [alt]="selectedImage.tagLabel + ' project photo'"
         class="max-h-[75vh] w-auto object-contain"
       >
       <div class="mt-6 text-center">
-        <span class="bg-white/10 text-white text-[0.65rem] font-headline font-bold uppercase tracking-widest px-4 py-2">
-          {{ selectedImage.categoryLabel }}
-        </span>
+        @if (selectedImage.tag !== 'uncategorized') {
+          <span class="bg-white/10 text-white text-[0.65rem] font-headline font-bold uppercase tracking-widest px-4 py-2">
+            {{ selectedImage.tagLabel }}
+          </span>
+        }
         <p class="text-white/40 text-xs mt-3 font-body">
           {{ selectedImage.date | date:'mediumDate' }}
         </p>
