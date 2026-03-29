@@ -141,11 +141,13 @@
           CachingOptimized managed policy<br>
           OAC &rarr; all 3 S3 buckets
         </div>
-        <span class="badge badge-perm" onclick="toggle('cf-behaviors')">3 behaviors</span>
+        <span class="badge badge-perm" onclick="toggle('cf-behaviors')">5 behaviors</span>
         <div id="cf-behaviors" class="perm-detail">
-          <code>/* (default)</code> &rarr; Site bucket (Angular app)<br>
-          <code>/gallery-images/*</code> &rarr; Gallery bucket<br>
-          <code>/reviews-data/*</code> &rarr; Reviews bucket
+          <code>/* (default)</code> &rarr; Site bucket (CachingOptimized)<br>
+          <code>/gallery-images/gallery.json</code> &rarr; Gallery bucket (<strong>CachingDisabled</strong>)<br>
+          <code>/reviews-data/reviews.json</code> &rarr; Reviews bucket (<strong>CachingDisabled</strong>)<br>
+          <code>/gallery-images/*</code> &rarr; Gallery bucket (CachingOptimized)<br>
+          <code>/reviews-data/*</code> &rarr; Reviews bucket (CachingOptimized)
         </div>
       </div>
       <div class="box gray">
@@ -285,12 +287,12 @@
 
     <!-- Reviews -->
     <div class="flex-col">
-      <div class="comp-node placeholder"><div class="comp-name">ReviewsComponent</div><div class="comp-sel">/reviews</div><div class="comp-desc">Placeholder</div></div>
+      <div class="comp-node page"><div class="comp-name">ReviewsComponent</div><div class="comp-sel">/reviews</div><div class="comp-desc">Star ratings, avg score<br>Loads from S3</div></div>
     </div>
 
     <!-- Admin -->
     <div class="flex-col">
-      <div class="comp-node admin"><div class="comp-name">AdminComponent</div><div class="comp-sel">/admin</div><div class="comp-desc">Upload, delete, reorder<br>authGuard protected</div></div>
+      <div class="comp-node admin"><div class="comp-name">AdminComponent</div><div class="comp-sel">/admin</div><div class="comp-desc">Gallery: upload, drag-reorder,<br>edit tags, delete<br>Reviews: add, edit, delete</div></div>
       <div class="connector"></div>
       <div class="comp-node admin" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">LoginComponent</div><div class="comp-sel">/admin/login</div></div>
     </div>
@@ -305,7 +307,8 @@
   <div class="box-grid">
     <div class="box purple"><div class="box-title">AuthService</div><div class="box-detail">Cognito sign-in (USER_PASSWORD_AUTH)<br>NEW_PASSWORD_REQUIRED flow<br>GetCredentialsForIdentity</div></div>
     <div class="box purple"><div class="box-title">UploadService</div><div class="box-detail">S3 PUT/DELETE/COPY<br>SigV4 signing in browser<br>putJson for manifests</div></div>
-    <div class="box purple"><div class="box-title">GalleryService</div><div class="box-detail">Fetch gallery.json via CloudFront<br>Parse filenames &rarr; tags, dates<br>Shared by gallery + admin</div></div>
+    <div class="box purple"><div class="box-title">GalleryService</div><div class="box-detail">Fetch gallery.json via CloudFront<br>Parse entries (string or object)<br>Custom tags + filename inference</div></div>
+    <div class="box purple"><div class="box-title">ReviewsService</div><div class="box-detail">Fetch reviews.json via CloudFront<br>Returns Review[] array</div></div>
   </div>
 
   <h2>Design System</h2>
@@ -362,7 +365,7 @@
     <tbody>
       <tr><td><code>/</code></td><td>HomeComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
       <tr><td><code>/gallery</code></td><td>GalleryComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
-      <tr><td><code>/reviews</code></td><td>ReviewsComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-todo">Placeholder</span></td></tr>
+      <tr><td><code>/reviews</code></td><td>ReviewsComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
       <tr><td><code>/admin</code></td><td>AdminComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td><span class="tag tag-guard">authGuard</span></td><td><span class="badge badge-done">Complete</span></td></tr>
       <tr><td><code>/admin/login</code></td><td>LoginComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
       <tr><td><code>**</code></td><td>Redirect &rarr; <code>/</code></td><td>&mdash;</td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
@@ -386,9 +389,14 @@
   <h2>Public Visitor — View Gallery</h2>
   <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Browser &rarr; <code>kvaking.com/gallery</code></div></div>
   <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">CloudFront serves <code>index.html</code> (SPA error page for 403)<br><small>Angular bootstraps, router loads GalleryComponent chunk</small></div></div>
-  <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">GalleryComponent fetches <code>/gallery-images/gallery.json</code><br><small>CloudFront &rarr; gallery bucket &rarr; returns JSON array of filenames</small></div></div>
-  <div class="flow-step"><div class="flow-num">4</div><div class="flow-text">Filenames parsed: sort number, date, tag extracted<br><small>Tags shown as filter pills, first 18 images rendered</small></div></div>
+  <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">GalleryComponent fetches <code>/gallery-images/gallery.json</code> (not cached)<br><small>CloudFront &rarr; gallery bucket &rarr; returns ordered array of entries (strings or objects with custom tags)</small></div></div>
+  <div class="flow-step"><div class="flow-num">4</div><div class="flow-text">Entries parsed: tag from object or inferred from filename<br><small>Tags shown as filter pills (uncategorized hidden), first 18 images rendered</small></div></div>
   <div class="flow-step"><div class="flow-num">5</div><div class="flow-text">Images loaded from <code>/gallery-images/0001_..._tag.jpg</code><br><small>CloudFront &rarr; gallery bucket (OAC). Edge-cached globally.</small></div></div>
+
+  <h2>Public Visitor — View Reviews</h2>
+  <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Browser &rarr; <code>kvaking.com/reviews</code></div></div>
+  <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">Angular loads ReviewsComponent, fetches <code>/reviews-data/reviews.json</code> (not cached)</div></div>
+  <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">Displays average rating, star ratings, review text, customer name + location</div></div>
 
   <h2>Admin — Login Flow</h2>
   <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Admin navigates to <code>/admin</code></div></div>
@@ -404,9 +412,20 @@
   <div class="flow-step"><div class="flow-num">4</div><div class="flow-text">After all uploads: admin lists S3 bucket, writes <code>gallery.json</code> manifest<br><small>Public gallery reads this manifest on next page load</small></div></div>
 
   <h2>Admin — Reorder Photos</h2>
-  <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Admin clicks up/down arrow on a photo</div></div>
-  <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">UploadService copies both images to new keys (swapped sort numbers)<br><small>S3 CopyObject &mdash; server-side, no data through browser</small></div></div>
-  <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">Deletes the old keys, updates local state, writes new <code>gallery.json</code></div></div>
+  <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Admin drags a photo to a new position (drop zones appear between items)</div></div>
+  <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">Array order updated in memory &mdash; no S3 file operations needed</div></div>
+  <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">Saves reordered <code>gallery.json</code> to S3 (instant, one PUT)</div></div>
+
+  <h2>Admin — Edit Tag</h2>
+  <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Admin clicks tag label on a photo &rarr; inline text input appears</div></div>
+  <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">Types new tag (or clears to revert to filename-inferred tag)</div></div>
+  <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">Saves <code>gallery.json</code> with <code>{ "file": "...", "tag": "Custom Tag" }</code></div></div>
+
+  <h2>Admin — Manage Reviews</h2>
+  <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Admin switches to Reviews tab &rarr; loads <code>/reviews-data/reviews.json</code></div></div>
+  <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">Click "Add Review" &rarr; form: name, rating (clickable stars), text, location, date</div></div>
+  <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">Save &rarr; UploadService.putJson writes <code>reviews.json</code> to reviews bucket</div></div>
+  <div class="flow-step"><div class="flow-num">4</div><div class="flow-text">Edit/delete work the same way &mdash; modify array, save JSON</div></div>
 </div>
 
 <!-- ==================== 6. MISC ==================== -->
@@ -432,15 +451,28 @@ region       — "eu-central-1"   (AWS region)</pre>
   <p>Values in <code>terraform.tfvars</code> (gitignored). Template in <code>terraform.tfvars.example</code>.</p>
 
   <h2>Image Filename Convention</h2>
-  <pre>&lt;sort-number&gt;_&lt;datetime&gt;_&lt;tag&gt;.&lt;ext&gt;
+  <pre>&lt;number&gt;_&lt;datetime&gt;_&lt;tag&gt;.&lt;ext&gt;
 0001_2026-02-25-10-30-00_water-heaters.jpg
 ^^^^  ^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^
-sort   Y-m-d-H-M-S          tag slug (or "uncategorized")</pre>
+num    Y-m-d-H-M-S          tag slug</pre>
   <ul>
-    <li>Sort number controls gallery order (admin can reorder)</li>
-    <li>Tag parsed into display label: <code>water-heaters</code> &rarr; "Water Heaters"</li>
+    <li>Number is auto-assigned on upload (not used for ordering — gallery.json controls order)</li>
+    <li>Tag inferred from filename: <code>water-heaters</code> &rarr; "Water Heaters"</li>
+    <li>Tag can be overridden per-image by admin (stored in gallery.json)</li>
     <li>"uncategorized" tag is hidden from display and filter bar</li>
     <li>Supported extensions: .jpg, .jpeg, .png, .webp</li>
+  </ul>
+
+  <h2>gallery.json Format</h2>
+  <pre>[
+  "0001_2026-03-28_water-heaters.jpg",
+  { "file": "0002_2026-03-28_sink.jpg", "tag": "Kitchen Plumbing" }
+]</pre>
+  <ul>
+    <li>Array order = display order (admin drag-to-reorder)</li>
+    <li>String entry = tag inferred from filename</li>
+    <li>Object entry with <code>tag</code> = custom tag set by admin</li>
+    <li>Backward compatible — old string-only format still works</li>
   </ul>
 
   <h2>Key Files</h2>
@@ -478,23 +510,26 @@ infrastructure/
   <div class="check check-todo">Create links/resources page (e.g. Chicago building permits)</div>
 
   <h2>Goal 1 — Angular Application <span class="badge badge-done">Complete</span></h2>
-  <div class="check check-done">Scaffold Angular project</div>
-  <div class="check check-done">Tailwind CSS via PostCSS</div>
-  <div class="check check-done">All components: Navbar, Hero, TrustStats, ServicesGrid, ServiceArea, Footer</div>
-  <div class="check check-done">Router: /, /gallery, /reviews</div>
-  <div class="check check-done">Gallery: S3 images, tag filters, lightbox, load more</div>
-  <div class="check check-done">Admin: upload, delete, reorder, Cognito auth</div>
-  <div class="check check-done">Gray design system ported</div>
+  <div class="check check-done">Angular 21 SPA with standalone components</div>
+  <div class="check check-done">Tailwind CSS v3 — "Architectural Minimalist" design (grayscale + burnt orange)</div>
+  <div class="check check-done">Components: Navbar, Hero, TrustStats, ServicesGrid, ServiceArea, Footer</div>
+  <div class="check check-done">Gallery: S3 images, tag filters (custom + inferred), lightbox, load more</div>
+  <div class="check check-done">Reviews: star ratings, average score, loads from S3</div>
+  <div class="check check-done">Admin: gallery management (upload, drag-reorder, edit tags, delete)</div>
+  <div class="check check-done">Admin: reviews management (add, edit, delete)</div>
+  <div class="check check-done">Login: Cognito auth with NEW_PASSWORD_REQUIRED handling</div>
+  <div class="check check-done">Phone number centralized in environment config (+1 country code)</div>
+  <div class="check check-done">Admin pages: noindex meta + robots.txt + no public links</div>
 
   <h2>Goal 2 — Terraform Infrastructure <span class="badge badge-done">Complete</span></h2>
-  <div class="check check-done">S3 buckets (site, gallery, reviews) — all private</div>
-  <div class="check check-done">CloudFront with 3 origins + path behaviors</div>
-  <div class="check check-done">ACM certificate (wildcard, DNS validation)</div>
-  <div class="check check-done">Route53 hosted zone + DNS records</div>
-  <div class="check check-done">Cognito User Pool + Identity Pool</div>
-  <div class="check check-done">IAM roles scoped to gallery + reviews buckets</div>
+  <div class="check check-done">3 S3 buckets (site, gallery, reviews) — all private, OAC only</div>
+  <div class="check check-done">CloudFront: 3 origins, 5 behaviors (manifests uncached, images cached)</div>
+  <div class="check check-done">ACM wildcard certificate (DNS validation, us-east-1)</div>
+  <div class="check check-done">Route53 hosted zone + A/AAAA alias records</div>
+  <div class="check check-done">Cognito User Pool + Identity Pool (no self-signup)</div>
+  <div class="check check-done">IAM role scoped to gallery-images/* and reviews-data/*</div>
   <div class="check check-done">Remote state (S3 + DynamoDB)</div>
-  <div class="check check-done">Parameterized via terraform.tfvars</div>
+  <div class="check check-done">Parameterized via terraform.tfvars, AWS managed cache policies only</div>
 
   <h2>Goal 3 — SEO</h2>
   <div class="check check-todo">LocalBusiness JSON-LD structured data</div>
@@ -510,17 +545,22 @@ infrastructure/
   <div class="check check-todo">Google Search Console</div>
 
   <h2>Goal 4 — README <span class="badge badge-done">Complete</span></h2>
-  <div class="check check-done">Prerequisites, local dev, build, deploy, project structure</div>
-  <div class="check check-done">Infrastructure setup instructions</div>
-  <div class="check check-done">Admin user creation</div>
+  <div class="check check-done">Prerequisites, local dev, build, deploy, infra setup, admin, gallery, reviews, project structure</div>
 
   <h2>Goal 5 — Tests</h2>
-  <div class="check check-todo">Unit tests (per component)</div>
+  <div class="check check-todo">Unit tests (per component incl. gallery, reviews, admin, login)</div>
   <div class="check check-todo">E2E tests (Playwright)</div>
 
-  <h2>Upcoming</h2>
-  <div class="check check-todo">Reviews page — display customer reviews from S3</div>
-  <div class="check check-todo">Admin: reviews management (add, edit, delete)</div>
+  <h2>Future Work</h2>
+  <div class="check check-todo">Links/resources page</div>
+  <div class="check check-todo">Real business address + Google Maps coordinates</div>
+  <div class="check check-todo">Enhanced footer (logo, address, phone, email, social, terms, privacy)</div>
+  <div class="check check-todo">Menu additions (About Us, Contact, FAQ, Tips, Coupons)</div>
+  <div class="check check-todo">Contact form</div>
+  <div class="check check-todo">Online chat integration</div>
+  <div class="check check-todo">Admin pagination (large gallery/review lists)</div>
+  <div class="check check-todo">Session persistence (tokens in sessionStorage)</div>
+  <div class="check check-todo">Home page real background photo</div>
 </div>
 
 <script>

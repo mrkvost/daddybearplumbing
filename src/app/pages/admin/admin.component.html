@@ -130,7 +130,26 @@
                 </div>
                 <!-- Info -->
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate">{{ image.tagLabel }}</p>
+                  @if (image.editingTag) {
+                    <input
+                      type="text"
+                      [value]="image.tagLabel === 'Uncategorized' ? '' : image.tagLabel"
+                      (keydown.enter)="saveTag(image, $any($event.target).value)"
+                      (keydown.escape)="cancelEditTag(image)"
+                      (blur)="saveTag(image, $any($event.target).value)"
+                      placeholder="Tag (empty = infer from filename)"
+                      class="w-full bg-surface-container-lowest border border-outline-variant/20 px-2 py-1 text-sm font-body text-on-surface focus:border-primary focus:ring-0"
+                      autofocus
+                    />
+                  } @else {
+                    <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate cursor-pointer hover:text-primary-fixed transition-colors"
+                       (click)="startEditTag(image)" title="Click to edit tag">
+                      {{ image.tagLabel }}
+                      @if (image.customTag) {
+                        <span class="text-[0.6rem] text-outline font-body normal-case tracking-normal">(custom)</span>
+                      }
+                    </p>
+                  }
                   <p class="text-[0.65rem] text-secondary">{{ image.date | date:'mediumDate' }} &middot; {{ image.filename }}</p>
                 </div>
                 <!-- Delete -->

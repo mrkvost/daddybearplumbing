@@ -5,12 +5,14 @@ import { Router } from '@angular/router';
 import { Meta } from '@angular/platform-browser';
 import { AuthService } from '../../services/auth.service';
 import { UploadService } from '../../services/upload.service';
-import { GalleryService, GalleryImage } from '../../services/gallery.service';
+import { GalleryService, GalleryImage, GalleryEntry } from '../../services/gallery.service';
 import { Review } from '../../services/reviews.service';
 import { environment } from '../../../environments/environment';
 
 interface AdminGalleryImage extends GalleryImage {
   deleting?: boolean;
+  editingTag?: boolean;
+  customTag?: string; // tag set by admin (stored in gallery.json)
 }
 
 interface AdminReview extends Review {
@@ -77,15 +79,22 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.loadingImages = true;
     this.cdr.detectChanges();
     try {
-      // Try loading from manifest first (preserves admin-defined order)
+      // Try loading from manifest first (preserves order + custom tags)
       // Fall back to S3 listing if manifest doesn't exist yet
       try {
         const response = await fetch(`/gallery-images/gallery.json?t=${Date.now()}`);
         if (response.ok) {
-          const filenames: string[] = await response.json();
-          this.images = filenames
-            .filter(f => /\.(jpg|jpeg|png|webp)$/i.test(f))
-            .map(f => this.galleryService.parseFilename(f) as AdminGalleryImage);
+          const entries: GalleryEntry[] = await response.json();
+          this.images = entries
+            .map(e => {
+              const img = this.galleryService.parseEntry(e) as AdminGalleryImage;
+              // Preserve custom tag info for saving back
+              if (typeof e !== 'string' && e.tag) {
+                img.customTag = e.tag;
+              }
+              return img;
+            })
+            .filter(img => /\.(jpg|jpeg|png|webp)$/i.test(img.filename));
         } else {
           throw new Error('no manifest');
         }
@@ -101,8 +110,14 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   private async saveGalleryManifest(): Promise<void> {
-    const filenames = this.images.map(img => img.filename);
-    await this.uploadService.putJson('gallery-images/gallery.json', filenames, GALLERY_BUCKET);
+    const entries: GalleryEntry[] = this.images.map(img => {
+      const adminImg = img as AdminGalleryImage;
+      if (adminImg.customTag) {
+        return { file: img.filename, tag: adminImg.customTag };
+      }
+      return img.filename;
+    });
+    await this.uploadService.putJson('gallery-images/gallery.json', entries, GALLERY_BUCKET);
   }
 
   /* Drag and drop state */
@@ -160,6 +175,36 @@ export class AdminComponent implements OnInit, OnDestroy {
       alert(`Reorder failed: ${e.message}`);
       await this.loadImages();
     }
+  }
+
+  /* ---------- Tag editing ---------- */
+
+  startEditTag(image: AdminGalleryImage): void {
+    image.editingTag = true;
+    this.cdr.detectChanges();
+  }
+
+  async saveTag(image: AdminGalleryImage, newTag: string): Promise<void> {
+    image.editingTag = false;
+    const trimmed = newTag.trim();
+    if (trimmed) {
+      image.customTag = trimmed;
+      image.tagLabel = trimmed;
+      image.tag = trimmed.toLowerCase().replace(/\s+/g, '-');
+    } else {
+      // Clear custom tag — revert to filename-inferred
+      image.customTag = undefined;
+      const parsed = this.galleryService.parseFilename(image.filename);
+      image.tag = parsed.tag;
+      image.tagLabel = parsed.tagLabel;
+    }
+    await this.saveGalleryManifest();
+    this.cdr.detectChanges();
+  }
+
+  cancelEditTag(image: AdminGalleryImage): void {
+    image.editingTag = false;
+    this.cdr.detectChanges();
   }
 
   async deleteImage(image: AdminGalleryImage): Promise<void> {
