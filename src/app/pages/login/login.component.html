@@ -1,0 +1,75 @@
+<section class="min-h-[calc(100vh-60px)] flex items-center justify-center px-6 bg-surface">
+  <div class="w-full max-w-sm">
+    <h1 class="font-headline font-black text-4xl tracking-tighter uppercase mb-2">Admin</h1>
+    <p class="text-secondary text-sm mb-12">
+      {{ needsNewPassword ? 'Set a new password to continue.' : 'Sign in to manage gallery photos.' }}
+    </p>
+
+    @if (error) {
+      <div class="bg-error-container text-on-error-container text-sm px-4 py-3 mb-6 ghost-border">
+        {{ error }}
+      </div>
+    }
+
+    <form (ngSubmit)="onSubmit()" class="space-y-6">
+      @if (!needsNewPassword) {
+        <div>
+          <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Username</label>
+          <input
+            type="text"
+            [(ngModel)]="username"
+            name="username"
+            required
+            autocomplete="username"
+            class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
+          />
+        </div>
+        <div>
+          <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Password</label>
+          <input
+            type="password"
+            [(ngModel)]="password"
+            name="password"
+            required
+            autocomplete="current-password"
+            class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
+          />
+        </div>
+      }
+
+      @if (needsNewPassword) {
+        <div>
+          <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">New Password</label>
+          <input
+            type="password"
+            [(ngModel)]="newPassword"
+            name="newPassword"
+            required
+            autocomplete="new-password"
+            class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
+          />
+          <p class="text-outline text-xs mt-2">Minimum 8 characters, uppercase, lowercase, and numbers.</p>
+        </div>
+        <div>
+          <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Confirm Password</label>
+          <input
+            type="password"
+            [(ngModel)]="confirmPassword"
+            name="confirmPassword"
+            required
+            autocomplete="new-password"
+            class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
+          />
+        </div>
+      }
+
+      <button
+        type="submit"
+        [disabled]="loading"
+        class="w-full bg-primary text-white px-6 py-3 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50"
+      >
+        {{ loading ? 'Please wait...' : (needsNewPassword ? 'Set password' : 'Sign in') }}
+      </button>
+    </form>
+  </div>
+</section>

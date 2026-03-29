@@ -5,6 +5,11 @@ Work through them one at a time. Each goal has acceptance criteria that define "
 
 ---
 
+## GOAL 0 — Links page
+e.g.:
+https://www.chicago.gov/city/en/sites/guide-to-building-permits/home/instructions/EPP/PLUMB.html
+
+
 ## GOAL 1 — Rewrite site as an Angular application
 
 **Why:** The current `index.html` is a single static file. Angular gives us reusable
@@ -46,60 +51,34 @@ components, a proper build pipeline, and a foundation for adding pages later.
 
 ---
 
-## GOAL 2 — Terraform: AWS infrastructure (S3 + CloudFront + Route53 + ACM)
+## GOAL 2 — Terraform: AWS infrastructure ✅ COMPLETE
 
-**Why:** Reproducible, version-controlled infrastructure. One command provisions everything.
+**Status:** Infrastructure is live and managed by Terraform.
 
-**Decisions:**
-- Production environment only
-- Domain placeholder: `kvaking.com` (Route53 hosted zone already exists in AWS — must be importable)
-- ACM certificate created in `us-east-1` (required by CloudFront)
-- Configuration lives in `config.yml` (not `variables.tf`) — Terraform reads it with
-  `yamldecode(file("config.yml"))`. Commit `config.yml.example`; add `config.yml` to `.gitignore`
-- All AWS resources in a single `main.tf`; separate `outputs.tf` and `import.tf` only
-- Remote state stored in S3 + DynamoDB — a bootstrap script creates these before first `terraform apply`
-- Manual deploy script: build Angular → sync to S3 → invalidate CloudFront cache
+**What was built:**
+- S3 bucket (private, OAC access from CloudFront)
+- CloudFront distribution (HTTPS, SPA error pages, CachingOptimized)
+- ACM certificate (wildcard, DNS validation)
+- Route53 hosted zone + A/AAAA alias records
+- Cognito User Pool + Identity Pool (admin authentication)
+- Lambda function (auto-regenerates gallery.json on S3 upload/delete)
+- S3 CORS configuration (browser-based uploads)
+- Remote state in S3 + DynamoDB lock table
+- All resources parameterized via `terraform.tfvars`
 
-**File structure (`infrastructure/`):**
+**Files:**
 ```
 infrastructure/
-  bootstrap.sh        # one-time script: creates S3 state bucket + DynamoDB lock table
-  config.yml.example  # copy to config.yml and fill in real values
-  config.yml          # gitignored — your real settings
-  main.tf             # ALL resource definitions (S3, CloudFront, ACM, Route53)
-  outputs.tf          # CloudFront URL, S3 bucket name
-  import.tf           # terraform import blocks for pre-existing resources (hosted zone)
-  deploy.sh           # ng build → s3 sync → CloudFront invalidation
+  bootstrap.sh           # Creates state bucket + lock table (one-time)
+  main.tf                # All AWS resource definitions
+  variables.tf           # Input variables (domain, bucket_name, project, region)
+  outputs.tf             # Cognito IDs, CloudFront domain, S3 bucket
+  import.tf              # Import blocks for pre-existing resources
+  terraform.tfvars       # Actual values (gitignored)
+  terraform.tfvars.example
+  lambda/
+    gallery_manifest.py  # Regenerates gallery.json on S3 events
 ```
-
-**Sub-tasks:**
-- [ ] Create `infrastructure/` directory
-- [ ] Write `bootstrap.sh` — creates the Terraform state S3 bucket and DynamoDB lock table
-      using AWS CLI; idempotent (safe to run twice); outputs bucket name and table name to use
-      in the `backend` block of `main.tf`
-- [ ] Create `config.yml.example` with all required keys and comments explaining each one
-      (domain name, AWS region, bucket name, project tag, Google Maps embed URL)
-- [ ] Write `main.tf` containing:
-  - `terraform` block with S3 backend (reads bucket/table from bootstrap output)
-  - `yamldecode(file("config.yml"))` to load all config values
-  - S3 bucket (private, versioning on, no static-website-hosting — CloudFront serves directly)
-  - CloudFront distribution (HTTPS only, OAC for S3 access, gzip + brotli, default root object `index.html`)
-  - ACM certificate (`kvaking.com` + `www.kvaking.com`, DNS validation)
-  - Route53 A + AAAA alias records → CloudFront; CNAME records for ACM DNS validation
-- [ ] Write `outputs.tf` — CloudFront domain name, S3 bucket name
-- [ ] Write `import.tf` — `import` blocks for the existing Route53 hosted zone plus
-      step-by-step comments on how to find the zone ID and run `terraform import`
-- [ ] Write `deploy.sh` — runs `ng build`, reads S3 bucket name from Terraform output,
-      syncs `dist/` to S3 with `--delete`, triggers CloudFront invalidation on `/*`
-- [ ] Add `config.yml` to `.gitignore`
-
-**Acceptance criteria:**
-- `bootstrap.sh` creates state bucket and lock table; subsequent runs do not error
-- `terraform init` connects to the remote S3 backend
-- `terraform plan` runs without errors after importing the hosted zone
-- `terraform apply` creates all resources and outputs a working CloudFront URL
-- `./deploy.sh` uploads the Angular build and invalidates the cache in one command
-- Visiting `https://kvaking.com` serves the site over HTTPS
 
 ---
 

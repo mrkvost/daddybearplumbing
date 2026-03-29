@@ -13,3 +13,15 @@ output "s3_bucket_name" {
 output "site_url" {
   value = "https://${var.domain}"
 }
+
+output "cognito_user_pool_id" {
+  value = aws_cognito_user_pool.admin.id
+}
+
+output "cognito_client_id" {
+  value = aws_cognito_user_pool_client.admin.id
+}
+
+output "cognito_identity_pool_id" {
+  value = aws_cognito_identity_pool.admin.id
+}

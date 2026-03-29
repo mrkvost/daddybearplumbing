@@ -1,0 +1,163 @@
+<section class="min-h-[calc(100vh-60px)] bg-surface">
+  <!-- Header -->
+  <div class="bg-black text-white px-6 py-8">
+    <div class="max-w-5xl mx-auto flex justify-between items-end">
+      <div>
+        <p class="text-white/50 text-[0.7rem] font-bold tracking-[0.3em] uppercase mb-2">Admin Panel</p>
+        <h1 class="font-headline font-black text-3xl tracking-tighter uppercase">Gallery</h1>
+      </div>
+      <button
+        (click)="signOut()"
+        class="text-white/50 hover:text-white text-xs font-headline font-bold uppercase tracking-widest transition-colors"
+      >Sign out</button>
+    </div>
+  </div>
+
+  <div class="max-w-5xl mx-auto px-6 py-12">
+
+    <!-- ==================== UPLOAD SECTION ==================== -->
+    <div class="mb-16">
+      <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-6">Upload New Photos</p>
+
+      <div class="grid md:grid-cols-[1fr_2fr] gap-6 mb-6">
+        <div>
+          <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Category</label>
+          <input
+            type="text"
+            [(ngModel)]="category"
+            placeholder="e.g. water-heaters"
+            class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
+          />
+        </div>
+        <div>
+          <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Files</label>
+          <label class="flex items-center justify-center gap-3 ghost-border bg-surface-container-low hover:bg-surface-container-lowest transition-colors cursor-pointer px-6 py-3">
+            <span class="material-symbols-outlined text-xl text-outline-variant">cloud_upload</span>
+            <span class="text-secondary text-sm">Select photos (JPG, PNG, WebP)</span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              (change)="onFilesSelected($event)"
+              class="hidden"
+            />
+          </label>
+        </div>
+      </div>
+
+      <!-- Upload queue -->
+      @if (uploads.length > 0) {
+        <div class="space-y-2 mb-4">
+          @for (item of uploads; track item.filename; let i = $index) {
+            <div class="flex items-center justify-between px-4 py-2 ghost-border bg-surface-container-low">
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-body text-on-surface truncate">{{ item.filename }}</p>
+              </div>
+              <div class="flex items-center gap-3 ml-4">
+                @if (item.status === 'pending') {
+                  <button (click)="removeUpload(i)" class="text-secondary hover:text-error transition-colors">
+                    <span class="material-symbols-outlined text-sm">close</span>
+                  </button>
+                }
+                @if (item.status === 'uploading') {
+                  <span class="text-primary-fixed text-xs uppercase tracking-widest animate-pulse">Uploading</span>
+                }
+                @if (item.status === 'error') {
+                  <span class="text-error text-xs">{{ item.error }}</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+        <button
+          (click)="uploadAll()"
+          [disabled]="uploading"
+          class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50"
+        >
+          {{ uploading ? 'Uploading...' : 'Upload ' + uploads.length + ' file' + (uploads.length !== 1 ? 's' : '') }}
+        </button>
+      }
+    </div>
+
+    <!-- ==================== GALLERY MANAGEMENT ==================== -->
+    <div class="border-t border-outline-variant/20 pt-12">
+      <div class="flex justify-between items-center mb-8">
+        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary">
+          {{ images.length }} photo{{ images.length !== 1 ? 's' : '' }} in gallery
+        </p>
+        <button
+          (click)="loadImages()"
+          class="text-secondary hover:text-primary text-xs font-headline font-bold uppercase tracking-widest transition-colors flex items-center gap-1"
+        >
+          <span class="material-symbols-outlined text-sm">refresh</span>
+          Refresh
+        </button>
+      </div>
+
+      @if (loadingImages) {
+        <div class="text-center py-16">
+          <span class="material-symbols-outlined text-4xl text-outline-variant animate-pulse block mb-3">photo_library</span>
+          <p class="text-secondary text-sm uppercase tracking-widest">Loading...</p>
+        </div>
+      }
+
+      @if (!loadingImages && images.length === 0) {
+        <div class="text-center py-16">
+          <span class="material-symbols-outlined text-4xl text-outline-variant block mb-3">photo_library</span>
+          <p class="text-secondary text-sm">No photos yet. Upload some above.</p>
+        </div>
+      }
+
+      @if (!loadingImages && images.length > 0) {
+        <div class="space-y-2">
+          @for (image of images; track image.filename; let i = $index; let first = $first; let last = $last) {
+            <div class="flex items-center gap-4 px-4 py-3 ghost-border bg-surface-container-low"
+                 [class.opacity-50]="image.deleting || image.moving">
+              <!-- Thumbnail -->
+              <div class="w-16 h-12 shrink-0 overflow-hidden bg-surface-container-high">
+                <img [src]="image.url" [alt]="image.category" class="w-full h-full object-cover" loading="lazy" />
+              </div>
+
+              <!-- Info -->
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate">{{ image.category }}</p>
+                <p class="text-[0.65rem] text-secondary">{{ image.date | date:'mediumDate' }} &middot; {{ image.filename }}</p>
+              </div>
+
+              <!-- Sort order -->
+              <div class="flex items-center gap-1 shrink-0">
+                <button
+                  (click)="moveImage(i, -1)"
+                  [disabled]="first || image.moving"
+                  class="p-1 text-secondary hover:text-primary disabled:text-outline-variant disabled:cursor-default transition-colors"
+                  title="Move up"
+                >
+                  <span class="material-symbols-outlined text-lg">arrow_upward</span>
+                </button>
+                <span class="text-xs text-outline w-8 text-center font-body">{{ image.sortNumber }}</span>
+                <button
+                  (click)="moveImage(i, 1)"
+                  [disabled]="last || image.moving"
+                  class="p-1 text-secondary hover:text-primary disabled:text-outline-variant disabled:cursor-default transition-colors"
+                  title="Move down"
+                >
+                  <span class="material-symbols-outlined text-lg">arrow_downward</span>
+                </button>
+              </div>
+
+              <!-- Delete -->
+              <button
+                (click)="deleteImage(image)"
+                [disabled]="image.deleting"
+                class="p-1 text-secondary hover:text-error transition-colors shrink-0 disabled:opacity-50"
+                title="Delete"
+              >
+                <span class="material-symbols-outlined text-lg">{{ image.deleting ? 'hourglass_top' : 'delete' }}</span>
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</section>
