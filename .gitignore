@@ -9,3 +9,9 @@
 
 # Miscellaneous
 /.angular/cache
+
+# Terraform
+infrastructure/terraform.tfvars
+infrastructure/.terraform/
+infrastructure/.terraform.lock.hcl
+infrastructure/*.tfstate*
