@@ -1,3 +1,4 @@
+<!-- Page header -->
 <section class="relative h-[300px] flex items-end overflow-hidden bg-black">
   <div class="relative z-10 w-full max-w-7xl mx-auto px-6 pb-12">
     <p class="text-white/50 text-[0.7rem] font-bold tracking-[0.3em] uppercase mb-4">Client Feedback</p>
@@ -7,7 +8,88 @@
   </div>
 </section>
 
-<section class="max-w-4xl mx-auto px-6 py-24 text-center">
-  <span class="material-symbols-outlined text-6xl text-outline-variant mb-6 block">rate_review</span>
-  <p class="text-secondary text-sm uppercase tracking-widest">Coming soon — what our customers say about us.</p>
+<!-- Loading -->
+@if (loading) {
+  <div class="max-w-4xl mx-auto px-6 py-24 text-center">
+    <span class="material-symbols-outlined text-5xl text-outline-variant animate-pulse block mb-4">rate_review</span>
+    <p class="text-secondary text-sm uppercase tracking-widest">Loading reviews...</p>
+  </div>
+}
+
+<!-- No reviews -->
+@if (!loading && reviews.length === 0) {
+  <div class="max-w-4xl mx-auto px-6 py-24 text-center">
+    <span class="material-symbols-outlined text-6xl text-outline-variant block mb-4">rate_review</span>
+    <p class="text-on-surface font-headline font-bold text-lg uppercase mb-2">No reviews yet</p>
+    <p class="text-secondary text-sm">Check back soon for customer testimonials.</p>
+  </div>
+}
+
+<!-- Reviews list -->
+@if (!loading && reviews.length > 0) {
+  <!-- Summary -->
+  <div class="bg-surface-container-lowest border-b border-outline-variant/20 py-12">
+    <div class="max-w-4xl mx-auto px-6 flex items-center gap-8">
+      <div>
+        <p class="font-headline font-black text-6xl tracking-tighter">{{ averageRatingDisplay }}</p>
+        <div class="flex gap-1 mt-1">
+          @for (s of averageStars; track $index) {
+            <span class="material-symbols-outlined text-sm" [style.color]="s ? '#b02f00' : '#c6c6c6'" [style.font-variation-settings]="s ? '\'FILL\' 1' : '\'FILL\' 0'">star</span>
+          }
+        </div>
+      </div>
+      <div>
+        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary">
+          {{ reviews.length }} review{{ reviews.length !== 1 ? 's' : '' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <section class="max-w-4xl mx-auto px-6 py-16">
+    <div class="space-y-0">
+      @for (review of reviews; track review.id) {
+        <div class="py-8 border-b border-outline-variant/10">
+          <!-- Stars + date -->
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex gap-1">
+              @for (s of stars(review.rating); track $index) {
+                <span class="material-symbols-outlined text-sm" [style.color]="s ? '#b02f00' : '#c6c6c6'" [style.font-variation-settings]="s ? '\'FILL\' 1' : '\'FILL\' 0'">star</span>
+              }
+            </div>
+            <span class="text-outline text-xs font-body">{{ review.date }}</span>
+          </div>
+
+          <!-- Text -->
+          <p class="text-on-surface text-sm leading-relaxed mb-4 font-body">{{ review.text }}</p>
+
+          <!-- Author -->
+          <div class="flex items-center gap-2">
+            <span class="font-headline font-bold text-sm uppercase tracking-tight">{{ review.name }}</span>
+            @if (review.location) {
+              <span class="text-outline text-xs">&middot;</span>
+              <span class="text-secondary text-xs font-body">{{ review.location }}</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+}
+
+<!-- CTA -->
+<section class="py-24 px-6 bg-surface-container-low border-t border-outline-variant/20">
+  <div class="max-w-3xl mx-auto text-center">
+    <h2 class="font-headline font-black text-3xl tracking-tighter uppercase mb-6">Ready to Experience the Difference?</h2>
+    <p class="text-secondary text-sm leading-relaxed mb-8">
+      Join our satisfied customers. Call us today for honest, professional plumbing service.
+    </p>
+    <a
+      [href]="'tel:' + phone"
+      class="inline-flex items-center gap-2 bg-primary-fixed text-white px-6 py-3 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all"
+    >
+      <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">call</span>
+      CALL {{ phoneDisplay }}
+    </a>
+  </div>
 </section>

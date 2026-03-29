@@ -3,467 +3,536 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Daddy Bear Plumbing - Architecture & Component Diagrams</title>
+<title>Daddy Bear Plumbing — Project Documentation</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background: #0f1117;
-    color: #e2e8f0;
-    padding: 40px 20px;
-    line-height: 1.5;
-  }
-  h1 {
-    text-align: center;
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 12px;
-    color: #f8fafc;
-  }
-  .subtitle {
-    text-align: center;
-    color: #94a3b8;
-    margin-bottom: 48px;
-    font-size: 14px;
-  }
-  h2 {
-    text-align: center;
-    font-size: 22px;
-    font-weight: 600;
-    margin-bottom: 32px;
-    color: #f8fafc;
-    padding-top: 48px;
-    border-top: 1px solid #1e293b;
-  }
-  h2:first-of-type { border-top: none; padding-top: 0; }
-  .diagram-container {
-    max-width: 1100px;
-    margin: 0 auto 64px;
-  }
-  .arch-layer {
-    background: #1a1f2e;
-    border: 1px solid #2d3548;
-    border-radius: 12px;
-    padding: 24px;
-    position: relative;
-  }
-  .arch-layer-label {
-    position: absolute;
-    top: -11px;
-    left: 20px;
-    background: #0f1117;
-    padding: 0 10px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: #64748b;
-  }
-  .arch-row {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .arch-box {
-    background: #0f1117;
-    border: 1px solid #334155;
-    border-radius: 8px;
-    padding: 16px 20px;
-    min-width: 160px;
-    text-align: center;
-    flex: 1;
-    max-width: 240px;
-  }
-  .arch-box.highlight { border-color: #f97316; box-shadow: 0 0 12px rgba(249, 115, 22, 0.15); }
-  .arch-box.green { border-color: #22c55e; box-shadow: 0 0 12px rgba(34, 197, 94, 0.1); }
-  .arch-box.blue { border-color: #3b82f6; box-shadow: 0 0 12px rgba(59, 130, 246, 0.1); }
-  .arch-box.purple { border-color: #a855f7; box-shadow: 0 0 12px rgba(168, 85, 247, 0.1); }
-  .arch-box.red { border-color: #ef4444; box-shadow: 0 0 12px rgba(239, 68, 68, 0.1); }
-  .arch-box-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
-  .arch-box-detail { font-size: 11px; color: #94a3b8; }
-  .arrow-down { text-align: center; color: #475569; font-size: 24px; padding: 4px 0; line-height: 1; }
-  .status-badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; margin-top: 6px; }
-  .status-done { background: #14532d; color: #4ade80; }
-  .status-planned { background: #1e1b4b; color: #a78bfa; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f1117; color: #e2e8f0; line-height: 1.6; }
 
-  .comp-tree { display: flex; flex-direction: column; align-items: center; }
-  .comp-node {
-    background: #1a1f2e;
-    border: 2px solid #334155;
-    border-radius: 10px;
-    padding: 14px 24px;
-    text-align: center;
-    min-width: 180px;
-  }
-  .comp-node.root { border-color: #f97316; box-shadow: 0 0 16px rgba(249, 115, 22, 0.2); }
-  .comp-node.layout { border-color: #22c55e; }
-  .comp-node.page { border-color: #3b82f6; }
-  .comp-node.section { border-color: #a855f7; }
-  .comp-node.admin { border-color: #ef4444; }
-  .comp-node.placeholder { border-color: #475569; opacity: 0.55; }
-  .comp-name { font-weight: 600; font-size: 14px; }
-  .comp-selector { font-size: 11px; color: #94a3b8; font-family: 'SF Mono', 'Fira Code', monospace; }
-  .comp-desc { font-size: 11px; color: #64748b; margin-top: 4px; }
-  .connector { width: 2px; height: 28px; background: #334155; margin: 0 auto; }
-  .flex-col-center { display: flex; flex-direction: column; align-items: center; }
+  /* Tab bar */
+  .tab-bar { position: sticky; top: 0; z-index: 50; background: #151822; border-bottom: 1px solid #1e293b; display: flex; overflow-x: auto; }
+  .tab-bar button { background: none; border: none; color: #64748b; padding: 14px 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; cursor: pointer; white-space: nowrap; border-bottom: 2px solid transparent; transition: all .2s; }
+  .tab-bar button:hover { color: #94a3b8; }
+  .tab-bar button.active { color: #f8fafc; border-bottom-color: #b02f00; }
+  .tab-content { display: none; padding: 40px 20px; max-width: 1200px; margin: 0 auto; }
+  .tab-content.active { display: block; }
 
-  .legend { display: flex; gap: 24px; justify-content: center; margin-bottom: 32px; flex-wrap: wrap; }
-  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #94a3b8; }
-  .legend-dot { width: 12px; height: 12px; border-radius: 3px; border: 2px solid; }
+  h1 { font-size: 24px; font-weight: 700; color: #f8fafc; margin-bottom: 8px; }
+  h2 { font-size: 18px; font-weight: 600; color: #f8fafc; margin: 40px 0 20px; padding-top: 24px; border-top: 1px solid #1e293b; }
+  h2:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+  .subtitle { color: #64748b; font-size: 13px; margin-bottom: 32px; }
+  p, li { font-size: 14px; color: #94a3b8; }
+  ul { padding-left: 20px; margin: 8px 0; }
+  li { margin: 4px 0; }
+  code { background: #1e293b; padding: 2px 6px; border-radius: 3px; font-size: 12px; color: #e2e8f0; }
+  pre { background: #1a1f2e; border: 1px solid #2d3548; border-radius: 8px; padding: 16px; overflow-x: auto; margin: 12px 0; font-size: 12px; color: #e2e8f0; }
 
-  .route-table { margin: 24px auto 0; border-collapse: collapse; font-size: 13px; max-width: 700px; width: 100%; }
-  .route-table th { text-align: left; padding: 8px 16px; border-bottom: 2px solid #334155; color: #94a3b8; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
-  .route-table td { padding: 8px 16px; border-bottom: 1px solid #1e293b; }
-  .route-table code { background: #1e293b; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #e2e8f0; }
-  .lazy-tag { display: inline-block; font-size: 10px; background: #1e3a5f; color: #60a5fa; padding: 1px 6px; border-radius: 4px; font-weight: 600; }
-  .guard-tag { display: inline-block; font-size: 10px; background: #3b1219; color: #f87171; padding: 1px 6px; border-radius: 4px; font-weight: 600; }
+  /* Boxes */
+  .box-grid { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin: 16px 0; }
+  .box { background: #1a1f2e; border: 1px solid #334155; border-radius: 8px; padding: 16px 20px; min-width: 160px; text-align: center; flex: 1; max-width: 260px; position: relative; }
+  .box-title { font-weight: 600; font-size: 14px; color: #f8fafc; margin-bottom: 4px; }
+  .box-detail { font-size: 11px; color: #94a3b8; line-height: 1.6; }
+  .box.green { border-color: #22c55e; } .box.blue { border-color: #3b82f6; } .box.purple { border-color: #a855f7; }
+  .box.red { border-color: #ef4444; } .box.orange { border-color: #f97316; } .box.gray { border-color: #475569; opacity: .6; }
+  .box.cyan { border-color: #06b6d4; }
+
+  .badge { display: inline-block; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-top: 6px; }
+  .badge-done { background: #14532d; color: #4ade80; } .badge-todo { background: #1e1b4b; color: #a78bfa; } .badge-ip { background: #422006; color: #fbbf24; }
+  .badge-perm { background: #172554; color: #60a5fa; font-size: 10px; cursor: pointer; }
+  .badge-perm:hover { background: #1e3a5f; }
+
+  .arrow { text-align: center; color: #475569; font-size: 20px; padding: 6px 0; }
+  .arrow-label { text-align: center; color: #475569; font-size: 11px; padding: 2px 0; }
+
+  /* Layer */
+  .layer { background: #1a1f2e; border: 1px solid #2d3548; border-radius: 12px; padding: 24px; margin: 8px 0; position: relative; }
+  .layer-label { position: absolute; top: -11px; left: 20px; background: #0f1117; padding: 0 10px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #64748b; }
+
+  /* Component tree */
+  .comp-node { background: #1a1f2e; border: 2px solid #334155; border-radius: 10px; padding: 12px 20px; text-align: center; min-width: 160px; }
+  .comp-node.root { border-color: #f97316; } .comp-node.layout { border-color: #22c55e; }
+  .comp-node.page { border-color: #3b82f6; } .comp-node.section { border-color: #a855f7; }
+  .comp-node.admin { border-color: #ef4444; } .comp-node.placeholder { border-color: #475569; opacity: .55; }
+  .comp-name { font-weight: 600; font-size: 13px; color: #f8fafc; }
+  .comp-sel { font-size: 11px; color: #94a3b8; font-family: monospace; }
+  .comp-desc { font-size: 11px; color: #64748b; margin-top: 3px; }
+  .connector { width: 2px; height: 24px; background: #334155; margin: 0 auto; }
+  .flex-col { display: flex; flex-direction: column; align-items: center; }
+
+  /* Legend */
+  .legend { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 24px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #94a3b8; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; border: 2px solid; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 16px 0; }
+  th { text-align: left; padding: 8px 12px; border-bottom: 2px solid #334155; color: #94a3b8; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+  td { padding: 8px 12px; border-bottom: 1px solid #1e293b; }
+  .tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 4px; }
+  .tag-lazy { background: #1e3a5f; color: #60a5fa; } .tag-guard { background: #3b1219; color: #f87171; }
+
+  /* Tooltip for permissions */
+  .perm-detail { display: none; background: #0f1117; border: 1px solid #334155; border-radius: 6px; padding: 12px; margin-top: 8px; font-size: 11px; text-align: left; color: #94a3b8; }
+  .perm-detail.show { display: block; }
+  .perm-detail code { font-size: 11px; }
+
+  /* Flow */
+  .flow-step { display: flex; align-items: flex-start; gap: 16px; margin: 12px 0; }
+  .flow-num { background: #1e293b; color: #94a3b8; width: 28px; height: 28px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .flow-num.orange { background: #431407; color: #fb923c; }
+  .flow-text { font-size: 13px; color: #e2e8f0; }
+  .flow-text small { color: #64748b; font-size: 11px; display: block; }
+
+  /* Checklist */
+  .check { margin: 6px 0; font-size: 13px; }
+  .check-done { color: #4ade80; } .check-todo { color: #94a3b8; }
+  .check-done::before { content: '\2713 '; } .check-todo::before { content: '\25CB '; }
 </style>
 </head>
 <body>
 
-<h1>Daddy Bear Plumbing</h1>
-<p class="subtitle">Architecture & Component Diagrams</p>
+<div class="tab-bar">
+  <button class="active" onclick="showTab('infra')">Infrastructure</button>
+  <button onclick="showTab('angular')">Angular</button>
+  <button onclick="showTab('build')">Build Pipeline</button>
+  <button onclick="showTab('routes')">Routes</button>
+  <button onclick="showTab('flows')">Flows</button>
+  <button onclick="showTab('misc')">Misc</button>
+  <button onclick="showTab('todos')">TODOs</button>
+</div>
 
-<!-- ==================== ARCHITECTURE DIAGRAM ==================== -->
-<div class="diagram-container">
-  <h2>System Architecture</h2>
+<!-- ==================== 1. INFRASTRUCTURE ==================== -->
+<div id="tab-infra" class="tab-content active">
+  <h1>Infrastructure Architecture</h1>
+  <p class="subtitle">All resources managed by Terraform (infrastructure/main.tf) with remote state in S3 + DynamoDB</p>
 
-  <!-- Client Layer -->
-  <div class="arch-layer" style="margin-bottom: 8px;">
-    <span class="arch-layer-label">Client</span>
-    <div class="arch-row">
-      <div class="arch-box highlight">
-        <div class="arch-box-title">Browser</div>
-        <div class="arch-box-detail">Angular 21 SPA<br>Lazy-loaded routes<br>Client-side routing</div>
+  <!-- DNS & Certs -->
+  <h2>DNS & Certificates</h2>
+  <div class="layer">
+    <span class="layer-label">Route 53 + ACM</span>
+    <div class="box-grid">
+      <div class="box cyan">
+        <div class="box-title">Registered Domain</div>
+        <div class="box-detail">kvaking.com<br>Managed via Route53 Registrar</div>
+      </div>
+      <div class="box cyan">
+        <div class="box-title">Hosted Zone</div>
+        <div class="box-detail">kvaking.com<br>NS + SOA (auto)<br>A + AAAA alias &rarr; CloudFront<br>CNAME (ACM validation)</div>
+      </div>
+      <div class="box cyan">
+        <div class="box-title">ACM Certificate</div>
+        <div class="box-detail">us-east-1 (required by CF)<br>kvaking.com + *.kvaking.com<br>DNS validation via CNAME</div>
+        <span class="badge badge-done">Auto-renew</span>
       </div>
     </div>
   </div>
 
-  <div class="arrow-down">&darr;</div>
+  <div class="arrow">&darr; A/AAAA alias</div>
 
-  <!-- Local Dev Layer -->
-  <div class="arch-layer" style="margin-bottom: 8px;">
-    <span class="arch-layer-label">Local Development</span>
-    <div class="arch-row">
-      <div class="arch-box green">
-        <div class="arch-box-title">Docker Build</div>
-        <div class="arch-box-detail">docker_build.sh<br>node:22-alpine<br>Bind mount &rarr; dist/</div>
+  <!-- CloudFront -->
+  <h2>CDN & WAF</h2>
+  <div class="layer">
+    <span class="layer-label">CloudFront</span>
+    <div class="box-grid">
+      <div class="box orange">
+        <div class="box-title">CloudFront Distribution</div>
+        <div class="box-detail">
+          HTTPS (TLS 1.2+) &middot; HTTP/2 &middot; Gzip+Brotli<br>
+          SPA error pages: 403,404 &rarr; /index.html (200)<br>
+          CachingOptimized managed policy<br>
+          OAC &rarr; all 3 S3 buckets
+        </div>
+        <span class="badge badge-perm" onclick="toggle('cf-behaviors')">3 behaviors</span>
+        <div id="cf-behaviors" class="perm-detail">
+          <code>/* (default)</code> &rarr; Site bucket (Angular app)<br>
+          <code>/gallery-images/*</code> &rarr; Gallery bucket<br>
+          <code>/reviews-data/*</code> &rarr; Reviews bucket
+        </div>
       </div>
-      <div class="arch-box green">
-        <div class="arch-box-title">Docker Serve</div>
-        <div class="arch-box-detail">docker_serve.sh<br>nginx:alpine :8080<br>SPA fallback routing</div>
-      </div>
-      <div class="arch-box green">
-        <div class="arch-box-title">deploy.sh</div>
-        <div class="arch-box-detail">S3 sync + CloudFront<br>cache invalidation</div>
+      <div class="box gray">
+        <div class="box-title">WAF Web ACL</div>
+        <div class="box-detail">Auto-managed by CloudFront<br>Security bundle (free)<br>Not in Terraform<br>(lifecycle ignore)</div>
       </div>
     </div>
   </div>
 
-  <div class="arrow-down">&darr;</div>
+  <div class="arrow">&darr; OAC (SigV4 signed)</div>
 
-  <!-- Build Pipeline -->
-  <div class="arch-layer" style="margin-bottom: 8px;">
-    <span class="arch-layer-label">Build Pipeline</span>
-    <div class="arch-row">
-      <div class="arch-box blue">
-        <div class="arch-box-title">Angular CLI</div>
-        <div class="arch-box-detail">ng build<br>Tree shaking<br>AOT compilation</div>
+  <!-- S3 Buckets -->
+  <h2>Storage</h2>
+  <div class="layer">
+    <span class="layer-label">S3 Buckets (all private, public access blocked)</span>
+    <div class="box-grid">
+      <div class="box green">
+        <div class="box-title">Site Bucket</div>
+        <div class="box-detail">kvaking<br>Angular build output<br>deploy.sh &rarr; s3 sync --delete</div>
+        <span class="badge badge-perm" onclick="toggle('perm-site')">policy</span>
+        <div id="perm-site" class="perm-detail">
+          <code>s3:GetObject</code> &mdash; CloudFront only (OAC condition on distribution ARN)<br>
+          All public access blocked
+        </div>
       </div>
-      <div class="arch-box blue">
-        <div class="arch-box-title">Tailwind CSS</div>
-        <div class="arch-box-detail">PostCSS pipeline<br>Purge unused CSS<br>Autoprefixer</div>
+      <div class="box green">
+        <div class="box-title">Gallery Bucket</div>
+        <div class="box-detail">kvaking-gallery<br>Prefix: gallery-images/<br>Photos + gallery.json</div>
+        <span class="badge badge-perm" onclick="toggle('perm-gallery')">policy + CORS</span>
+        <div id="perm-gallery" class="perm-detail">
+          <code>s3:GetObject</code> &mdash; CloudFront only (OAC)<br>
+          CORS: GET, PUT, DELETE from <code>https://kvaking.com</code><br>
+          Admin writes via Cognito temp creds
+        </div>
       </div>
-      <div class="arch-box blue">
-        <div class="arch-box-title">TypeScript</div>
-        <div class="arch-box-detail">ES2022 target<br>Strict mode<br>Template type-check</div>
+      <div class="box green">
+        <div class="box-title">Reviews Bucket</div>
+        <div class="box-detail">kvaking-reviews<br>Prefix: reviews-data/<br>Review JSON data</div>
+        <span class="badge badge-perm" onclick="toggle('perm-reviews')">policy + CORS</span>
+        <div id="perm-reviews" class="perm-detail">
+          <code>s3:GetObject</code> &mdash; CloudFront only (OAC)<br>
+          CORS: GET, PUT, DELETE from <code>https://kvaking.com</code><br>
+          Admin writes via Cognito temp creds
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="arrow-down">&darr;</div>
+  <div class="arrow">&uarr; temp credentials</div>
 
-  <!-- Terraform Layer -->
-  <div class="arch-layer" style="margin-bottom: 8px;">
-    <span class="arch-layer-label">Infrastructure (Terraform)</span>
-    <div class="arch-row">
-      <div class="arch-box purple">
-        <div class="arch-box-title">Terraform</div>
-        <div class="arch-box-detail">All resources in main.tf<br>Remote state (S3+DDB)<br>Parameterized via .tfvars</div>
+  <!-- Cognito -->
+  <h2>Authentication (Admin Only)</h2>
+  <div class="layer">
+    <span class="layer-label">Cognito</span>
+    <div class="box-grid">
+      <div class="box red">
+        <div class="box-title">User Pool</div>
+        <div class="box-detail">Admin accounts<br>No self-signup<br>USER_PASSWORD_AUTH + SRP<br>Min 8 chars, upper+lower+num</div>
+      </div>
+      <div class="box red">
+        <div class="box-title">User Pool Client</div>
+        <div class="box-detail">No client secret<br>(browser-based auth)</div>
+      </div>
+      <div class="box red">
+        <div class="box-title">Identity Pool</div>
+        <div class="box-detail">Exchanges JWT &rarr; temp AWS creds<br>No unauthenticated access</div>
+        <span class="badge badge-perm" onclick="toggle('perm-cognito')">IAM role</span>
+        <div id="perm-cognito" class="perm-detail">
+          <strong>Authenticated role grants:</strong><br>
+          <code>s3:PutObject, s3:DeleteObject, s3:GetObject</code><br>
+          &nbsp;&nbsp;on <code>kvaking-gallery/gallery-images/*</code><br>
+          &nbsp;&nbsp;on <code>kvaking-reviews/reviews-data/*</code><br>
+          <code>s3:ListBucket</code><br>
+          &nbsp;&nbsp;on both gallery and reviews buckets
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="arrow-down">&darr;</div>
-
-  <!-- AWS Layer -->
-  <div class="arch-layer" style="margin-bottom: 8px;">
-    <span class="arch-layer-label">AWS — CDN & DNS</span>
-    <div class="arch-row">
-      <div class="arch-box green">
-        <div class="arch-box-title">Route 53</div>
-        <div class="arch-box-detail">DNS<br>A + AAAA alias records<br>&rarr; CloudFront</div>
+  <!-- Terraform State -->
+  <h2>Terraform State</h2>
+  <div class="layer">
+    <span class="layer-label">Remote State (created by bootstrap.sh)</span>
+    <div class="box-grid">
+      <div class="box purple">
+        <div class="box-title">State Bucket</div>
+        <div class="box-detail">kvaking-terraform-state<br>Versioned, encrypted, private</div>
       </div>
-      <div class="arch-box green">
-        <div class="arch-box-title">ACM</div>
-        <div class="arch-box-detail">TLS Certificate<br>*.domain + domain<br>DNS validation</div>
-      </div>
-      <div class="arch-box green">
-        <div class="arch-box-title">CloudFront</div>
-        <div class="arch-box-detail">CDN + HTTPS + WAF<br>OAC &rarr; S3<br>SPA error pages (403/404)</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="arrow-down">&darr; 3 origins with path behaviors</div>
-
-  <!-- S3 Layer -->
-  <div class="arch-layer" style="margin-bottom: 8px;">
-    <span class="arch-layer-label">AWS — S3 Storage (all private, OAC only)</span>
-    <div class="arch-row">
-      <div class="arch-box green">
-        <div class="arch-box-title">Site Bucket</div>
-        <div class="arch-box-detail">Angular build output<br>Default behavior: /*<br>deploy.sh &rarr; sync</div>
-      </div>
-      <div class="arch-box green">
-        <div class="arch-box-title">Gallery Bucket</div>
-        <div class="arch-box-detail">Photos + gallery.json<br>/gallery-images/*<br>Admin uploads via Cognito</div>
-      </div>
-      <div class="arch-box green">
-        <div class="arch-box-title">Reviews Bucket</div>
-        <div class="arch-box-detail">Review data<br>/reviews-data/*<br>Admin manages via Cognito</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="arrow-down">&darr;</div>
-
-  <!-- Auth Layer -->
-  <div class="arch-layer">
-    <span class="arch-layer-label">AWS — Authentication (Admin)</span>
-    <div class="arch-row">
-      <div class="arch-box red">
-        <div class="arch-box-title">Cognito User Pool</div>
-        <div class="arch-box-detail">Admin accounts<br>No self-signup<br>Password auth flow</div>
-      </div>
-      <div class="arch-box red">
-        <div class="arch-box-title">Cognito Identity Pool</div>
-        <div class="arch-box-detail">JWT &rarr; temp AWS creds<br>Scoped to gallery +<br>reviews buckets only</div>
+      <div class="box purple">
+        <div class="box-title">Lock Table</div>
+        <div class="box-detail">kvaking-terraform-locks<br>DynamoDB, PAY_PER_REQUEST</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ==================== COMPONENT DIAGRAM ==================== -->
-<div class="diagram-container">
-  <h2>Angular Component Tree</h2>
+<!-- ==================== 2. ANGULAR ==================== -->
+<div id="tab-angular" class="tab-content">
+  <h1>Angular Component Tree</h1>
+  <p class="subtitle">Angular 21, standalone components, lazy-loaded routes</p>
 
   <div class="legend">
     <div class="legend-item"><div class="legend-dot" style="border-color: #f97316;"></div> Root</div>
-    <div class="legend-item"><div class="legend-dot" style="border-color: #22c55e;"></div> Layout (always visible)</div>
-    <div class="legend-item"><div class="legend-dot" style="border-color: #3b82f6;"></div> Page (routed)</div>
-    <div class="legend-item"><div class="legend-dot" style="border-color: #a855f7;"></div> Section component</div>
-    <div class="legend-item"><div class="legend-dot" style="border-color: #ef4444;"></div> Admin (auth guarded)</div>
-    <div class="legend-item"><div class="legend-dot" style="border-color: #475569; opacity: 0.55;"></div> Placeholder</div>
+    <div class="legend-item"><div class="legend-dot" style="border-color: #22c55e;"></div> Layout</div>
+    <div class="legend-item"><div class="legend-dot" style="border-color: #3b82f6;"></div> Page</div>
+    <div class="legend-item"><div class="legend-dot" style="border-color: #a855f7;"></div> Section</div>
+    <div class="legend-item"><div class="legend-dot" style="border-color: #ef4444;"></div> Admin</div>
   </div>
 
-  <div class="comp-tree">
-
-    <!-- Root -->
-    <div class="comp-node root">
-      <div class="comp-name">AppComponent</div>
-      <div class="comp-selector">&lt;app-root&gt;</div>
-      <div class="comp-desc">Layout shell: navbar + router-outlet + footer</div>
-    </div>
-
+  <div class="flex-col">
+    <div class="comp-node root"><div class="comp-name">AppComponent</div><div class="comp-sel">&lt;app-root&gt;</div><div class="comp-desc">navbar + router-outlet + footer</div></div>
     <div class="connector"></div>
-
-    <div style="display: flex; gap: 0; align-items: flex-start; justify-content: center; width: 100%;">
-      <!-- Navbar -->
-      <div class="flex-col-center" style="flex: 0 0 200px;">
-        <svg width="200" height="28" style="display: block;">
-          <line x1="100" y1="0" x2="100" y2="28" stroke="#334155" stroke-width="2"/>
-        </svg>
-        <div class="comp-node layout">
-          <div class="comp-name">NavbarComponent</div>
-          <div class="comp-selector">&lt;app-navbar&gt;</div>
-          <div class="comp-desc">Fixed header + dropdown menu<br>Logo, nav links, call CTA</div>
-        </div>
-      </div>
-
-      <!-- Router Outlet -->
-      <div class="flex-col-center" style="flex: 0 0 auto; min-width: 780px;">
-        <svg width="780" height="28" style="display: block;">
-          <line x1="100" y1="0" x2="680" y2="0" stroke="#334155" stroke-width="2"/>
-          <line x1="100" y1="0" x2="100" y2="28" stroke="#334155" stroke-width="2"/>
-          <line x1="390" y1="0" x2="390" y2="28" stroke="#334155" stroke-width="2"/>
-          <line x1="680" y1="0" x2="680" y2="28" stroke="#334155" stroke-width="2"/>
-        </svg>
-
-        <div style="background: #1a1f2e; border: 2px dashed #475569; border-radius: 10px; padding: 14px 24px; text-align: center; min-width: 200px;">
-          <div class="comp-name" style="color: #94a3b8;">&lt;router-outlet&gt;</div>
-          <div class="comp-desc">Swaps page content by route</div>
-        </div>
-
-        <div class="connector"></div>
-
-        <!-- Pages -->
-        <div style="display: flex; gap: 16px; justify-content: center; width: 100%;">
-
-          <!-- Home -->
-          <div class="flex-col-center">
-            <div class="comp-node page" style="min-width: 160px;">
-              <div class="comp-name">HomeComponent</div>
-              <div class="comp-selector">/</div>
-              <div class="comp-desc">Composition of sections</div>
-            </div>
-            <div class="connector"></div>
-            <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
-              <div class="comp-node section" style="min-width: 140px; padding: 10px 16px;">
-                <div class="comp-name" style="font-size: 12px;">HeroComponent</div>
-                <div class="comp-desc">Grayscale hero + headline</div>
-              </div>
-              <div class="comp-node section" style="min-width: 140px; padding: 10px 16px;">
-                <div class="comp-name" style="font-size: 12px;">TrustStatsComponent</div>
-                <div class="comp-desc">Operational hours</div>
-              </div>
-              <div class="comp-node section" style="min-width: 140px; padding: 10px 16px;">
-                <div class="comp-name" style="font-size: 12px;">ServicesGridComponent</div>
-                <div class="comp-desc">4 service cards + hover</div>
-              </div>
-              <div class="comp-node section" style="min-width: 140px; padding: 10px 16px;">
-                <div class="comp-name" style="font-size: 12px;">ServiceAreaComponent</div>
-                <div class="comp-desc">Google Maps + locations</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Gallery -->
-          <div class="flex-col-center">
-            <div class="comp-node page" style="min-width: 160px;">
-              <div class="comp-name">GalleryComponent</div>
-              <div class="comp-selector">/gallery</div>
-              <div class="comp-desc">S3 image grid + tags<br>Lightbox + load more</div>
-            </div>
-          </div>
-
-          <!-- Reviews -->
-          <div class="flex-col-center">
-            <div class="comp-node placeholder" style="min-width: 160px;">
-              <div class="comp-name">ReviewsComponent</div>
-              <div class="comp-selector">/reviews</div>
-              <div class="comp-desc">Placeholder</div>
-            </div>
-          </div>
-
-          <!-- Admin -->
-          <div class="flex-col-center">
-            <div class="comp-node admin" style="min-width: 160px;">
-              <div class="comp-name">AdminComponent</div>
-              <div class="comp-selector">/admin</div>
-              <div class="comp-desc">Gallery management<br>Upload, delete, reorder</div>
-            </div>
-            <div class="connector"></div>
-            <div class="comp-node admin" style="min-width: 160px; padding: 10px 16px;">
-              <div class="comp-name" style="font-size: 12px;">LoginComponent</div>
-              <div class="comp-selector">/admin/login</div>
-              <div class="comp-desc">Cognito auth</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div class="flex-col-center" style="flex: 0 0 200px;">
-        <svg width="200" height="28" style="display: block;">
-          <line x1="100" y1="0" x2="100" y2="28" stroke="#334155" stroke-width="2"/>
-        </svg>
-        <div class="comp-node layout">
-          <div class="comp-name">FooterComponent</div>
-          <div class="comp-selector">&lt;app-footer&gt;</div>
-          <div class="comp-desc">Copyright + links</div>
-        </div>
-      </div>
-    </div>
-
   </div>
 
-  <!-- Services -->
-  <h2 style="font-size: 18px; margin-top: 48px;">Services</h2>
-  <div class="arch-row" style="margin-bottom: 32px;">
-    <div class="arch-box purple" style="max-width: 200px;">
-      <div class="arch-box-title">AuthService</div>
-      <div class="arch-box-detail">Cognito sign-in<br>Get temp AWS credentials</div>
+  <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 8px;">
+    <!-- Navbar -->
+    <div class="flex-col">
+      <div class="comp-node layout"><div class="comp-name">NavbarComponent</div><div class="comp-desc">Fixed header, dropdown menu, call CTA</div></div>
     </div>
-    <div class="arch-box purple" style="max-width: 200px;">
-      <div class="arch-box-title">UploadService</div>
-      <div class="arch-box-detail">S3 upload/delete/copy<br>SigV4 signing</div>
+
+    <!-- Home -->
+    <div class="flex-col">
+      <div class="comp-node page"><div class="comp-name">HomeComponent</div><div class="comp-sel">/</div></div>
+      <div class="connector"></div>
+      <div style="display: flex; flex-direction: column; gap: 6px; align-items: center;">
+        <div class="comp-node section" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">HeroComponent</div><div class="comp-desc">Grayscale hero + headline</div></div>
+        <div class="comp-node section" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">TrustStatsComponent</div><div class="comp-desc">Operational hours</div></div>
+        <div class="comp-node section" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">ServicesGridComponent</div><div class="comp-desc">4 services + hover anim</div></div>
+        <div class="comp-node section" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">ServiceAreaComponent</div><div class="comp-desc">Google Maps + 6 locations</div></div>
+      </div>
     </div>
-    <div class="arch-box purple" style="max-width: 200px;">
-      <div class="arch-box-title">GalleryService</div>
-      <div class="arch-box-detail">Load gallery.json<br>Parse filenames to images</div>
+
+    <!-- Gallery -->
+    <div class="flex-col">
+      <div class="comp-node page"><div class="comp-name">GalleryComponent</div><div class="comp-sel">/gallery</div><div class="comp-desc">S3 images, tag filters<br>Lightbox, load more</div></div>
+    </div>
+
+    <!-- Reviews -->
+    <div class="flex-col">
+      <div class="comp-node placeholder"><div class="comp-name">ReviewsComponent</div><div class="comp-sel">/reviews</div><div class="comp-desc">Placeholder</div></div>
+    </div>
+
+    <!-- Admin -->
+    <div class="flex-col">
+      <div class="comp-node admin"><div class="comp-name">AdminComponent</div><div class="comp-sel">/admin</div><div class="comp-desc">Upload, delete, reorder<br>authGuard protected</div></div>
+      <div class="connector"></div>
+      <div class="comp-node admin" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">LoginComponent</div><div class="comp-sel">/admin/login</div></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="flex-col">
+      <div class="comp-node layout"><div class="comp-name">FooterComponent</div><div class="comp-desc">Copyright + links</div></div>
     </div>
   </div>
 
-  <!-- Routing Table -->
-  <h2 style="font-size: 18px; margin-top: 48px;">Route Configuration</h2>
-  <table class="route-table">
-    <thead>
-      <tr>
-        <th>Path</th>
-        <th>Component</th>
-        <th>Loading</th>
-        <th>Guard</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><code>/</code></td>
-        <td>HomeComponent</td>
-        <td><span class="lazy-tag">Lazy</span></td>
-        <td>&mdash;</td>
-        <td><span class="status-badge status-done">Complete</span></td>
-      </tr>
-      <tr>
-        <td><code>/gallery</code></td>
-        <td>GalleryComponent</td>
-        <td><span class="lazy-tag">Lazy</span></td>
-        <td>&mdash;</td>
-        <td><span class="status-badge status-done">Complete</span></td>
-      </tr>
-      <tr>
-        <td><code>/reviews</code></td>
-        <td>ReviewsComponent</td>
-        <td><span class="lazy-tag">Lazy</span></td>
-        <td>&mdash;</td>
-        <td><span class="status-badge status-planned">Placeholder</span></td>
-      </tr>
-      <tr>
-        <td><code>/admin</code></td>
-        <td>AdminComponent</td>
-        <td><span class="lazy-tag">Lazy</span></td>
-        <td><span class="guard-tag">authGuard</span></td>
-        <td><span class="status-badge status-done">Complete</span></td>
-      </tr>
-      <tr>
-        <td><code>/admin/login</code></td>
-        <td>LoginComponent</td>
-        <td><span class="lazy-tag">Lazy</span></td>
-        <td>&mdash;</td>
-        <td><span class="status-badge status-done">Complete</span></td>
-      </tr>
-      <tr>
-        <td><code>**</code></td>
-        <td>Redirect &rarr; <code>/</code></td>
-        <td>&mdash;</td>
-        <td>&mdash;</td>
-        <td><span class="status-badge status-done">Complete</span></td>
-      </tr>
-    </tbody>
-  </table>
+  <h2>Services</h2>
+  <div class="box-grid">
+    <div class="box purple"><div class="box-title">AuthService</div><div class="box-detail">Cognito sign-in (USER_PASSWORD_AUTH)<br>NEW_PASSWORD_REQUIRED flow<br>GetCredentialsForIdentity</div></div>
+    <div class="box purple"><div class="box-title">UploadService</div><div class="box-detail">S3 PUT/DELETE/COPY<br>SigV4 signing in browser<br>putJson for manifests</div></div>
+    <div class="box purple"><div class="box-title">GalleryService</div><div class="box-detail">Fetch gallery.json via CloudFront<br>Parse filenames &rarr; tags, dates<br>Shared by gallery + admin</div></div>
+  </div>
+
+  <h2>Design System</h2>
+  <div class="box-grid">
+    <div class="box" style="border-color: #777; text-align: left; max-width: 400px;">
+      <div class="box-title">The Architectural Minimalist</div>
+      <div class="box-detail" style="text-align: left;">
+        Grayscale palette + burnt orange (#b02f00) accent<br>
+        0px border-radius everywhere (sharp corners)<br>
+        Public Sans (headlines) + Inter (body)<br>
+        Ghost borders (1px @ 20% opacity)<br>
+        Zero shadows, tonal stepping for depth<br>
+        Thin Material Symbols icons (wght 300)
+      </div>
+    </div>
+  </div>
 </div>
 
+<!-- ==================== 3. BUILD PIPELINE ==================== -->
+<div id="tab-build" class="tab-content">
+  <h1>Build & Deploy Pipeline</h1>
+  <p class="subtitle">From source code to production</p>
+
+  <div class="flow-step"><div class="flow-num">1</div><div class="flow-text"><strong>docker_build.sh</strong><br><small>Runs <code>npm install && npm run build</code> inside <code>node:22-alpine</code> container. Source mounted via bind mount. Output written to <code>dist/daddy-bear-plumbing/browser/</code> on host.</small></div></div>
+  <div class="flow-step"><div class="flow-num">2</div><div class="flow-text"><strong>Angular CLI (ng build)</strong><br><small>AOT compilation, tree shaking, code splitting. Produces hashed JS/CSS bundles. Lazy chunks per route (gallery, admin, login, reviews, home).</small></div></div>
+  <div class="flow-step"><div class="flow-num">3</div><div class="flow-text"><strong>Tailwind CSS (PostCSS)</strong><br><small>Scans all .html/.ts files for class usage. Purges unused CSS. Autoprefixer adds vendor prefixes. Final CSS in <code>styles-*.css</code>.</small></div></div>
+  <div class="flow-step"><div class="flow-num">4</div><div class="flow-text"><strong>TypeScript Compiler</strong><br><small>ES2022 target, strict mode, Angular template type-checking. All standalone components, no NgModules.</small></div></div>
+  <div class="flow-step"><div class="flow-num">5</div><div class="flow-text"><strong>deploy.sh</strong><br><small><code>aws s3 sync dist/.../browser/ s3://kvaking --delete</code><br>Syncs build output to site S3 bucket. Removes stale files.</small></div></div>
+  <div class="flow-step"><div class="flow-num">6</div><div class="flow-text"><strong>CloudFront Invalidation</strong><br><small><code>aws cloudfront create-invalidation --paths "/*"</code><br>Clears CDN cache so new content is served immediately.</small></div></div>
+
+  <h2>Local Development</h2>
+  <div class="flow-step"><div class="flow-num orange">A</div><div class="flow-text"><strong>docker_serve.sh</strong><br><small>Serves pre-built <code>dist/</code> via <code>nginx:alpine</code> on port 8080. Uses custom <code>nginx.conf</code> with SPA fallback (<code>try_files $uri /index.html</code>).</small></div></div>
+  <div class="flow-step"><div class="flow-num orange">B</div><div class="flow-text"><strong>ng serve (optional)</strong><br><small>Webpack dev server on port 4200 with hot reload. Requires local Node.js installation.</small></div></div>
+
+  <h2>Build Output</h2>
+  <pre>dist/daddy-bear-plumbing/browser/
+  index.html              # SPA entry point
+  main-XXXXXXXX.js        # App bootstrap + providers
+  styles-XXXXXXXX.css     # Tailwind output
+  chunk-XXXXXXXX.js       # Lazy: home, gallery, admin, login, reviews
+  favicon.ico             # Bear paw favicon
+  robots.txt              # Disallow /admin</pre>
+</div>
+
+<!-- ==================== 4. ROUTES ==================== -->
+<div id="tab-routes" class="tab-content">
+  <h1>Route Configuration</h1>
+  <p class="subtitle">src/app/app.routes.ts</p>
+
+  <table>
+    <thead>
+      <tr><th>Path</th><th>Component</th><th>Loading</th><th>Guard</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>/</code></td><td>HomeComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
+      <tr><td><code>/gallery</code></td><td>GalleryComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
+      <tr><td><code>/reviews</code></td><td>ReviewsComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-todo">Placeholder</span></td></tr>
+      <tr><td><code>/admin</code></td><td>AdminComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td><span class="tag tag-guard">authGuard</span></td><td><span class="badge badge-done">Complete</span></td></tr>
+      <tr><td><code>/admin/login</code></td><td>LoginComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
+      <tr><td><code>**</code></td><td>Redirect &rarr; <code>/</code></td><td>&mdash;</td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Route Details</h2>
+  <ul>
+    <li><code>/admin</code> is a parent route with children <code>login</code> (public) and <code>""</code> (guarded)</li>
+    <li><code>authGuard</code> checks <code>AuthService.isAuthenticated</code>, redirects to <code>/admin/login</code> if false</li>
+    <li>All routes use <code>loadComponent()</code> for lazy loading (separate JS chunks)</li>
+    <li><code>/admin</code> and <code>/admin/login</code> set <code>&lt;meta name="robots" content="noindex, nofollow"&gt;</code></li>
+    <li><code>robots.txt</code> disallows <code>/admin</code> — no links to admin from public pages</li>
+  </ul>
+</div>
+
+<!-- ==================== 5. FLOWS ==================== -->
+<div id="tab-flows" class="tab-content">
+  <h1>Flow Diagrams</h1>
+
+  <h2>Public Visitor — View Gallery</h2>
+  <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Browser &rarr; <code>kvaking.com/gallery</code></div></div>
+  <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">CloudFront serves <code>index.html</code> (SPA error page for 403)<br><small>Angular bootstraps, router loads GalleryComponent chunk</small></div></div>
+  <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">GalleryComponent fetches <code>/gallery-images/gallery.json</code><br><small>CloudFront &rarr; gallery bucket &rarr; returns JSON array of filenames</small></div></div>
+  <div class="flow-step"><div class="flow-num">4</div><div class="flow-text">Filenames parsed: sort number, date, tag extracted<br><small>Tags shown as filter pills, first 18 images rendered</small></div></div>
+  <div class="flow-step"><div class="flow-num">5</div><div class="flow-text">Images loaded from <code>/gallery-images/0001_..._tag.jpg</code><br><small>CloudFront &rarr; gallery bucket (OAC). Edge-cached globally.</small></div></div>
+
+  <h2>Admin — Login Flow</h2>
+  <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Admin navigates to <code>/admin</code></div></div>
+  <div class="flow-step"><div class="flow-num">2</div><div class="flow-text"><code>authGuard</code> checks: not authenticated &rarr; redirect to <code>/admin/login</code></div></div>
+  <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">Admin enters username + password &rarr; AuthService calls Cognito <code>InitiateAuth</code><br><small>If first login: NEW_PASSWORD_REQUIRED challenge &rarr; show new password + confirm fields</small></div></div>
+  <div class="flow-step"><div class="flow-num">4</div><div class="flow-text">Cognito returns JWT tokens (ID, Access, Refresh)</div></div>
+  <div class="flow-step"><div class="flow-num">5</div><div class="flow-text">Redirect to <code>/admin</code> &rarr; guard passes &rarr; AdminComponent loads</div></div>
+
+  <h2>Admin — Upload Photo</h2>
+  <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Admin sets tag, selects files &rarr; filenames auto-generated<br><small>Format: <code>0011_2026-03-29-17-00-00_water-heaters.jpg</code></small></div></div>
+  <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">AuthService calls Cognito Identity Pool &rarr; <code>GetCredentialsForIdentity</code><br><small>Returns temp AccessKeyId, SecretAccessKey, SessionToken</small></div></div>
+  <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">UploadService signs S3 PUT request with SigV4 using temp creds<br><small>Uploads directly to <code>kvaking-gallery/gallery-images/filename.jpg</code></small></div></div>
+  <div class="flow-step"><div class="flow-num">4</div><div class="flow-text">After all uploads: admin lists S3 bucket, writes <code>gallery.json</code> manifest<br><small>Public gallery reads this manifest on next page load</small></div></div>
+
+  <h2>Admin — Reorder Photos</h2>
+  <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Admin clicks up/down arrow on a photo</div></div>
+  <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">UploadService copies both images to new keys (swapped sort numbers)<br><small>S3 CopyObject &mdash; server-side, no data through browser</small></div></div>
+  <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">Deletes the old keys, updates local state, writes new <code>gallery.json</code></div></div>
+</div>
+
+<!-- ==================== 6. MISC ==================== -->
+<div id="tab-misc" class="tab-content">
+  <h1>Miscellaneous</h1>
+
+  <h2>Environment Configuration</h2>
+  <p>All environment-specific values live in <code>src/environments/environment.ts</code>:</p>
+  <pre>phone / phoneDisplay    — business phone (used in navbar + CTAs)
+aws.region              — eu-central-1
+aws.userPoolId          — Cognito User Pool ID
+aws.cognitoClientId     — Cognito Client ID
+aws.identityPoolId      — Cognito Identity Pool ID
+aws.bucketName          — site bucket (kvaking)
+aws.galleryBucket       — gallery bucket (kvaking-gallery)
+aws.reviewsBucket       — reviews bucket (kvaking-reviews)</pre>
+
+  <h2>Terraform Variables</h2>
+  <pre>domain       — "kvaking.com"    (primary domain)
+bucket_name  — "kvaking"        (site S3 bucket name)
+project      — "kvaking"        (resource naming prefix)
+region       — "eu-central-1"   (AWS region)</pre>
+  <p>Values in <code>terraform.tfvars</code> (gitignored). Template in <code>terraform.tfvars.example</code>.</p>
+
+  <h2>Image Filename Convention</h2>
+  <pre>&lt;sort-number&gt;_&lt;datetime&gt;_&lt;tag&gt;.&lt;ext&gt;
+0001_2026-02-25-10-30-00_water-heaters.jpg
+^^^^  ^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^
+sort   Y-m-d-H-M-S          tag slug (or "uncategorized")</pre>
+  <ul>
+    <li>Sort number controls gallery order (admin can reorder)</li>
+    <li>Tag parsed into display label: <code>water-heaters</code> &rarr; "Water Heaters"</li>
+    <li>"uncategorized" tag is hidden from display and filter bar</li>
+    <li>Supported extensions: .jpg, .jpeg, .png, .webp</li>
+  </ul>
+
+  <h2>Key Files</h2>
+  <pre>deploy.sh              — S3 sync + CloudFront invalidation
+docker_build.sh        — Build Angular in Docker
+docker_serve.sh        — Serve dist/ via nginx locally
+convert_to_jpg.sh      — Convert PNGs to JPG (ImageMagick)
+verify_deploy.sh       — Check deployed state
+infrastructure/
+  bootstrap.sh         — Create state bucket + lock table
+  main.tf              — All AWS resources
+  variables.tf         — Input variables
+  outputs.tf           — Cognito IDs, CF domain, bucket names
+  import.tf            — Import blocks (existing resources)
+  terraform.tfvars     — Actual values (gitignored)</pre>
+
+  <h2>Security Notes</h2>
+  <ul>
+    <li>All 3 S3 buckets fully private (public access blocked)</li>
+    <li>CloudFront OAC is the only way to read bucket contents</li>
+    <li>Cognito: no self-signup, admin creates users via CLI</li>
+    <li>Admin pages: noindex meta tag + robots.txt disallow + no public links</li>
+    <li>Cognito IAM role scoped to gallery-images/* and reviews-data/* only</li>
+    <li>Terraform state encrypted at rest (SSE-S3)</li>
+    <li>WAF auto-managed by CloudFront security bundle</li>
+  </ul>
+</div>
+
+<!-- ==================== 7. TODOS ==================== -->
+<div id="tab-todos" class="tab-content">
+  <h1>Project TODOs</h1>
+  <p class="subtitle">From docs/TODO.md</p>
+
+  <h2>Goal 0 — Links Page</h2>
+  <div class="check check-todo">Create links/resources page (e.g. Chicago building permits)</div>
+
+  <h2>Goal 1 — Angular Application <span class="badge badge-done">Complete</span></h2>
+  <div class="check check-done">Scaffold Angular project</div>
+  <div class="check check-done">Tailwind CSS via PostCSS</div>
+  <div class="check check-done">All components: Navbar, Hero, TrustStats, ServicesGrid, ServiceArea, Footer</div>
+  <div class="check check-done">Router: /, /gallery, /reviews</div>
+  <div class="check check-done">Gallery: S3 images, tag filters, lightbox, load more</div>
+  <div class="check check-done">Admin: upload, delete, reorder, Cognito auth</div>
+  <div class="check check-done">Gray design system ported</div>
+
+  <h2>Goal 2 — Terraform Infrastructure <span class="badge badge-done">Complete</span></h2>
+  <div class="check check-done">S3 buckets (site, gallery, reviews) — all private</div>
+  <div class="check check-done">CloudFront with 3 origins + path behaviors</div>
+  <div class="check check-done">ACM certificate (wildcard, DNS validation)</div>
+  <div class="check check-done">Route53 hosted zone + DNS records</div>
+  <div class="check check-done">Cognito User Pool + Identity Pool</div>
+  <div class="check check-done">IAM roles scoped to gallery + reviews buckets</div>
+  <div class="check check-done">Remote state (S3 + DynamoDB)</div>
+  <div class="check check-done">Parameterized via terraform.tfvars</div>
+
+  <h2>Goal 3 — SEO</h2>
+  <div class="check check-todo">LocalBusiness JSON-LD structured data</div>
+  <div class="check check-todo">Title + meta description per page</div>
+  <div class="check check-todo">Open Graph tags</div>
+  <div class="check check-todo">Heading hierarchy audit</div>
+  <div class="check check-done">robots.txt (created, disallows /admin)</div>
+  <div class="check check-todo">sitemap.xml</div>
+  <div class="check check-todo">Canonical tags</div>
+  <div class="check check-todo">Pre-rendering evaluation</div>
+  <div class="check check-todo">Core Web Vitals optimization</div>
+  <div class="check check-todo">Google Business Profile</div>
+  <div class="check check-todo">Google Search Console</div>
+
+  <h2>Goal 4 — README <span class="badge badge-done">Complete</span></h2>
+  <div class="check check-done">Prerequisites, local dev, build, deploy, project structure</div>
+  <div class="check check-done">Infrastructure setup instructions</div>
+  <div class="check check-done">Admin user creation</div>
+
+  <h2>Goal 5 — Tests</h2>
+  <div class="check check-todo">Unit tests (per component)</div>
+  <div class="check check-todo">E2E tests (Playwright)</div>
+
+  <h2>Upcoming</h2>
+  <div class="check check-todo">Reviews page — display customer reviews from S3</div>
+  <div class="check check-todo">Admin: reviews management (add, edit, delete)</div>
+</div>
+
+<script>
+function showTab(id) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+function toggle(id) {
+  document.getElementById(id).classList.toggle('show');
+}
+</script>
 </body>
 </html>

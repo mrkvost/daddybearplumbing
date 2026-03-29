@@ -6,11 +6,17 @@ import { Meta } from '@angular/platform-browser';
 import { AuthService } from '../../services/auth.service';
 import { UploadService } from '../../services/upload.service';
 import { GalleryService, GalleryImage } from '../../services/gallery.service';
+import { Review } from '../../services/reviews.service';
 import { environment } from '../../../environments/environment';
 
 interface AdminGalleryImage extends GalleryImage {
   deleting?: boolean;
   moving?: boolean;
+}
+
+interface AdminReview extends Review {
+  deleting?: boolean;
+  editing?: boolean;
 }
 
 interface UploadItem {
@@ -21,6 +27,7 @@ interface UploadItem {
 }
 
 const GALLERY_BUCKET = environment.aws.galleryBucket;
+const REVIEWS_BUCKET = environment.aws.reviewsBucket;
 const REGION = environment.aws.region;
 
 @Component({
@@ -37,28 +44,41 @@ export class AdminComponent implements OnInit, OnDestroy {
   private meta = inject(Meta);
   private cdr = inject(ChangeDetectorRef);
 
+  activeTab: 'gallery' | 'reviews' = 'gallery';
+
+  /* Gallery state */
   images: AdminGalleryImage[] = [];
   uploads: UploadItem[] = [];
   tag = '';
   loadingImages = true;
   uploading = false;
 
+  /* Reviews state */
+  reviews: AdminReview[] = [];
+  loadingReviews = true;
+  showReviewForm = false;
+  editingReview: AdminReview | null = null;
+  reviewForm = { name: '', rating: 5, text: '', location: '', date: '' };
+
   ngOnInit(): void {
     this.meta.addTag({ name: 'robots', content: 'noindex, nofollow' });
     this.loadImages();
+    this.loadReviews();
   }
 
   ngOnDestroy(): void {
     this.meta.removeTag('name="robots"');
   }
 
-  /* ---------- List images from S3 directly ---------- */
+  /* ================================================================
+   * GALLERY
+   * ================================================================ */
 
   async loadImages(): Promise<void> {
     this.loadingImages = true;
     this.cdr.detectChanges();
     try {
-      const filenames = await this.listS3();
+      const filenames = await this.listS3(GALLERY_BUCKET, 'gallery-images/');
       this.images = filenames.map(f => this.galleryService.parseFilename(f) as AdminGalleryImage)
         .sort((a, b) => a.sortNumber - b.sortNumber);
     } catch {
@@ -68,26 +88,200 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  /** List image files in the gallery bucket using Cognito credentials */
-  private async listS3(): Promise<string[]> {
+  private async saveGalleryManifest(): Promise<void> {
+    const filenames = this.images
+      .sort((a, b) => a.sortNumber - b.sortNumber)
+      .map(img => img.filename);
+    await this.uploadService.putJson('gallery-images/gallery.json', filenames, GALLERY_BUCKET);
+  }
+
+  async moveImage(index: number, direction: -1 | 1): Promise<void> {
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= this.images.length) return;
+
+    const a = this.images[index];
+    const b = this.images[targetIndex];
+    a.moving = true;
+    b.moving = true;
+    this.cdr.detectChanges();
+
+    try {
+      const newA = this.replaceNumber(a.filename, b.sortNumber);
+      const newB = this.replaceNumber(b.filename, a.sortNumber);
+
+      await this.uploadService.copy(`gallery-images/${a.filename}`, `gallery-images/${newA}`, GALLERY_BUCKET);
+      await this.uploadService.copy(`gallery-images/${b.filename}`, `gallery-images/${newB}`, GALLERY_BUCKET);
+      await this.uploadService.delete(`gallery-images/${a.filename}`, GALLERY_BUCKET);
+      await this.uploadService.delete(`gallery-images/${b.filename}`, GALLERY_BUCKET);
+
+      const oldSortA = a.sortNumber;
+      a.filename = newA; a.url = `/gallery-images/${newA}`; a.sortNumber = b.sortNumber;
+      b.filename = newB; b.url = `/gallery-images/${newB}`; b.sortNumber = oldSortA;
+      this.images.sort((x, y) => x.sortNumber - y.sortNumber);
+      await this.saveGalleryManifest();
+    } catch (e: any) {
+      alert(`Move failed: ${e.message}`);
+    }
+    a.moving = false;
+    b.moving = false;
+    this.cdr.detectChanges();
+  }
+
+  private replaceNumber(filename: string, newNumber: number): string {
+    return filename.replace(/^\d+/, String(newNumber).padStart(4, '0'));
+  }
+
+  async deleteImage(image: AdminGalleryImage): Promise<void> {
+    image.deleting = true;
+    this.cdr.detectChanges();
+    try {
+      await this.uploadService.delete(`gallery-images/${image.filename}`, GALLERY_BUCKET);
+      this.images = this.images.filter(i => i !== image);
+      await this.saveGalleryManifest();
+    } catch (e: any) {
+      image.deleting = false;
+      alert(`Delete failed: ${e.message}`);
+    }
+    this.cdr.detectChanges();
+  }
+
+  onFilesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files) return;
+
+    const now = new Date();
+    const dateStr = [
+      now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'),
+      String(now.getDate()).padStart(2, '0'), String(now.getHours()).padStart(2, '0'),
+      String(now.getMinutes()).padStart(2, '0'), String(now.getSeconds()).padStart(2, '0'),
+    ].join('-');
+
+    const maxSort = this.images.reduce((max, img) => Math.max(max, img.sortNumber), 0);
+    let nextNum = maxSort + 1;
+
+    for (const file of Array.from(input.files)) {
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const num = String(nextNum++).padStart(4, '0');
+      const slug = this.tag || 'uncategorized';
+      this.uploads.push({ file, filename: `${num}_${dateStr}_${slug}.${ext}`, status: 'pending' });
+    }
+    input.value = '';
+  }
+
+  removeUpload(index: number): void {
+    this.uploads.splice(index, 1);
+  }
+
+  async uploadAll(): Promise<void> {
+    this.uploading = true;
+    for (const item of this.uploads.filter(u => u.status === 'pending')) {
+      item.status = 'uploading';
+      this.cdr.detectChanges();
+      try {
+        await this.uploadService.upload(item.file, `gallery-images/${item.filename}`, GALLERY_BUCKET);
+        item.status = 'done';
+      } catch (e: any) {
+        item.status = 'error';
+        item.error = e.message;
+      }
+      this.cdr.detectChanges();
+    }
+    this.uploading = false;
+    this.uploads = this.uploads.filter(u => u.status !== 'done');
+    await this.loadImages();
+    await this.saveGalleryManifest();
+    this.cdr.detectChanges();
+  }
+
+  /* ================================================================
+   * REVIEWS
+   * ================================================================ */
+
+  async loadReviews(): Promise<void> {
+    this.loadingReviews = true;
+    this.cdr.detectChanges();
+    try {
+      const response = await fetch(`/reviews-data/reviews.json?t=${Date.now()}`);
+      this.reviews = response.ok ? await response.json() : [];
+    } catch {
+      this.reviews = [];
+    }
+    this.loadingReviews = false;
+    this.cdr.detectChanges();
+  }
+
+  private async saveReviews(): Promise<void> {
+    await this.uploadService.putJson('reviews-data/reviews.json', this.reviews, REVIEWS_BUCKET);
+  }
+
+  openNewReview(): void {
+    this.editingReview = null;
+    const today = new Date().toISOString().split('T')[0];
+    this.reviewForm = { name: '', rating: 5, text: '', location: '', date: today };
+    this.showReviewForm = true;
+  }
+
+  openEditReview(review: AdminReview): void {
+    this.editingReview = review;
+    this.reviewForm = {
+      name: review.name,
+      rating: review.rating,
+      text: review.text,
+      location: review.location,
+      date: review.date,
+    };
+    this.showReviewForm = true;
+  }
+
+  cancelReviewForm(): void {
+    this.showReviewForm = false;
+    this.editingReview = null;
+  }
+
+  async saveReview(): Promise<void> {
+    if (this.editingReview) {
+      // Update existing
+      Object.assign(this.editingReview, this.reviewForm);
+    } else {
+      // Add new
+      const id = 'r' + Date.now();
+      this.reviews.unshift({ id, ...this.reviewForm });
+    }
+    this.showReviewForm = false;
+    this.editingReview = null;
+    await this.saveReviews();
+    this.cdr.detectChanges();
+  }
+
+  async deleteReview(review: AdminReview): Promise<void> {
+    review.deleting = true;
+    this.cdr.detectChanges();
+    this.reviews = this.reviews.filter(r => r !== review);
+    await this.saveReviews();
+    this.cdr.detectChanges();
+  }
+
+  /* ================================================================
+   * S3 LIST (shared)
+   * ================================================================ */
+
+  private async listS3(bucket: string, prefix: string): Promise<string[]> {
     const credentials = await this.auth.getCredentials();
-    const host = `${GALLERY_BUCKET}.s3.${REGION}.amazonaws.com`;
+    const host = `${bucket}.s3.${REGION}.amazonaws.com`;
     const filenames: string[] = [];
     let continuationToken: string | null = null;
 
     do {
-      const params = new URLSearchParams({ 'list-type': '2', 'prefix': 'gallery-images/' });
+      const params = new URLSearchParams({ 'list-type': '2', 'prefix': prefix });
       if (continuationToken) params.set('continuation-token', continuationToken);
 
       const dateStamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
       const shortDate = dateStamp.substring(0, 8);
-      const bodyHash = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'; // empty body
+      const bodyHash = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
 
       const headers: Record<string, string> = {
-        'host': host,
-        'x-amz-content-sha256': bodyHash,
-        'x-amz-date': dateStamp,
-        'x-amz-security-token': credentials.sessionToken,
+        'host': host, 'x-amz-content-sha256': bodyHash,
+        'x-amz-date': dateStamp, 'x-amz-security-token': credentials.sessionToken,
       };
 
       const signedHeaderKeys = Object.keys(headers).sort();
@@ -112,160 +306,22 @@ export class AdminComponent implements OnInit, OnDestroy {
       const kSigning = await sign(kService, 'aws4_request');
       const sig = Array.from(new Uint8Array(await sign(kSigning, stringToSign))).map(b => b.toString(16).padStart(2, '0')).join('');
 
-      const authorization = `AWS4-HMAC-SHA256 Credential=${credentials.accessKeyId}/${scope}, SignedHeaders=${signedHeaders}, Signature=${sig}`;
-
       const response = await fetch(`https://${host}/?${params}`, {
-        headers: { ...headers, 'Authorization': authorization },
+        headers: { ...headers, 'Authorization': `AWS4-HMAC-SHA256 Credential=${credentials.accessKeyId}/${scope}, SignedHeaders=${signedHeaders}, Signature=${sig}` },
       });
 
-      const xml = await response.text();
-      const doc = new DOMParser().parseFromString(xml, 'application/xml');
-
+      const doc = new DOMParser().parseFromString(await response.text(), 'application/xml');
       for (const item of doc.querySelectorAll('Contents')) {
         const key = item.querySelector('Key')?.textContent || '';
-        const name = key.replace(/^gallery-images\//, '');
-        if (name && /\.(jpg|jpeg|png|webp)$/i.test(name)) {
-          filenames.push(name);
-        }
+        const name = key.slice(prefix.length);
+        if (name && !/\.json$/i.test(name)) filenames.push(name);
       }
 
       const isTruncated = doc.querySelector('IsTruncated')?.textContent === 'true';
-      continuationToken = isTruncated
-        ? doc.querySelector('NextContinuationToken')?.textContent || null
-        : null;
+      continuationToken = isTruncated ? doc.querySelector('NextContinuationToken')?.textContent || null : null;
     } while (continuationToken);
 
     return filenames.sort();
-  }
-
-  /* ---------- Write gallery.json manifest ---------- */
-
-  private async saveManifest(): Promise<void> {
-    const filenames = this.images.map(img => img.filename).sort((a, b) => {
-      const numA = parseInt(a, 10) || 0;
-      const numB = parseInt(b, 10) || 0;
-      return numA - numB;
-    });
-    await this.uploadService.putJson('gallery-images/gallery.json', filenames, GALLERY_BUCKET);
-  }
-
-  /* ---------- Reorder ---------- */
-
-  async moveImage(index: number, direction: -1 | 1): Promise<void> {
-    const targetIndex = index + direction;
-    if (targetIndex < 0 || targetIndex >= this.images.length) return;
-
-    const a = this.images[index];
-    const b = this.images[targetIndex];
-    a.moving = true;
-    b.moving = true;
-    this.cdr.detectChanges();
-
-    try {
-      const newFilenameA = this.replaceNumber(a.filename, b.sortNumber);
-      const newFilenameB = this.replaceNumber(b.filename, a.sortNumber);
-
-      await this.uploadService.copy(`gallery-images/${a.filename}`, `gallery-images/${newFilenameA}`, GALLERY_BUCKET);
-      await this.uploadService.copy(`gallery-images/${b.filename}`, `gallery-images/${newFilenameB}`, GALLERY_BUCKET);
-      await this.uploadService.delete(`gallery-images/${a.filename}`, GALLERY_BUCKET);
-      await this.uploadService.delete(`gallery-images/${b.filename}`, GALLERY_BUCKET);
-
-      a.filename = newFilenameA;
-      a.url = `/gallery-images/${newFilenameA}`;
-      const oldSortA = a.sortNumber;
-      a.sortNumber = b.sortNumber;
-
-      b.filename = newFilenameB;
-      b.url = `/gallery-images/${newFilenameB}`;
-      b.sortNumber = oldSortA;
-
-      this.images.sort((x, y) => x.sortNumber - y.sortNumber);
-      await this.saveManifest();
-    } catch (e: any) {
-      alert(`Move failed: ${e.message}`);
-    }
-
-    a.moving = false;
-    b.moving = false;
-    this.cdr.detectChanges();
-  }
-
-  private replaceNumber(filename: string, newNumber: number): string {
-    return filename.replace(/^\d+/, String(newNumber).padStart(4, '0'));
-  }
-
-  /* ---------- Delete ---------- */
-
-  async deleteImage(image: AdminGalleryImage): Promise<void> {
-    image.deleting = true;
-    this.cdr.detectChanges();
-    try {
-      await this.uploadService.delete(`gallery-images/${image.filename}`, GALLERY_BUCKET);
-      this.images = this.images.filter(i => i !== image);
-      await this.saveManifest();
-    } catch (e: any) {
-      image.deleting = false;
-      alert(`Delete failed: ${e.message}`);
-    }
-    this.cdr.detectChanges();
-  }
-
-  /* ---------- Upload ---------- */
-
-  onFilesSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (!input.files) return;
-
-    const now = new Date();
-    const dateStr = [
-      now.getFullYear(),
-      String(now.getMonth() + 1).padStart(2, '0'),
-      String(now.getDate()).padStart(2, '0'),
-      String(now.getHours()).padStart(2, '0'),
-      String(now.getMinutes()).padStart(2, '0'),
-      String(now.getSeconds()).padStart(2, '0'),
-    ].join('-');
-
-    const maxSort = this.images.reduce((max, img) => Math.max(max, img.sortNumber), 0);
-    let nextNum = maxSort + 1;
-
-    for (const file of Array.from(input.files)) {
-      const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-      const num = String(nextNum++).padStart(4, '0');
-      const slug = this.tag || 'uncategorized';
-      const filename = `${num}_${dateStr}_${slug}.${ext}`;
-      this.uploads.push({ file, filename, status: 'pending' });
-    }
-
-    input.value = '';
-  }
-
-  removeUpload(index: number): void {
-    this.uploads.splice(index, 1);
-  }
-
-  async uploadAll(): Promise<void> {
-    this.uploading = true;
-    const pending = this.uploads.filter(u => u.status === 'pending');
-
-    for (const item of pending) {
-      item.status = 'uploading';
-      this.cdr.detectChanges();
-      try {
-        await this.uploadService.upload(item.file, `gallery-images/${item.filename}`, GALLERY_BUCKET);
-        item.status = 'done';
-      } catch (e: any) {
-        item.status = 'error';
-        item.error = e.message;
-      }
-      this.cdr.detectChanges();
-    }
-
-    this.uploading = false;
-    this.uploads = this.uploads.filter(u => u.status !== 'done');
-    await this.loadImages();
-    await this.saveManifest();
-    this.cdr.detectChanges();
   }
 
   signOut(): void {
