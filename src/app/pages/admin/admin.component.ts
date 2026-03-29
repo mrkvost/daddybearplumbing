@@ -105,25 +105,61 @@ export class AdminComponent implements OnInit, OnDestroy {
     await this.uploadService.putJson('gallery-images/gallery.json', filenames, GALLERY_BUCKET);
   }
 
-  async moveImage(index: number, direction: -1 | 1): Promise<void> {
-    const targetIndex = index + direction;
-    if (targetIndex < 0 || targetIndex >= this.images.length) return;
+  /* Drag and drop state */
+  dragIndex = -1;
+  dragOverIndex = -1;
+  dropTargetIndex = -1;
+  dragging = false;
 
-    // Swap positions in the array — no S3 operations needed
-    const temp = this.images[index];
-    this.images[index] = this.images[targetIndex];
-    this.images[targetIndex] = temp;
+  onDragStart(index: number): void {
+    this.dragIndex = index;
+    this.dragging = true;
+    this.cdr.detectChanges();
+  }
+
+  /** Determines drop position based on cursor being in top or bottom half of row */
+  onRowDragOver(event: DragEvent, rowIndex: number): void {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const midY = rect.top + rect.height / 2;
+    const insertAt = event.clientY < midY ? rowIndex : rowIndex + 1;
+    if (insertAt !== this.dragOverIndex) {
+      this.dragOverIndex = insertAt;
+      this.dropTargetIndex = insertAt;
+      this.cdr.detectChanges();
+    }
+  }
+
+  onDragEnd(): void {
+    this.dragIndex = -1;
+    this.dragOverIndex = -1;
+    this.dropTargetIndex = -1;
+    this.dragging = false;
+    this.cdr.detectChanges();
+  }
+
+  async onDrop(event: DragEvent, targetIndex: number): Promise<void> {
+    event.preventDefault();
+    const fromIndex = this.dragIndex;
+    this.dragIndex = -1;
+    this.dragOverIndex = -1;
+    this.dropTargetIndex = -1;
+    this.dragging = false;
+    this.cdr.detectChanges();
+
+    if (fromIndex < 0 || fromIndex === targetIndex || fromIndex === targetIndex - 1) return;
+
+    // Remove from old position, insert at new position
+    const [item] = this.images.splice(fromIndex, 1);
+    const insertAt = targetIndex > fromIndex ? targetIndex - 1 : targetIndex;
+    this.images.splice(insertAt, 0, item);
     this.cdr.detectChanges();
 
     try {
       await this.saveGalleryManifest();
     } catch (e: any) {
-      // Revert on failure
-      this.images[targetIndex] = this.images[index];
-      this.images[index] = temp;
-      alert(`Move failed: ${e.message}`);
+      alert(`Reorder failed: ${e.message}`);
+      await this.loadImages();
     }
-    this.cdr.detectChanges();
   }
 
   async deleteImage(image: AdminGalleryImage): Promise<void> {

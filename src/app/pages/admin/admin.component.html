@@ -100,29 +100,54 @@
           </div>
         }
         @if (!loadingImages && images.length > 0) {
-          <div class="space-y-2">
-            @for (image of images; track image.filename; let i = $index; let first = $first; let last = $last) {
-              <div class="flex items-center gap-4 px-4 py-3 ghost-border bg-surface-container-low" [class.opacity-50]="image.deleting">
+          <div class="space-y-1">
+            @for (image of images; track image.filename; let i = $index) {
+              <!-- Drop indicator above -->
+              <div
+                class="transition-all overflow-hidden"
+                [style.height.px]="dragOverIndex === i && dragIndex !== i && dragIndex !== i - 1 ? 60 : 0"
+                (dragover)="$event.preventDefault()"
+                (drop)="onDrop($event, i)"
+              >
+                <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
+              </div>
+              <div
+                class="flex items-center gap-4 px-4 py-3 ghost-border bg-surface-container-low cursor-grab active:cursor-grabbing"
+                [class.opacity-30]="dragIndex === i"
+                [class.opacity-50]="image.deleting"
+                draggable="true"
+                (dragstart)="onDragStart(i)"
+                (dragend)="onDragEnd()"
+                (dragover)="onRowDragOver($event, i)"
+              >
+                <!-- Position number -->
+                <span class="text-xs text-outline w-6 text-center font-body shrink-0">{{ i + 1 }}</span>
+                <!-- Drag handle -->
+                <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
+                <!-- Thumbnail -->
                 <div class="w-16 h-12 shrink-0 overflow-hidden bg-surface-container-high">
                   <img [src]="image.url" [alt]="image.tagLabel" class="w-full h-full object-cover" loading="lazy" />
                 </div>
+                <!-- Info -->
                 <div class="flex-1 min-w-0">
                   <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate">{{ image.tagLabel }}</p>
                   <p class="text-[0.65rem] text-secondary">{{ image.date | date:'mediumDate' }} &middot; {{ image.filename }}</p>
                 </div>
-                <div class="flex items-center gap-1 shrink-0">
-                  <button (click)="moveImage(i, -1)" [disabled]="first" class="p-1 text-secondary hover:text-primary disabled:text-outline-variant disabled:cursor-default transition-colors" title="Move up">
-                    <span class="material-symbols-outlined text-lg">arrow_upward</span>
-                  </button>
-                  <button (click)="moveImage(i, 1)" [disabled]="last" class="p-1 text-secondary hover:text-primary disabled:text-outline-variant disabled:cursor-default transition-colors" title="Move down">
-                    <span class="material-symbols-outlined text-lg">arrow_downward</span>
-                  </button>
-                </div>
+                <!-- Delete -->
                 <button (click)="deleteImage(image)" [disabled]="image.deleting" class="p-1 text-secondary hover:text-error transition-colors shrink-0 disabled:opacity-50" title="Delete">
                   <span class="material-symbols-outlined text-lg">{{ image.deleting ? 'hourglass_top' : 'delete' }}</span>
                 </button>
               </div>
             }
+            <!-- Drop indicator after last item -->
+            <div
+              class="transition-all overflow-hidden"
+              [style.height.px]="dragOverIndex === images.length && dragIndex !== images.length - 1 ? 60 : 0"
+              (dragover)="$event.preventDefault()"
+              (drop)="onDrop($event, images.length)"
+            >
+              <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
+            </div>
           </div>
         }
       </div>
