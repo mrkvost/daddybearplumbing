@@ -227,6 +227,26 @@
     </div>
   </div>
 
+  <!-- Contact Form -->
+  <h2>Contact Form</h2>
+  <div class="layer">
+    <span class="layer-label">Lambda + SES</span>
+    <div class="box-grid">
+      <div class="box blue">
+        <div class="box-title">Lambda Function URL</div>
+        <div class="box-detail">kvaking-contact-form<br>Python 3.12, 10s timeout<br>Reserved concurrency: 10<br>Public (NONE auth)</div>
+      </div>
+      <div class="box blue">
+        <div class="box-title">SES Domain Identity</div>
+        <div class="box-detail">kvaking.com<br>DKIM verified via Route53<br>Sends from contactform@</div>
+      </div>
+      <div class="box orange">
+        <div class="box-title">Cloudflare Turnstile</div>
+        <div class="box-detail">Invisible widget<br>Bot verification<br>Free, unlimited</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Terraform State -->
   <h2>Terraform State</h2>
   <div class="layer">
@@ -288,6 +308,11 @@
     <!-- Reviews -->
     <div class="flex-col">
       <div class="comp-node page"><div class="comp-name">ReviewsComponent</div><div class="comp-sel">/reviews</div><div class="comp-desc">Star ratings, avg score<br>Loads from S3</div></div>
+    </div>
+
+    <!-- Contact -->
+    <div class="flex-col">
+      <div class="comp-node page"><div class="comp-name">ContactComponent</div><div class="comp-sel">/contact</div><div class="comp-desc">Form + Turnstile + honeypot<br>Lambda → SES email</div></div>
     </div>
 
     <!-- Admin -->
@@ -356,6 +381,8 @@
 <!-- ==================== 4. ROUTES ==================== -->
 <div id="tab-routes" class="tab-content">
   <h1>Route Configuration</h1>
+
+  <h2>Angular Routes</h2>
   <p class="subtitle">src/app/app.routes.ts</p>
 
   <table>
@@ -366,19 +393,38 @@
       <tr><td><code>/</code></td><td>HomeComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
       <tr><td><code>/gallery</code></td><td>GalleryComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
       <tr><td><code>/reviews</code></td><td>ReviewsComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
+      <tr><td><code>/contact</code></td><td>ContactComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
       <tr><td><code>/admin</code></td><td>AdminComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td><span class="tag tag-guard">authGuard</span></td><td><span class="badge badge-done">Complete</span></td></tr>
       <tr><td><code>/admin/login</code></td><td>LoginComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
       <tr><td><code>**</code></td><td>Redirect &rarr; <code>/</code></td><td>&mdash;</td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
     </tbody>
   </table>
 
+  <h2>CloudFront Behaviors</h2>
+  <p class="subtitle">Ordered by specificity — first match wins</p>
+
+  <table>
+    <thead>
+      <tr><th>Path Pattern</th><th>Origin (S3 Bucket)</th><th>Cache Policy</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>/gallery-images/gallery.json</code></td><td>Gallery</td><td><span class="tag tag-guard">CachingDisabled</span></td><td>Always fresh — admin writes after changes</td></tr>
+      <tr><td><code>/reviews-data/reviews.json</code></td><td>Reviews</td><td><span class="tag tag-guard">CachingDisabled</span></td><td>Always fresh — admin writes after changes</td></tr>
+      <tr><td><code>/gallery-images/*</code></td><td>Gallery</td><td><span class="tag tag-lazy">CachingOptimized</span></td><td>Images (immutable content)</td></tr>
+      <tr><td><code>/reviews-data/*</code></td><td>Reviews</td><td><span class="tag tag-lazy">CachingOptimized</span></td><td>Future review assets</td></tr>
+      <tr><td><code>/* (default)</code></td><td>Site</td><td><span class="tag tag-lazy">CachingOptimized</span></td><td>Angular app + static assets</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top: 12px; font-size: 12px; color: #64748b;">403/404 errors on the default behavior serve <code>/index.html</code> (200) for SPA client-side routing.</p>
+
   <h2>Route Details</h2>
   <ul>
     <li><code>/admin</code> is a parent route with children <code>login</code> (public) and <code>""</code> (guarded)</li>
     <li><code>authGuard</code> checks <code>AuthService.isAuthenticated</code>, redirects to <code>/admin/login</code> if false</li>
-    <li>All routes use <code>loadComponent()</code> for lazy loading (separate JS chunks)</li>
+    <li>All Angular routes use <code>loadComponent()</code> for lazy loading (separate JS chunks)</li>
     <li><code>/admin</code> and <code>/admin/login</code> set <code>&lt;meta name="robots" content="noindex, nofollow"&gt;</code></li>
     <li><code>robots.txt</code> disallows <code>/admin</code> — no links to admin from public pages</li>
+    <li>Manifest JSONs are never cached so gallery/reviews updates are instant</li>
   </ul>
 </div>
 
@@ -397,6 +443,14 @@
   <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Browser &rarr; <code>kvaking.com/reviews</code></div></div>
   <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">Angular loads ReviewsComponent, fetches <code>/reviews-data/reviews.json</code> (not cached)</div></div>
   <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">Displays average rating, star ratings, review text, customer name + location</div></div>
+
+  <h2>Visitor — Contact Form</h2>
+  <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Visitor fills form: name, email, phone (optional), message</div></div>
+  <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">Turnstile (invisible) generates verification token in background</div></div>
+  <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">Browser POSTs to Lambda function URL: form data + Turnstile token + honeypot</div></div>
+  <div class="flow-step"><div class="flow-num">4</div><div class="flow-text">Lambda checks: honeypot empty? → Turnstile token valid? → required fields present?</div></div>
+  <div class="flow-step"><div class="flow-num">5</div><div class="flow-text">SES sends email from <code>contactform@domain</code> to business email with reply-to: visitor's email</div></div>
+  <div class="flow-step"><div class="flow-num">6</div><div class="flow-text">On 429 (throttled): frontend retries 2x with 1s delay before showing error</div></div>
 
   <h2>Admin — Login Flow</h2>
   <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Admin navigates to <code>/admin</code></div></div>

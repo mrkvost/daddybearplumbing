@@ -18,6 +18,11 @@ export const routes: Routes = [
       import('./pages/reviews/reviews.component').then((m) => m.ReviewsComponent),
   },
   {
+    path: 'contact',
+    loadComponent: () =>
+      import('./pages/contact/contact.component').then((m) => m.ContactComponent),
+  },
+  {
     path: 'admin',
     children: [
       {

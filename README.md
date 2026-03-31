@@ -118,6 +118,13 @@ Public reviews page reads `reviews.json` via CloudFront (not cached — instant 
 
 ---
 
+## Contact Form
+
+The `/contact` page sends submissions via Lambda + SES.
+See `docs/contact-form-setup.md` for full setup instructions (Turnstile, SES verification, etc.).
+
+---
+
 ## Admin Area
 
 The `/admin` route is protected by Cognito authentication.
@@ -134,7 +141,7 @@ The `/admin` route is protected by Cognito authentication.
 src/
   app/
     components/        # Reusable UI (navbar, footer, hero, trust-stats, services-grid, service-area)
-    pages/             # Route pages (home, gallery, reviews, admin, login)
+    pages/             # Route pages (home, gallery, reviews, contact, admin, login)
     services/          # AuthService, UploadService, GalleryService, ReviewsService
     guards/            # authGuard (protects /admin)
     app.routes.ts      # Route configuration
@@ -143,7 +150,9 @@ src/
   styles.css           # Tailwind directives + custom utilities
   index.html           # HTML entry point
 infrastructure/
-  main.tf              # All AWS resources (S3 x3, CloudFront, Route53, ACM, Cognito, IAM)
+  main.tf              # All AWS resources (S3 x3, CloudFront, Route53, ACM, Cognito, SES, Lambda)
+  lambda/
+    contact_form.py    # Contact form handler (Turnstile + SES)
   variables.tf         # Input variables
   outputs.tf           # Terraform outputs
   import.tf            # Import blocks for existing resources

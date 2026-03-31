@@ -2,15 +2,25 @@
   <div class="max-w-7xl mx-auto">
     <div class="mb-12">
       <p class="text-secondary text-[0.7rem] font-bold tracking-[0.3em] uppercase mb-4">Service Radius</p>
-      <h2 class="font-headline font-black text-4xl tracking-tighter uppercase">Serving La Grange &amp; Villa Park</h2>
+      <h2 class="font-headline font-black text-4xl tracking-tighter uppercase">Serving the Western Suburbs</h2>
     </div>
 
     <div class="grid md:grid-cols-2 gap-12">
-      <!-- Left: location list -->
+      <!-- Left: address + location list -->
       <div>
+        <!-- Address -->
+        <div class="ghost-border bg-surface-container-lowest p-6 mb-8">
+          <p class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold mb-3">Headquarters</p>
+          <p class="font-headline font-bold text-sm uppercase tracking-tight text-on-surface">
+            {{ address.line1 }}<br>
+            {{ address.line2 }}<br>
+            {{ address.city }}, {{ address.state }} {{ address.zip }}
+          </p>
+        </div>
+
         <p class="text-secondary text-sm leading-relaxed mb-8">
           Serving Cook and DuPage Counties with specialized field units deployed daily
-          across La Grange, Villa Park, and the surrounding Western Suburbs.
+          across Brookfield, La Grange, Villa Park, and the surrounding Western Suburbs.
         </p>
         <div class="space-y-4">
           @for (loc of locations; track loc) {
@@ -33,7 +43,6 @@
           loading="lazy"
           referrerpolicy="no-referrer-when-downgrade"
           title="Daddy Bear Plumbing service area map"
-          class=""
         ></iframe>
       </div>
     </div>

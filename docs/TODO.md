@@ -19,10 +19,10 @@ Work through them one at a time. Each goal has acceptance criteria that define "
 - Tailwind CSS v3 via PostCSS with "Architectural Minimalist" design system
 - Design: grayscale palette, burnt orange accent (#b02f00), 0px border-radius, Public Sans + Inter fonts
 - Components: Navbar, Hero, TrustStats (operational hours), ServicesGrid, ServiceArea (Google Maps), Footer
-- Pages: Home (composition), Gallery (S3 images + tags + lightbox), Reviews (star ratings), Admin (gallery + reviews management), Login (Cognito auth)
+- Pages: Home (composition), Gallery (S3 images + tags + lightbox), Reviews (star ratings), Contact (form + Turnstile + SES), Admin (gallery + reviews management), Login (Cognito auth)
 - Services: AuthService (Cognito), UploadService (S3 SigV4), GalleryService, ReviewsService
 - Auth guard on /admin route, noindex meta tags on admin pages, robots.txt disallows /admin
-- Phone number centralized in environment config
+- Phone number + address centralized in environment config
 - All routes lazy-loaded
 
 ---
@@ -42,6 +42,8 @@ Work through them one at a time. Each goal has acceptance criteria that define "
 - Cognito User Pool (no self-signup) + Identity Pool (temp S3 credentials)
 - IAM role scoped to gallery-images/* and reviews-data/* prefixes
 - S3 CORS for browser-based uploads from the domain
+- SES domain identity + DKIM for sending contact form emails
+- Lambda function + function URL for contact form (reserved concurrency 10)
 - WAF auto-managed by CloudFront security bundle (not in Terraform)
 - Remote state in S3 + DynamoDB lock table
 - All resources parameterized via terraform.tfvars
@@ -143,15 +145,15 @@ admin user creation, gallery photo convention, project structure.
 ## GOAL 6 — Future Work (unstructured)
 
 - [ ] Home page background image (real photo)
-- [ ] Business address on the site
-- [ ] Enhanced footer
+- [x] Business address on the site (service area, contact page, footer)
+- [ ] Enhanced footer (further improvements)
     *   logo, address, phone, email, fb
     *   information (terms, privacy, cookies)
     *   about us, contact us\*, faq, tips(and links)
     *   license
 - [ ] Menu additions: About Us, Contact Us, FAQ, Tips/Links, Coupons
     *   https://www.chicago.gov/city/en/sites/guide-to-building-permits/home/instructions/EPP/PLUMB.html
-- [ ] Contact form - more complex
+- [x] Contact form (Turnstile + honeypot + Lambda + SES)
 - [ ] Online chat integration - more complex
 - [ ] Pagination for admin gallery and reviews lists
 - [ ] Session persistence (ctrl+shift+r loses login — store tokens in sessionStorage)

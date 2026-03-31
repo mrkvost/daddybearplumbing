@@ -1,14 +1,38 @@
 <footer class="bg-surface-container-low w-full border-t border-outline-variant/20">
-  <div class="flex flex-col md:flex-row justify-between items-center px-8 py-12 w-full max-w-7xl mx-auto">
-    <div class="mb-8 md:mb-0">
-      <span class="font-headline font-bold text-primary text-xl tracking-tighter uppercase">DADDY BEAR PLUMBING</span>
-      <p class="font-body text-[0.75rem] tracking-tight leading-relaxed uppercase text-secondary mt-2">
-        &copy; {{ currentYear }} DADDY BEAR PLUMBING. PRECISION ENGINEERING.
-      </p>
+  <div class="max-w-7xl mx-auto px-8 py-12">
+    <div class="grid md:grid-cols-3 gap-8 mb-8">
+      <!-- Brand -->
+      <div>
+        <span class="font-headline font-bold text-primary text-xl tracking-tighter uppercase">DADDY BEAR PLUMBING</span>
+        <p class="font-body text-[0.75rem] text-secondary mt-2 leading-relaxed">
+          Precision engineering meets old-school integrity.
+          Licensed, insured, and locally owned.
+        </p>
+      </div>
+      <!-- Address -->
+      <div>
+        <p class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold mb-2">Address</p>
+        <p class="font-body text-[0.75rem] text-on-surface leading-relaxed">
+          {{ address.line1 }}, {{ address.line2 }}<br>
+          {{ address.city }}, {{ address.state }} {{ address.zip }}
+        </p>
+      </div>
+      <!-- Contact -->
+      <div>
+        <p class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold mb-2">Contact</p>
+        <a [href]="'tel:' + phone" class="font-body text-[0.75rem] text-on-surface hover:text-primary-fixed transition-colors">
+          {{ phoneDisplay }}
+        </a>
+      </div>
     </div>
-    <nav class="flex gap-8">
-      <a class="font-body text-[0.75rem] tracking-tight uppercase text-secondary hover:text-primary underline transition-colors" href="#">Privacy Policy</a>
-      <a class="font-body text-[0.75rem] tracking-tight uppercase text-secondary hover:text-primary underline transition-colors" href="#">Terms of Service</a>
-    </nav>
+    <div class="border-t border-outline-variant/10 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
+      <p class="font-body text-[0.65rem] tracking-tight uppercase text-secondary">
+        &copy; {{ currentYear }} DADDY BEAR PLUMBING
+      </p>
+      <nav class="flex gap-6">
+        <a class="font-body text-[0.65rem] tracking-tight uppercase text-secondary hover:text-primary underline transition-colors" href="#">Privacy Policy</a>
+        <a class="font-body text-[0.65rem] tracking-tight uppercase text-secondary hover:text-primary underline transition-colors" href="#">Terms of Service</a>
+      </nav>
+    </div>
   </div>
 </footer>

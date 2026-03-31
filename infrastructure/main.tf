@@ -487,3 +487,123 @@ resource "aws_cognito_identity_pool_roles_attachment" "admin" {
   }
 }
 
+# ---------- SES: Email for Contact Form ----------
+
+resource "aws_ses_domain_identity" "site" {
+  domain = var.domain
+}
+
+resource "aws_ses_domain_dkim" "site" {
+  domain = aws_ses_domain_identity.site.domain
+}
+
+# DNS records for SES domain verification
+resource "aws_route53_record" "ses_verification" {
+  zone_id = aws_route53_zone.site.zone_id
+  name    = "_amazonses.${var.domain}"
+  type    = "TXT"
+  ttl     = 600
+  records = [aws_ses_domain_identity.site.verification_token]
+}
+
+resource "aws_route53_record" "ses_dkim" {
+  count   = 3
+  zone_id = aws_route53_zone.site.zone_id
+  name    = "${aws_ses_domain_dkim.site.dkim_tokens[count.index]}._domainkey.${var.domain}"
+  type    = "CNAME"
+  ttl     = 600
+  records = ["${aws_ses_domain_dkim.site.dkim_tokens[count.index]}.dkim.amazonses.com"]
+}
+
+# ---------- Lambda: Contact Form Handler ----------
+
+data "archive_file" "contact_form" {
+  type        = "zip"
+  source_file = "${path.module}/lambda/contact_form.py"
+  output_path = "${path.module}/lambda/contact_form.zip"
+}
+
+resource "aws_iam_role" "contact_lambda" {
+  name = "${var.project}-contact-form-lambda"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "lambda.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "contact_lambda_ses" {
+  name = "${var.project}-contact-lambda-ses"
+  role = aws_iam_role.contact_lambda.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = "ses:SendEmail"
+      Resource = "*"
+      Condition = {
+        StringEquals = {
+          "ses:FromAddress" = "contact@${var.domain}"
+        }
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "contact_lambda_logs" {
+  role       = aws_iam_role.contact_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_lambda_function" "contact_form" {
+  function_name                  = "${var.project}-contact-form"
+  role                           = aws_iam_role.contact_lambda.arn
+  handler                        = "contact_form.handler"
+  runtime                        = "python3.12"
+  timeout                        = 10
+  reserved_concurrent_executions = 10
+  filename         = data.archive_file.contact_form.output_path
+  source_code_hash = data.archive_file.contact_form.output_base64sha256
+
+  environment {
+    variables = {
+      TURNSTILE_SECRET = var.turnstile_secret
+      TO_EMAIL         = var.contact_email
+      FROM_EMAIL       = "contact@${var.domain}"
+      SES_REGION       = var.region
+    }
+  }
+}
+
+resource "aws_lambda_function_url" "contact_form" {
+  function_name      = aws_lambda_function.contact_form.function_name
+  authorization_type = "NONE"
+
+  cors {
+    allow_origins = ["https://${var.domain}"]
+    allow_methods = ["POST"]
+    allow_headers = ["content-type"]
+    max_age       = 3600
+  }
+}
+
+resource "aws_lambda_permission" "contact_form_url" {
+  statement_id           = "FunctionURLAllowPublicAccess"
+  action                 = "lambda:InvokeFunctionUrl"
+  function_name          = aws_lambda_function.contact_form.function_name
+  principal              = "*"
+  function_url_auth_type = "NONE"
+}
+
+resource "aws_lambda_permission" "contact_form_invoke" {
+  statement_id  = "FunctionURLAllowPublicInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.contact_form.function_name
+  principal     = "*"
+}
+

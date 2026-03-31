@@ -16,7 +16,7 @@ Visitor submits form → Turnstile validates → Lambda verifies token → SES s
 
 1. Go to https://dash.cloudflare.com/
 2. Create a free Cloudflare account if you don't have one
-3. In the left sidebar, click **Turnstile**
+3. In the left sidebar, expand **Application Security** → click **Turnstile**
 4. Click **Add site**
 5. Fill in:
    - **Site name:** Your business name (e.g. "Daddy Bear Plumbing")

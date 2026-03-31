@@ -33,3 +33,7 @@ output "cognito_client_id" {
 output "cognito_identity_pool_id" {
   value = aws_cognito_identity_pool.admin.id
 }
+
+output "contact_form_url" {
+  value = aws_lambda_function_url.contact_form.function_url
+}

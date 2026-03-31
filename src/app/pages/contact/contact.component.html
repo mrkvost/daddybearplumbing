@@ -1,0 +1,142 @@
+<!-- Page header -->
+<section class="relative h-[300px] flex items-end overflow-hidden bg-black">
+  <div class="relative z-10 w-full max-w-7xl mx-auto px-6 pb-12">
+    <p class="text-white/50 text-[0.7rem] font-bold tracking-[0.3em] uppercase mb-4">Get In Touch</p>
+    <h1 class="font-headline font-black text-5xl md:text-7xl text-white leading-[0.9] tracking-tighter uppercase">
+      Contact Us
+    </h1>
+  </div>
+</section>
+
+<section class="max-w-4xl mx-auto px-6 py-16">
+  <div class="grid md:grid-cols-[2fr_1fr] gap-16">
+
+    <!-- Form -->
+    <div>
+      @if (sent) {
+        <div class="py-16 text-center">
+          <span class="material-symbols-outlined text-5xl block mb-4" style="color: #2e7d32;">check_circle</span>
+          <h2 class="font-headline font-black text-2xl tracking-tighter uppercase mb-3">Message Sent</h2>
+          <p class="text-secondary text-sm">Thank you for reaching out. We'll get back to you as soon as possible.</p>
+        </div>
+      } @else {
+        @if (error) {
+          <div class="bg-error-container text-on-error-container text-sm px-4 py-3 mb-6 ghost-border">
+            {{ error }}
+          </div>
+        }
+
+        <form (ngSubmit)="onSubmit()" class="space-y-6">
+          <div>
+            <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Name *</label>
+            <input
+              type="text"
+              [(ngModel)]="form.name"
+              name="name"
+              required
+              autocomplete="name"
+              class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
+            />
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-6">
+            <div>
+              <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Email *</label>
+              <input
+                type="email"
+                [(ngModel)]="form.email"
+                name="email"
+                required
+                autocomplete="email"
+                class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
+              />
+            </div>
+            <div>
+              <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Phone</label>
+              <input
+                type="tel"
+                [(ngModel)]="form.phone"
+                name="phone"
+                autocomplete="tel"
+                class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
+              />
+            </div>
+          </div>
+
+          <!-- Honeypot — hidden from humans, bots fill it in -->
+          <div style="position: absolute; left: -9999px;" aria-hidden="true">
+            <input type="text" [(ngModel)]="form.website" name="website" tabindex="-1" autocomplete="off" />
+          </div>
+
+          <div>
+            <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Message *</label>
+            <textarea
+              [(ngModel)]="form.message"
+              name="message"
+              required
+              rows="5"
+              class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors resize-y"
+            ></textarea>
+          </div>
+
+          <!-- Turnstile widget -->
+          <div id="turnstile-container"></div>
+
+          <button
+            type="submit"
+            [disabled]="sending"
+            class="bg-primary text-white px-8 py-3 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50"
+          >
+            {{ sending ? 'Sending...' : 'Send Message' }}
+          </button>
+        </form>
+      }
+    </div>
+
+    <!-- Contact info sidebar -->
+    <div>
+      <div class="ghost-border bg-surface-container-low p-6 mb-6">
+        <p class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold mb-4">Call Us</p>
+        <a
+          [href]="'tel:' + phone"
+          class="flex items-center gap-3 font-headline font-bold text-lg text-on-surface hover:text-primary-fixed transition-colors"
+        >
+          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">call</span>
+          {{ phoneDisplay }}
+        </a>
+      </div>
+
+      <div class="ghost-border bg-surface-container-low p-6 mb-6">
+        <p class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold mb-4">Hours</p>
+        <div class="space-y-2 text-sm font-body">
+          <div class="flex justify-between">
+            <span class="text-on-surface font-bold">Mon — Fri</span>
+            <span class="text-secondary">08:00 — 17:00</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-on-surface font-bold">Saturday</span>
+            <span class="text-secondary">08:00 — 13:00</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ghost-border bg-surface-container-low p-6 mb-6">
+        <p class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold mb-4">Address</p>
+        <p class="text-sm text-on-surface font-body leading-relaxed">
+          {{ address.line1 }}<br>
+          {{ address.line2 }}<br>
+          {{ address.city }}, {{ address.state }} {{ address.zip }}
+        </p>
+      </div>
+
+      <div class="ghost-border bg-surface-container-low p-6">
+        <p class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold mb-4">Service Area</p>
+        <p class="text-sm text-secondary font-body leading-relaxed">
+          Brookfield, La Grange, Villa Park, Western Springs, Elmhurst, Countryside, Oak Brook
+          and the surrounding Western Suburbs.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
