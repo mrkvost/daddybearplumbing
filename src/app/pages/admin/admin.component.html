@@ -26,6 +26,11 @@
         [class]="activeTab === 'reviews' ? 'border-b-2 border-primary text-primary' : 'text-secondary hover:text-on-surface'"
         class="px-6 py-4 font-headline font-bold text-xs uppercase tracking-widest transition-colors"
       >Reviews ({{ reviews.length }})</button>
+      <button
+        (click)="activeTab = 'settings'"
+        [class]="activeTab === 'settings' ? 'border-b-2 border-primary text-primary' : 'text-secondary hover:text-on-surface'"
+        class="px-6 py-4 font-headline font-bold text-xs uppercase tracking-widest transition-colors"
+      >Settings</button>
     </div>
   </div>
 
@@ -291,6 +296,64 @@
           }
         </div>
       }
+    }
+
+    <!-- ==================== SETTINGS TAB ==================== -->
+    @if (activeTab === 'settings') {
+      <div class="max-w-md">
+        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-8">Change Password</p>
+
+        @if (passwordSuccess) {
+          <div class="bg-surface-container-low ghost-border px-4 py-3 mb-6 text-sm" style="border-color: rgba(46, 125, 50, 0.3);">
+            <span class="material-symbols-outlined text-sm align-middle" style="color: #2e7d32;">check_circle</span>
+            Password changed successfully.
+          </div>
+        }
+
+        @if (passwordError) {
+          <div class="bg-error-container text-on-error-container text-sm px-4 py-3 mb-6 ghost-border">
+            {{ passwordError }}
+          </div>
+        }
+
+        <div class="space-y-6">
+          <div>
+            <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Current Password</label>
+            <input
+              type="password"
+              [(ngModel)]="passwordForm.current"
+              autocomplete="current-password"
+              class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
+            />
+          </div>
+          <div>
+            <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">New Password</label>
+            <input
+              type="password"
+              [(ngModel)]="passwordForm.newPassword"
+              autocomplete="new-password"
+              class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
+            />
+            <p class="text-outline text-xs mt-2">Minimum 8 characters, uppercase, lowercase, and numbers.</p>
+          </div>
+          <div>
+            <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Confirm New Password</label>
+            <input
+              type="password"
+              [(ngModel)]="passwordForm.confirm"
+              autocomplete="new-password"
+              class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
+            />
+          </div>
+          <button
+            (click)="changePassword()"
+            [disabled]="passwordChanging"
+            class="bg-primary text-white px-6 py-3 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50"
+          >
+            {{ passwordChanging ? 'Changing...' : 'Change Password' }}
+          </button>
+        </div>
+      </div>
     }
 
   </div>

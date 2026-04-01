@@ -20,8 +20,11 @@
       <!-- Contact -->
       <div>
         <p class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold mb-2">Contact</p>
-        <a [href]="'tel:' + phone" class="font-body text-[0.75rem] text-on-surface hover:text-primary-fixed transition-colors">
+        <a [href]="'tel:' + phone" class="font-body text-[0.75rem] text-on-surface hover:text-primary-fixed transition-colors block">
           {{ phoneDisplay }}
+        </a>
+        <a [href]="'mailto:' + email" class="font-body text-[0.75rem] text-on-surface hover:text-primary-fixed transition-colors block mt-1">
+          {{ email }}
         </a>
       </div>
     </div>

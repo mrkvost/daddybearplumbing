@@ -157,9 +157,13 @@ admin user creation, gallery photo convention, project structure.
 - [ ] Online chat integration - more complex
 - [ ] Pagination for admin gallery and reviews lists
 - [ ] Session persistence (ctrl+shift+r loses login — store tokens in sessionStorage)
-- [ ] Google Maps: update to real business coordinates
+- [x] Google Maps: update to real business coordinates
+- [ ] Google Business Profile link on map/address
 
 ---
+
+-   footer like in https://firstchicagoplumbing.com/
+-   !!!list of areas!!!
 
 ## Notes
 

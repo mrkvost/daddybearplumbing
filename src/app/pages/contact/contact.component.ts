@@ -29,6 +29,7 @@ export class ContactComponent implements AfterViewInit {
 
   phone = environment.phone;
   phoneDisplay = environment.phoneDisplay;
+  email = environment.email;
   address = environment.address;
 
   form = { name: '', email: '', phone: '', message: '', website: '' };

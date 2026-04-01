@@ -107,6 +107,17 @@
       </div>
 
       <div class="ghost-border bg-surface-container-low p-6 mb-6">
+        <p class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold mb-4">Email</p>
+        <a
+          [href]="'mailto:' + email"
+          class="flex items-center gap-3 font-body text-sm text-on-surface hover:text-primary-fixed transition-colors"
+        >
+          <span class="material-symbols-outlined">mail</span>
+          {{ email }}
+        </a>
+      </div>
+
+      <div class="ghost-border bg-surface-container-low p-6 mb-6">
         <p class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold mb-4">Hours</p>
         <div class="space-y-2 text-sm font-body">
           <div class="flex justify-between">

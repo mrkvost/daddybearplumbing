@@ -45,7 +45,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   private meta = inject(Meta);
   private cdr = inject(ChangeDetectorRef);
 
-  activeTab: 'gallery' | 'reviews' = 'gallery';
+  activeTab: 'gallery' | 'reviews' | 'settings' = 'gallery';
 
   /* Gallery state */
   images: AdminGalleryImage[] = [];
@@ -404,6 +404,39 @@ export class AdminComponent implements OnInit, OnDestroy {
     } while (continuationToken);
 
     return filenames.sort();
+  }
+
+  /* ================================================================
+   * SETTINGS
+   * ================================================================ */
+
+  passwordForm = { current: '', newPassword: '', confirm: '' };
+  passwordChanging = false;
+  passwordSuccess = false;
+  passwordError = '';
+
+  async changePassword(): Promise<void> {
+    this.passwordError = '';
+    this.passwordSuccess = false;
+
+    if (this.passwordForm.newPassword !== this.passwordForm.confirm) {
+      this.passwordError = 'Passwords do not match';
+      return;
+    }
+
+    this.passwordChanging = true;
+    this.cdr.detectChanges();
+
+    try {
+      await this.auth.changePassword(this.passwordForm.current, this.passwordForm.newPassword);
+      this.passwordSuccess = true;
+      this.passwordForm = { current: '', newPassword: '', confirm: '' };
+    } catch (e: any) {
+      this.passwordError = e.message || 'Password change failed';
+    }
+
+    this.passwordChanging = false;
+    this.cdr.detectChanges();
   }
 
   signOut(): void {

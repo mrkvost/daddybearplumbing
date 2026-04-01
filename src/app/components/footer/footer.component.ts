@@ -11,5 +11,6 @@ export class FooterComponent {
   currentYear = new Date().getFullYear();
   phone = environment.phone;
   phoneDisplay = environment.phoneDisplay;
+  email = environment.email;
   address = environment.address;
 }

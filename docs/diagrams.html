@@ -97,6 +97,7 @@
   <button onclick="showTab('routes')">Routes</button>
   <button onclick="showTab('flows')">Flows</button>
   <button onclick="showTab('misc')">Misc</button>
+  <button onclick="showTab('setup')">Fresh Setup</button>
   <button onclick="showTab('todos')">TODOs</button>
 </div>
 
@@ -556,6 +557,129 @@ infrastructure/
 </div>
 
 <!-- ==================== 7. TODOS ==================== -->
+<!-- ==================== FRESH SETUP ==================== -->
+<div id="tab-setup" class="tab-content">
+  <h1>Fresh Setup Guide</h1>
+  <p class="subtitle">Complete walkthrough from zero — no AWS account, no domain, no infrastructure</p>
+
+  <h2>Phase 1: Accounts &amp; Tools</h2>
+
+  <div class="flow-step"><div class="flow-num">1</div><div class="flow-text"><strong>AWS Account</strong><br><small>Go to <code>aws.amazon.com</code> → Create account. Requires email, credit card, phone verification. Select "Personal" or "Business" tier. Free tier covers everything needed.</small></div></div>
+
+  <div class="flow-step"><div class="flow-num">2</div><div class="flow-text"><strong>IAM User</strong><br><small>AWS Console → IAM → Users → Create user. Attach <code>AdministratorAccess</code> policy (for setup; scope down later). Create access key (CLI access) → save Access Key ID + Secret Key.</small></div></div>
+
+  <div class="flow-step"><div class="flow-num">3</div><div class="flow-text"><strong>Domain Registration</strong><br><small>AWS Console → Route 53 → Register domain. Pick a domain name. AWS creates the hosted zone automatically. ~$12/year for .com.</small></div></div>
+
+  <div class="flow-step"><div class="flow-num">4</div><div class="flow-text"><strong>Cloudflare Account (for Turnstile)</strong><br><small>Go to <code>dash.cloudflare.com</code> → Create free account. Application Security → Turnstile → Add site → enter your domain → Widget type: Invisible. Save the Site Key and Secret Key.</small></div></div>
+
+  <div class="flow-step"><div class="flow-num">5</div><div class="flow-text"><strong>Install Tools (on your machine)</strong><br><small>
+    • <strong>Docker</strong> — <code>docker.com</code> → Download Docker Desktop (or install Docker Engine on Linux)<br>
+    • <strong>AWS CLI</strong> — <code>aws.amazon.com/cli</code> → Download installer → run <code>aws configure</code> → enter Access Key ID, Secret Key, region (e.g. <code>eu-central-1</code>), output format (<code>json</code>)<br>
+    • <strong>Terraform</strong> — <code>terraform.io/downloads</code> → Download binary → add to PATH → verify with <code>terraform --version</code><br>
+    • <strong>Git</strong> — <code>git-scm.com</code> (if not already installed)
+  </small></div></div>
+
+  <h2>Phase 2: Repository Setup</h2>
+
+  <div class="flow-step"><div class="flow-num">6</div><div class="flow-text"><strong>Clone the repository</strong><br><small><code>git clone &lt;repo-url&gt; &amp;&amp; cd daddybearplumbing</code></small></div></div>
+
+  <div class="flow-step"><div class="flow-num">7</div><div class="flow-text"><strong>Configure environment</strong><br><small>Edit <code>src/environments/environment.ts</code>:<br>
+    • <code>phone</code> / <code>phoneDisplay</code> — business phone number (with +1 country code)<br>
+    • <code>address</code> — business address (line1, line2, city, state, zip)<br>
+    • AWS values will be filled in after Terraform apply (step 12)
+  </small></div></div>
+
+  <div class="flow-step"><div class="flow-num">8</div><div class="flow-text"><strong>Test the build locally</strong><br><small><code>./docker_build.sh</code> — should produce <code>dist/</code> with no errors<br><code>./docker_serve.sh</code> — open <code>http://localhost:8080</code> to verify</small></div></div>
+
+  <h2>Phase 3: Infrastructure</h2>
+
+  <div class="flow-step"><div class="flow-num">9</div><div class="flow-text"><strong>Create Terraform state storage</strong><br><small><code>cd infrastructure</code><br><code>./bootstrap.sh &lt;project-name&gt; &lt;region&gt;</code><br>e.g. <code>./bootstrap.sh daddybear eu-central-1</code><br>Creates S3 bucket + DynamoDB table for state locking.</small></div></div>
+
+  <div class="flow-step"><div class="flow-num">10</div><div class="flow-text"><strong>Update Terraform backend</strong><br><small>Edit the <code>backend "s3"</code> block in <code>main.tf</code> with the bucket/table names from bootstrap output.</small></div></div>
+
+  <div class="flow-step"><div class="flow-num">11</div><div class="flow-text"><strong>Configure Terraform variables</strong><br><small><code>cp terraform.tfvars.example terraform.tfvars</code><br>Edit <code>terraform.tfvars</code>:<br>
+    • <code>domain</code> — your registered domain (e.g. <code>daddybearplumbing.com</code>)<br>
+    • <code>bucket_name</code> — unique S3 bucket name (e.g. <code>daddybearplumbing-site</code>)<br>
+    • <code>project</code> — short name for resource naming (e.g. <code>daddybear</code>)<br>
+    • <code>region</code> — AWS region (e.g. <code>eu-central-1</code>)<br>
+    • <code>contact_email</code> — where contact form emails go (e.g. <code>info+contactform@yourdomain.com</code>)<br>
+    • <code>turnstile_secret</code> — Secret Key from Cloudflare Turnstile dashboard
+  </small></div></div>
+
+  <div class="flow-step"><div class="flow-num">12</div><div class="flow-text"><strong>Delete import.tf</strong><br><small>This file is only for importing existing resources. For a fresh setup, delete it:<br><code>rm import.tf</code></small></div></div>
+
+  <div class="flow-step"><div class="flow-num">13</div><div class="flow-text"><strong>Initialize and apply Terraform</strong><br><small>
+    <code>terraform init</code><br>
+    <code>terraform plan</code> — review all resources to be created<br>
+    <code>terraform apply</code> — creates: S3 buckets (x3), CloudFront, Route53 records, ACM certificate, Cognito, SES, Lambda<br>
+    Wait for ACM DNS validation (1-5 minutes).
+  </small></div></div>
+
+  <h2>Phase 4: Angular Configuration</h2>
+
+  <div class="flow-step"><div class="flow-num">14</div><div class="flow-text"><strong>Get Terraform outputs</strong><br><small>
+    <code>terraform output cognito_user_pool_id</code><br>
+    <code>terraform output cognito_client_id</code><br>
+    <code>terraform output cognito_identity_pool_id</code><br>
+    <code>terraform output contact_form_url</code>
+  </small></div></div>
+
+  <div class="flow-step"><div class="flow-num">15</div><div class="flow-text"><strong>Update environment.ts</strong><br><small>Paste the Terraform outputs + Turnstile site key into <code>src/environments/environment.ts</code>:<br>
+    • <code>aws.userPoolId</code><br>
+    • <code>aws.cognitoClientId</code><br>
+    • <code>aws.identityPoolId</code><br>
+    • <code>aws.bucketName</code> / <code>galleryBucket</code> / <code>reviewsBucket</code> (match your terraform.tfvars)<br>
+    • <code>contactFormUrl</code><br>
+    • <code>turnstileSiteKey</code>
+  </small></div></div>
+
+  <h2>Phase 5: Deploy</h2>
+
+  <div class="flow-step"><div class="flow-num">16</div><div class="flow-text"><strong>Update deploy.sh</strong><br><small>Edit <code>deploy.sh</code> with your S3 bucket name and CloudFront distribution ID:<br>
+    <code>terraform output s3_bucket_name</code><br>
+    <code>terraform output cloudfront_distribution_id</code>
+  </small></div></div>
+
+  <div class="flow-step"><div class="flow-num">17</div><div class="flow-text"><strong>Build and deploy</strong><br><small><code>cd ..</code><br><code>./docker_build.sh</code><br><code>./deploy.sh</code></small></div></div>
+
+  <div class="flow-step"><div class="flow-num">18</div><div class="flow-text"><strong>Verify</strong><br><small>Open <code>https://yourdomain.com</code> — should show the site with HTTPS.<br>If DNS hasn't propagated yet, wait a few minutes.</small></div></div>
+
+  <h2>Phase 6: Admin &amp; Email Setup</h2>
+
+  <div class="flow-step"><div class="flow-num">19</div><div class="flow-text"><strong>Create admin user</strong><br><small><code>aws cognito-idp admin-create-user --user-pool-id &lt;POOL_ID&gt; --username your@email.com --temporary-password TempPass123</code><br>Go to <code>/admin/login</code> → sign in → set new password.</small></div></div>
+
+  <div class="flow-step"><div class="flow-num">20</div><div class="flow-text"><strong>SES: Verify receiving email (sandbox)</strong><br><small><code>aws ses verify-email-identity --email-address your@email.com --region &lt;region&gt;</code><br>Click the confirmation link in your inbox.</small></div></div>
+
+  <div class="flow-step"><div class="flow-num">21</div><div class="flow-text"><strong>SES: Request production access (when ready)</strong><br><small>AWS Console → SES → Account dashboard → Request production access.<br>Mail type: Transactional. Use case: "Contact form, ~5-10 emails/day."<br>Approved within 24 hours. Until then, only verified emails can receive.</small></div></div>
+
+  <h2>Phase 7: Content</h2>
+
+  <div class="flow-step"><div class="flow-num">22</div><div class="flow-text"><strong>Upload gallery photos</strong><br><small>Go to <code>/admin</code> → set tag → select photos → upload.<br>Photos appear on <code>/gallery</code> immediately.</small></div></div>
+
+  <div class="flow-step"><div class="flow-num">23</div><div class="flow-text"><strong>Add reviews</strong><br><small>Go to <code>/admin</code> → Reviews tab → Add Review → fill in customer name, rating, text, location, date.</small></div></div>
+
+  <div class="flow-step"><div class="flow-num">24</div><div class="flow-text"><strong>Test contact form</strong><br><small>Go to <code>/contact</code> → fill in form → submit → check your email inbox.</small></div></div>
+
+  <h2>Optional: Google Workspace Email</h2>
+
+  <div class="flow-step"><div class="flow-num orange">A</div><div class="flow-text"><strong>Set up Google Workspace</strong><br><small>Go to <code>workspace.google.com</code> → sign up ($6/month for 1 user). Add your domain. Follow DNS verification steps (MX records in Route53).</small></div></div>
+
+  <div class="flow-step"><div class="flow-num orange">B</div><div class="flow-text"><strong>Use plus addressing for contact form</strong><br><small>Set <code>contact_email = "info+contactform@yourdomain.com"</code> in terraform.tfvars. Emails arrive in <code>info@</code> inbox. Set up a Gmail filter to auto-label them.</small></div></div>
+
+  <h2>Cost Summary (monthly)</h2>
+  <table>
+    <thead><tr><th>Service</th><th>Cost</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>AWS Free Tier</td><td>$0</td><td>S3, CloudFront, Lambda, SES, Cognito, Route53 queries</td></tr>
+      <tr><td>Domain registration</td><td>~$1/mo</td><td>~$12/year for .com via Route53</td></tr>
+      <tr><td>Route53 hosted zone</td><td>$0.50/mo</td><td>Per hosted zone</td></tr>
+      <tr><td>Cloudflare Turnstile</td><td>$0</td><td>Free, unlimited</td></tr>
+      <tr><td>Google Workspace (optional)</td><td>$6/mo</td><td>Business email</td></tr>
+      <tr><td><strong>Total</strong></td><td><strong>~$1.50/mo</strong></td><td>Without email; ~$7.50 with Workspace</td></tr>
+    </tbody>
+  </table>
+</div>
+
 <div id="tab-todos" class="tab-content">
   <h1>Project TODOs</h1>
   <p class="subtitle">From docs/TODO.md</p>
@@ -607,7 +731,8 @@ infrastructure/
 
   <h2>Future Work</h2>
   <div class="check check-todo">Links/resources page</div>
-  <div class="check check-todo">Real business address + Google Maps coordinates</div>
+  <div class="check check-done">Real business address + Google Maps coordinates</div>
+  <div class="check check-todo">Google Business Profile link on map/address</div>
   <div class="check check-todo">Enhanced footer (logo, address, phone, email, social, terms, privacy)</div>
   <div class="check check-todo">Menu additions (About Us, Contact, FAQ, Tips, Coupons)</div>
   <div class="check check-todo">Contact form</div>

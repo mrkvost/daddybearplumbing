@@ -111,6 +111,34 @@ export class AuthService {
   }
 
   /**
+   * Change password for the currently authenticated user.
+   */
+  async changePassword(oldPassword: string, newPassword: string): Promise<void> {
+    if (!this.tokens) throw new Error('Not authenticated');
+
+    const response = await fetch(
+      `https://cognito-idp.${environment.aws.region}.amazonaws.com/`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-amz-json-1.1',
+          'X-Amz-Target': 'AWSCognitoIdentityProviderService.ChangePassword',
+        },
+        body: JSON.stringify({
+          AccessToken: this.tokens.accessToken,
+          PreviousPassword: oldPassword,
+          ProposedPassword: newPassword,
+        }),
+      }
+    );
+
+    const data = await response.json();
+    if (!response.ok || data.__type) {
+      throw new Error(data.message || 'Password change failed');
+    }
+  }
+
+  /**
    * Get temporary AWS credentials via Cognito Identity Pool.
    */
   async getCredentials(): Promise<AwsCredentials> {
