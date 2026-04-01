@@ -80,7 +80,7 @@ with some external steps that cannot be automated.
 - [ ] Ensure heading hierarchy is correct: one `<h1>` per page, logical `<h2>`/`<h3>` order
 - [ ] Add descriptive `alt` text to all images
 - [x] Create `robots.txt` in Angular's `public/` folder (disallows /admin)
-- [ ] Create `sitemap.xml` listing all routes; update `lastmod` date in `deploy.sh` on each deploy
+- [x] Create `sitemap.xml` listing all public routes; robots.txt points to it
 - [x] Add `<link rel="canonical">` per page (CanonicalService, auto on navigation, skips /admin)
 - [ ] Evaluate Angular pre-rendering (`ng build` with `prerender` option) so crawlers receive
       real HTML instead of a blank JS shell — enable if straightforward, document if deferred
