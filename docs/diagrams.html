@@ -606,7 +606,12 @@ infrastructure/
     • <code>turnstile_secret</code> — Secret Key from Cloudflare Turnstile dashboard
   </small></div></div>
 
-  <div class="flow-step"><div class="flow-num">12</div><div class="flow-text"><strong>Delete import.tf</strong><br><small>This file is only for importing existing resources. For a fresh setup, delete it:<br><code>rm import.tf</code></small></div></div>
+  <div class="flow-step"><div class="flow-num">12</div><div class="flow-text"><strong>Handle import.tf</strong><br><small>
+    <strong>Fully fresh setup (no existing resources):</strong> delete <code>import.tf</code><br>
+    <strong>Existing hosted zone / domain in AWS:</strong> copy <code>import.tf.example</code> to <code>import.tf</code>, fill in the hosted zone ID:<br>
+    <code>aws route53 list-hosted-zones --query "HostedZones[?Name=='yourdomain.com.'].Id" --output text</code><br>
+    Uncomment any other pre-existing resources (ACM cert, S3 bucket, CloudFront). After successful <code>terraform apply</code>, you can delete <code>import.tf</code>.
+  </small></div></div>
 
   <div class="flow-step"><div class="flow-num">13</div><div class="flow-text"><strong>Initialize and apply Terraform</strong><br><small>
     <code>terraform init</code><br>

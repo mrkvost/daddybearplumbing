@@ -1,0 +1,57 @@
+# Import blocks for existing AWS resources.
+#
+# Use this file when deploying to an AWS account that already has
+# some resources created manually (e.g. domain registered via Route53).
+#
+# Steps:
+#   1. Copy this file to import.tf
+#   2. Fill in the IDs for resources that already exist
+#   3. Remove blocks for resources that don't exist yet (Terraform will create them)
+#   4. Run `terraform plan` to preview
+#   5. Run `terraform apply` to import
+#   6. After successful import, you can delete import.tf
+#
+# How to find the IDs:
+#
+#   Hosted Zone ID:
+#     aws route53 list-hosted-zones --query "HostedZones[?Name=='yourdomain.com.'].Id" --output text
+#     → returns /hostedzone/ZXXXXXXXXX → use just ZXXXXXXXXX
+#
+#   ACM Certificate ARN (if certificate already exists in us-east-1):
+#     aws acm list-certificates --region us-east-1 --query "CertificateSummaryList[?DomainName=='yourdomain.com'].CertificateArn" --output text
+#
+#   CloudFront Distribution ID (if distribution already exists):
+#     aws cloudfront list-distributions --query "DistributionList.Items[*].{Id:Id,Domain:Aliases.Items[0]}" --output table
+
+# Route53 Hosted Zone — most common pre-existing resource
+import {
+  to = aws_route53_zone.site
+  id = "ZXXXXXXXXXXXXXXXXX"  # Hosted zone ID
+}
+
+# Uncomment and fill in if these resources already exist:
+
+# import {
+#   to = aws_acm_certificate.site
+#   id = "arn:aws:acm:us-east-1:ACCOUNT_ID:certificate/CERT_ID"
+# }
+
+# import {
+#   to = aws_s3_bucket.site
+#   id = "bucket-name"
+# }
+
+# import {
+#   to = aws_cloudfront_distribution.site
+#   id = "EXXXXXXXXXXXXXX"
+# }
+
+# import {
+#   to = aws_route53_record.a
+#   id = "ZONE_ID_yourdomain.com_A"
+# }
+
+# import {
+#   to = aws_route53_record.aaaa
+#   id = "ZONE_ID_yourdomain.com_AAAA"
+# }
