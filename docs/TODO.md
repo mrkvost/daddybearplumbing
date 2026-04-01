@@ -81,7 +81,7 @@ with some external steps that cannot be automated.
 - [ ] Add descriptive `alt` text to all images
 - [x] Create `robots.txt` in Angular's `public/` folder (disallows /admin)
 - [ ] Create `sitemap.xml` listing all routes; update `lastmod` date in `deploy.sh` on each deploy
-- [ ] Add `<link rel="canonical">` per page to prevent duplicate URL indexing
+- [x] Add `<link rel="canonical">` per page (CanonicalService, auto on navigation, skips /admin)
 - [ ] Evaluate Angular pre-rendering (`ng build` with `prerender` option) so crawlers receive
       real HTML instead of a blank JS shell — enable if straightforward, document if deferred
 - [ ] Verify Core Web Vitals: lazy-load the Google Maps iframe (`loading="lazy"`),
