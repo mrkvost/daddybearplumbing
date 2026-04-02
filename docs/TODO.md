@@ -74,8 +74,7 @@ with some external steps that cannot be automated.
 **Sub-tasks (in-code):**
 - [ ] Add `LocalBusiness` JSON-LD structured data schema (name, address, phone, hours,
       service area, geo coordinates) to Angular's `index.html` or via a service
-- [ ] Set `<title>` and `<meta name="description">` per page/component using Angular's
-      `Title` and `Meta` services (each route sets its own values on load)
+- [x] Set `<title>` and `<meta name="description">` per page via route data + CanonicalService
 - [ ] Add Open Graph tags (`og:title`, `og:description`, `og:image`, `og:url`) for link sharing
 - [ ] Ensure heading hierarchy is correct: one `<h1>` per page, logical `<h2>`/`<h3>` order
 - [ ] Add descriptive `alt` text to all images
@@ -151,9 +150,8 @@ admin user creation, gallery photo convention, project structure.
     *   information (terms, privacy, cookies)
     *   about us, contact us\*, faq, tips(and links)
     *   license
-- [ ] Menu additions: About Us, Contact Us, FAQ, Tips/Links, Coupons
+- [ ] Menu additions: About Us, FAQ, Tips/Links, Coupons
     *   https://www.chicago.gov/city/en/sites/guide-to-building-permits/home/instructions/EPP/PLUMB.html
-- [x] Contact form (Turnstile + honeypot + Lambda + SES)
 - [ ] Online chat integration - more complex
 - [ ] Pagination for admin gallery and reviews lists
 - [ ] Session persistence (ctrl+shift+r loses login — store tokens in sessionStorage)
