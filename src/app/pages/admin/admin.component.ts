@@ -45,7 +45,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   private meta = inject(Meta);
   private cdr = inject(ChangeDetectorRef);
 
-  activeTab: 'gallery' | 'reviews' | 'settings' = 'gallery';
+  activeTab: 'gallery' | 'reviews' | 'seo' | 'settings' = 'gallery';
 
   /* Gallery state */
   images: AdminGalleryImage[] = [];
@@ -65,6 +65,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.meta.addTag({ name: 'robots', content: 'noindex, nofollow' });
     this.loadImages();
     this.loadReviews();
+    this.loadOgImage();
   }
 
   ngOnDestroy(): void {
@@ -436,6 +437,64 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     this.passwordChanging = false;
+    this.cdr.detectChanges();
+  }
+
+  /* ================================================================
+   * SEO (OG Image)
+   * ================================================================ */
+
+  ogImageUrl: string | null = null;
+  ogUploading = false;
+  ogSuccess = false;
+  ogError = '';
+
+  private readonly OG_IMAGE_KEY = 'gallery-images/meta/og-image.jpg';
+  private readonly OG_IMAGE_PUBLIC = '/gallery-images/meta/og-image.jpg';
+
+  async loadOgImage(): Promise<void> {
+    try {
+      const res = await fetch(`${this.OG_IMAGE_PUBLIC}?t=${Date.now()}`, { method: 'HEAD' });
+      this.ogImageUrl = res.ok ? `${this.OG_IMAGE_PUBLIC}?t=${Date.now()}` : null;
+    } catch {
+      this.ogImageUrl = null;
+    }
+    this.cdr.detectChanges();
+  }
+
+  async onOgFileSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+
+    const file = input.files[0];
+    input.value = '';
+
+    this.ogUploading = true;
+    this.ogError = '';
+    this.ogSuccess = false;
+    this.cdr.detectChanges();
+
+    try {
+      await this.uploadService.upload(file, this.OG_IMAGE_KEY, GALLERY_BUCKET);
+      this.ogImageUrl = `${this.OG_IMAGE_PUBLIC}?t=${Date.now()}`;
+      this.ogSuccess = true;
+    } catch (e: any) {
+      this.ogError = e.message || 'Upload failed';
+    }
+
+    this.ogUploading = false;
+    this.cdr.detectChanges();
+  }
+
+  async deleteOgImage(): Promise<void> {
+    this.ogError = '';
+    this.ogSuccess = false;
+    try {
+      await this.uploadService.delete(this.OG_IMAGE_KEY, GALLERY_BUCKET);
+      this.ogImageUrl = null;
+    } catch (e: any) {
+      this.ogError = e.message || 'Delete failed';
+    }
     this.cdr.detectChanges();
   }
 

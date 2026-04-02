@@ -75,7 +75,9 @@ with some external steps that cannot be automated.
 - [ ] Add `LocalBusiness` JSON-LD structured data schema (name, address, phone, hours,
       service area, geo coordinates) to Angular's `index.html` or via a service
 - [x] Set `<title>` and `<meta name="description">` per page via route data + CanonicalService
-- [ ] Add Open Graph tags (`og:title`, `og:description`, `og:image`, `og:url`) for link sharing
+- [x] Add Open Graph tags (`og:title`, `og:description`, `og:image`, `og:url`) for link sharing
+      — managed by CanonicalService; OG image uploadable from Admin → SEO tab
+- [ ] Add OG placeholder image at `gallery-images/meta/placeholder.jpg` (1200×630, branded fallback)
 - [ ] Ensure heading hierarchy is correct: one `<h1>` per page, logical `<h2>`/`<h3>` order
 - [ ] Add descriptive `alt` text to all images
 - [x] Create `robots.txt` in Angular's `public/` folder (disallows /admin)

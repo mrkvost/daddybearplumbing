@@ -27,6 +27,11 @@
         class="px-6 py-4 font-headline font-bold text-xs uppercase tracking-widest transition-colors"
       >Reviews ({{ reviews.length }})</button>
       <button
+        (click)="activeTab = 'seo'"
+        [class]="activeTab === 'seo' ? 'border-b-2 border-primary text-primary' : 'text-secondary hover:text-on-surface'"
+        class="px-6 py-4 font-headline font-bold text-xs uppercase tracking-widest transition-colors"
+      >SEO</button>
+      <button
         (click)="activeTab = 'settings'"
         [class]="activeTab === 'settings' ? 'border-b-2 border-primary text-primary' : 'text-secondary hover:text-on-surface'"
         class="px-6 py-4 font-headline font-bold text-xs uppercase tracking-widest transition-colors"
@@ -296,6 +301,54 @@
           }
         </div>
       }
+    }
+
+    <!-- ==================== SEO TAB ==================== -->
+    @if (activeTab === 'seo') {
+      <div class="max-w-lg">
+        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2">Open Graph Image</p>
+        <p class="text-xs text-outline mb-8">This image appears when your site is shared on Facebook, LinkedIn, Slack, iMessage, etc. Recommended size: 1200 &times; 630 px.</p>
+
+        @if (ogSuccess) {
+          <div class="bg-surface-container-low ghost-border px-4 py-3 mb-6 text-sm" style="border-color: rgba(46, 125, 50, 0.3);">
+            <span class="material-symbols-outlined text-sm align-middle" style="color: #2e7d32;">check_circle</span>
+            OG image uploaded successfully.
+          </div>
+        }
+
+        @if (ogError) {
+          <div class="bg-error-container text-on-error-container text-sm px-4 py-3 mb-6 ghost-border">
+            {{ ogError }}
+          </div>
+        }
+
+        <!-- Current image preview -->
+        @if (ogImageUrl) {
+          <div class="mb-6">
+            <p class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold mb-2">Current Image</p>
+            <div class="ghost-border bg-surface-container-low p-2">
+              <img [src]="ogImageUrl" alt="OG preview" class="w-full max-h-64 object-contain" />
+            </div>
+            <button (click)="deleteOgImage()"
+              class="mt-3 text-secondary hover:text-error text-xs font-headline font-bold uppercase tracking-widest transition-colors flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">delete</span> Remove
+            </button>
+          </div>
+        } @else {
+          <div class="ghost-border bg-surface-container-low p-6 mb-6 text-center">
+            <span class="material-symbols-outlined text-4xl text-outline-variant block mb-2">image</span>
+            <p class="text-secondary text-sm">No OG image set. Social shares will show no preview.</p>
+          </div>
+        }
+
+        <!-- Upload -->
+        <label class="flex items-center justify-center gap-3 ghost-border bg-surface-container-low hover:bg-surface-container-lowest transition-colors cursor-pointer px-6 py-3"
+          [class.opacity-50]="ogUploading" [class.pointer-events-none]="ogUploading">
+          <span class="material-symbols-outlined text-xl text-outline-variant">cloud_upload</span>
+          <span class="text-secondary text-sm">{{ ogUploading ? 'Uploading...' : 'Select image (JPG, PNG, WebP)' }}</span>
+          <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onOgFileSelected($event)" class="hidden" [disabled]="ogUploading" />
+        </label>
+      </div>
     }
 
     <!-- ==================== SETTINGS TAB ==================== -->

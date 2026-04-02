@@ -39,12 +39,20 @@ export class CanonicalService {
         this.meta.removeTag('name="description"');
       }
 
-      // Canonical
+      // Canonical + Open Graph
       if (url.startsWith('/admin')) {
         this.removeCanonical();
       } else {
         const cleanPath = url.split('?')[0].replace(/\/+$/, '');
-        this.setCanonical(`https://${environment.domain}${cleanPath}`);
+        const fullUrl = `https://${environment.domain}${cleanPath}`;
+        this.setCanonical(fullUrl);
+
+        // Open Graph tags
+        const ogTitle = pageTitle ? `${BRAND} | ${pageTitle}` : BRAND;
+        this.meta.updateTag({ property: 'og:title', content: ogTitle });
+        this.meta.updateTag({ property: 'og:description', content: description || '' });
+        this.meta.updateTag({ property: 'og:url', content: fullUrl });
+        this.meta.updateTag({ property: 'og:image', content: `https://${environment.domain}/gallery-images/meta/og-image.jpg` });
       }
     });
   }
