@@ -20,10 +20,16 @@ interface AwsCredentials {
   sessionToken: string;
 }
 
+const STORAGE_KEY = 'auth_tokens';
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private tokens: AuthTokens | null = null;
   private credentials: AwsCredentials | null = null;
+
+  constructor() {
+    this.loadTokens();
+  }
 
   get isAuthenticated(): boolean {
     return this.tokens !== null;
@@ -31,6 +37,30 @@ export class AuthService {
 
   get idToken(): string | null {
     return this.tokens?.idToken ?? null;
+  }
+
+  private saveTokens(): void {
+    if (this.tokens) {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(this.tokens));
+    }
+  }
+
+  private loadTokens(): void {
+    try {
+      const stored = sessionStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        this.tokens = JSON.parse(stored);
+        if (this.isTokenExpired()) {
+          this.refreshSession().catch(() => this.clearTokens());
+        }
+      }
+    } catch { /* corrupted data, ignore */ }
+  }
+
+  private clearTokens(): void {
+    this.tokens = null;
+    this.credentials = null;
+    sessionStorage.removeItem(STORAGE_KEY);
   }
 
   /**
@@ -71,6 +101,7 @@ export class AuthService {
       accessToken: data.AuthenticationResult.AccessToken,
       refreshToken: data.AuthenticationResult.RefreshToken,
     };
+    this.saveTokens();
   }
 
   /**
@@ -108,6 +139,7 @@ export class AuthService {
       accessToken: data.AuthenticationResult.AccessToken,
       refreshToken: data.AuthenticationResult.RefreshToken,
     };
+    this.saveTokens();
   }
 
   /**
@@ -138,11 +170,58 @@ export class AuthService {
     }
   }
 
+  private isTokenExpired(): boolean {
+    if (!this.tokens) return true;
+    try {
+      const payload = JSON.parse(atob(this.tokens.idToken.split('.')[1]));
+      return payload.exp * 1000 < Date.now();
+    } catch { return true; }
+  }
+
+  private async refreshSession(): Promise<void> {
+    if (!this.tokens?.refreshToken) throw new Error('No refresh token');
+
+    const response = await fetch(
+      `https://cognito-idp.${environment.aws.region}.amazonaws.com/`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-amz-json-1.1',
+          'X-Amz-Target': 'AWSCognitoIdentityProviderService.InitiateAuth',
+        },
+        body: JSON.stringify({
+          AuthFlow: 'REFRESH_TOKEN_AUTH',
+          ClientId: environment.aws.cognitoClientId,
+          AuthParameters: {
+            REFRESH_TOKEN: this.tokens.refreshToken,
+          },
+        }),
+      }
+    );
+
+    const data = await response.json();
+    if (!response.ok || data.__type) {
+      this.clearTokens();
+      throw new Error('Session expired');
+    }
+
+    this.tokens = {
+      idToken: data.AuthenticationResult.IdToken,
+      accessToken: data.AuthenticationResult.AccessToken,
+      refreshToken: this.tokens.refreshToken,
+    };
+    this.saveTokens();
+  }
+
   /**
    * Get temporary AWS credentials via Cognito Identity Pool.
    */
   async getCredentials(): Promise<AwsCredentials> {
     if (!this.tokens) throw new Error('Not authenticated');
+
+    if (this.isTokenExpired()) {
+      await this.refreshSession();
+    }
 
     // Step 1: Get identity ID
     const idResponse = await fetch(
@@ -194,7 +273,6 @@ export class AuthService {
   }
 
   signOut(): void {
-    this.tokens = null;
-    this.credentials = null;
+    this.clearTokens();
   }
 }
