@@ -131,10 +131,11 @@ The `/admin` route is protected by Cognito authentication.
 - Only manually created users can log in (no self-signup)
 - First login requires setting a new password
 - Session survives page refresh (tokens in sessionStorage, auto-refreshed; cleared on tab close)
-- Four tabs: **Gallery** (upload, reorder, tag, delete), **Reviews** (add, edit, delete), **Site** (hero image, OG image), **Settings** (change password)
+- Five tabs: **Gallery** (upload, reorder, tag, delete), **Reviews** (add, edit, delete), **Site** (hero image, OG image), **Services** (service card editor), **Settings** (change password)
 - **Hero image**: select file → full grayscale preview (matches homepage look) → confirm upload. Hash-based filenames for cache busting. Falls back to default `hero.jpg` if no custom image set.
 - **OG image**: same flow, used for social media link previews (1200×630 recommended)
 - Both tracked via `meta.json` in the gallery bucket
+- **Service cards**: edit cards shown on `/residential` and `/commercial` pages. Drag-and-drop reorder, add/edit/delete. "Load Defaults" to populate from hardcoded cards for first-time editing. Stored as `services-residential.json` and `services-commercial.json` in the gallery bucket.
 - Admin pages are not indexed (noindex meta + robots.txt)
 
 ---
@@ -145,7 +146,7 @@ The `/admin` route is protected by Cognito authentication.
 src/
   app/
     components/        # Reusable UI (navbar, footer, hero, trust-stats, services-grid, service-area)
-    pages/             # Route pages (home, gallery, reviews, contact, admin, login)
+    pages/             # Route pages (home, gallery, reviews, contact, about, residential, commercial, faq, terms, privacy, cookies, admin, login)
     services/          # AuthService, UploadService, GalleryService, ReviewsService, CanonicalService
     guards/            # authGuard (protects /admin)
     app.routes.ts      # Route configuration

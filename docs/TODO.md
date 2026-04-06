@@ -19,7 +19,7 @@ Work through them one at a time. Each goal has acceptance criteria that define "
 - Tailwind CSS v3 via PostCSS with "Architectural Minimalist" design system
 - Design: grayscale palette, burnt orange accent (#b02f00), 0px border-radius, Public Sans + Inter fonts
 - Components: Navbar, Hero, TrustStats (operational hours), ServicesGrid, ServiceArea (Google Maps), Footer
-- Pages: Home (composition), Gallery (S3 images + tags + lightbox), Reviews (star ratings), Contact (form + Turnstile + SES), Admin (gallery + reviews + site image management), Login (Cognito auth)
+- Pages: Home (composition), Gallery (S3 images + tags + lightbox), Reviews (star ratings), Contact (form + Turnstile + SES), About Us, Residential Services, Commercial Services, FAQ, Terms, Privacy, Cookies, Admin (gallery + reviews + site images + service cards), Login (Cognito auth)
 - Services: AuthService (Cognito), UploadService (S3 SigV4), GalleryService, ReviewsService
 - Auth guard on /admin route, noindex meta tags on admin pages, robots.txt disallows /admin
 - Phone number + address centralized in environment config
@@ -147,12 +147,13 @@ admin user creation, gallery photo convention, project structure.
 
 - [x] Home page background image (real photo) — admin-uploadable hero image with preview
 - [x] Business address on the site (service area, contact page, footer)
+- [x] Footer links: FAQ, Privacy Policy, Terms & Conditions, Cookies
+- [x] Menu additions: About Us, Services (Residential / Commercial), Gallery, Reviews, Contact
+- [x] Content pages: About Us, Residential Services, Commercial Services, FAQ, Terms, Privacy, Cookies
+- [x] Admin service cards editor (drag-and-drop reorder, add/edit/delete, load defaults)
 - [ ] Enhanced footer (further improvements)
-    *   logo, address, phone, email, fb
-    *   information (terms, privacy, cookies)
-    *   about us, contact us\*, faq, tips(and links)
-    *   license
-- [ ] Menu additions: About Us, FAQ, Tips/Links, Coupons
+    *   logo, fb, license
+- [ ] Tips/Links page
     *   https://www.chicago.gov/city/en/sites/guide-to-building-permits/home/instructions/EPP/PLUMB.html
 - [ ] Online chat integration - more complex
 - [ ] Pagination for admin gallery and reviews lists

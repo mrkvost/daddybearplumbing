@@ -316,9 +316,32 @@
       <div class="comp-node page"><div class="comp-name">ContactComponent</div><div class="comp-sel">/contact</div><div class="comp-desc">Form + Turnstile + honeypot<br>Lambda → SES email</div></div>
     </div>
 
+    <!-- Content Pages -->
+    <div class="flex-col">
+      <div class="comp-node page"><div class="comp-name">AboutComponent</div><div class="comp-sel">/about</div><div class="comp-desc">Company history,<br>why choose us, promise</div></div>
+    </div>
+    <div class="flex-col">
+      <div class="comp-node page"><div class="comp-name">ResidentialComponent</div><div class="comp-sel">/residential</div><div class="comp-desc">Service cards from S3<br>(fallback defaults)</div></div>
+    </div>
+    <div class="flex-col">
+      <div class="comp-node page"><div class="comp-name">CommercialComponent</div><div class="comp-sel">/commercial</div><div class="comp-desc">Industry + service cards<br>from S3 (fallback defaults)</div></div>
+    </div>
+    <div class="flex-col">
+      <div class="comp-node page"><div class="comp-name">FaqComponent</div><div class="comp-sel">/faq</div><div class="comp-desc">Q&amp;A accordion</div></div>
+    </div>
+
+    <!-- Legal Pages -->
+    <div class="flex-col">
+      <div class="comp-node page" style="opacity: .7;"><div class="comp-name" style="font-size:12px;">TermsComponent</div><div class="comp-sel">/terms</div></div>
+      <div style="height:4px;"></div>
+      <div class="comp-node page" style="opacity: .7;"><div class="comp-name" style="font-size:12px;">PrivacyComponent</div><div class="comp-sel">/privacy</div></div>
+      <div style="height:4px;"></div>
+      <div class="comp-node page" style="opacity: .7;"><div class="comp-name" style="font-size:12px;">CookiesComponent</div><div class="comp-sel">/cookies</div></div>
+    </div>
+
     <!-- Admin -->
     <div class="flex-col">
-      <div class="comp-node admin"><div class="comp-name">AdminComponent</div><div class="comp-sel">/admin</div><div class="comp-desc">Gallery: upload, drag-reorder,<br>edit tags, delete<br>Reviews: add, edit, delete<br>Site: hero image, OG image<br>(preview + confirm upload)</div></div>
+      <div class="comp-node admin"><div class="comp-name">AdminComponent</div><div class="comp-sel">/admin</div><div class="comp-desc">Gallery: upload, drag-reorder,<br>edit tags, delete<br>Reviews: add, edit, delete<br>Site: hero image, OG image<br>Services: card editor (drag-reorder)</div></div>
       <div class="connector"></div>
       <div class="comp-node admin" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">LoginComponent</div><div class="comp-sel">/admin/login</div></div>
     </div>
@@ -395,6 +418,13 @@
       <tr><td><code>/gallery</code></td><td>GalleryComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
       <tr><td><code>/reviews</code></td><td>ReviewsComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
       <tr><td><code>/contact</code></td><td>ContactComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
+      <tr><td><code>/about</code></td><td>AboutComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
+      <tr><td><code>/residential</code></td><td>ResidentialComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
+      <tr><td><code>/commercial</code></td><td>CommercialComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
+      <tr><td><code>/faq</code></td><td>FaqComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
+      <tr><td><code>/terms</code></td><td>TermsComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
+      <tr><td><code>/privacy</code></td><td>PrivacyComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
+      <tr><td><code>/cookies</code></td><td>CookiesComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
       <tr><td><code>/admin</code></td><td>AdminComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td><span class="tag tag-guard">authGuard</span></td><td><span class="badge badge-done">Complete</span></td></tr>
       <tr><td><code>/admin/login</code></td><td>LoginComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
       <tr><td><code>**</code></td><td>Redirect &rarr; <code>/</code></td><td>&mdash;</td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
@@ -409,7 +439,7 @@
       <tr><th>Path Pattern</th><th>Origin (S3 Bucket)</th><th>Cache Policy</th><th>Notes</th></tr>
     </thead>
     <tbody>
-      <tr><td><code>/gallery-images/*.json</code></td><td>Gallery</td><td><span class="tag tag-guard">CachingDisabled</span></td><td>Always fresh — gallery.json + meta.json (hero/OG image hashes)</td></tr>
+      <tr><td><code>/gallery-images/*.json</code></td><td>Gallery</td><td><span class="tag tag-guard">CachingDisabled</span></td><td>Always fresh — gallery.json, meta.json, services-*.json</td></tr>
       <tr><td><code>/reviews-data/reviews.json</code></td><td>Reviews</td><td><span class="tag tag-guard">CachingDisabled</span></td><td>Always fresh — admin writes after changes</td></tr>
       <tr><td><code>/gallery-images/*</code></td><td>Gallery</td><td><span class="tag tag-lazy">CachingOptimized</span></td><td>Images (immutable content)</td></tr>
       <tr><td><code>/reviews-data/*</code></td><td>Reviews</td><td><span class="tag tag-lazy">CachingOptimized</span></td><td>Future review assets</td></tr>
@@ -425,7 +455,7 @@
     <li>All Angular routes use <code>loadComponent()</code> for lazy loading (separate JS chunks)</li>
     <li><code>/admin</code> and <code>/admin/login</code> set <code>&lt;meta name="robots" content="noindex, nofollow"&gt;</code></li>
     <li><code>robots.txt</code> disallows <code>/admin</code> — no links to admin from public pages</li>
-    <li>Manifest JSONs are never cached so gallery/reviews updates are instant</li>
+    <li>All <code>*.json</code> in gallery bucket are never cached (gallery, meta, services) so updates are instant</li>
   </ul>
 </div>
 
@@ -481,6 +511,12 @@
   <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">Selects new image &rarr; staged locally with full grayscale preview (matches homepage look)</div></div>
   <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">Clicks "Confirm Upload" &rarr; uploads as <code>hero-&lt;hash&gt;.ext</code> to <code>gallery-images/meta/</code><br><small>Old file deleted, <code>meta.json</code> updated with new filename. Hash-based names for cache busting.</small></div></div>
   <div class="flow-step"><div class="flow-num">4</div><div class="flow-text">HeroComponent on homepage fetches <code>meta.json</code> (uncached) &rarr; loads <code>/gallery-images/meta/hero-&lt;hash&gt;.ext</code><br><small>Falls back to <code>hero.jpg</code> if no custom image set. Only one image request made.</small></div></div>
+
+  <h2>Admin — Service Cards</h2>
+  <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Admin switches to Services tab &rarr; three card lists: Residential, Commercial Industries, Commercial Services</div></div>
+  <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">If no cards saved yet &rarr; "Load Defaults to Edit" populates lists from hardcoded defaults and saves to S3</div></div>
+  <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">Add/edit cards: icon name (Material Symbols), title, description &mdash; with live preview<br><small>Drag-and-drop reorder (same pattern as gallery photos: numbered rows, drag handle, blue drop indicators)</small></div></div>
+  <div class="flow-step"><div class="flow-num">4</div><div class="flow-text">Saves to <code>services-residential.json</code> and <code>services-commercial.json</code> in gallery bucket<br><small>Residential/Commercial pages load from JSON on init; fall back to hardcoded defaults if no JSON exists</small></div></div>
 
   <h2>Admin — Manage Reviews</h2>
   <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Admin switches to Reviews tab &rarr; loads <code>/reviews-data/reviews.json</code></div></div>
@@ -544,6 +580,29 @@ num    Y-m-d-H-M-S          tag slug</pre>
     <li>Actual images stored in <code>gallery-images/meta/</code> subfolder</li>
     <li>HeroComponent reads this on page load; falls back to <code>hero.jpg</code> if absent</li>
     <li>CanonicalService reads <code>og</code> for Open Graph image tag</li>
+  </ul>
+
+  <h2>Service Card JSON Format</h2>
+  <p><strong>services-residential.json</strong></p>
+  <pre>[
+  { "icon": "water_drop", "title": "Drain Cleaning", "description": "..." },
+  { "icon": "plumbing", "title": "Leak Detection", "description": "..." }
+]</pre>
+  <p style="margin-top: 12px;"><strong>services-commercial.json</strong></p>
+  <pre>{
+  "industries": [
+    { "icon": "restaurant", "title": "Restaurants", "description": "..." }
+  ],
+  "services": [
+    { "icon": "build", "title": "Repairs & Maintenance", "description": "" }
+  ]
+}</pre>
+  <ul>
+    <li>Stored in gallery bucket at <code>gallery-images/services-*.json</code></li>
+    <li>Matched by <code>/gallery-images/*.json</code> CachingDisabled pattern</li>
+    <li>Icon names from <a href="https://fonts.google.com/icons" style="color: #60a5fa;">Material Symbols</a></li>
+    <li>Pages fall back to hardcoded defaults if JSON doesn't exist</li>
+    <li>Admin "Load Defaults" saves hardcoded cards to S3 for editing</li>
   </ul>
 
   <h2>Key Files</h2>
@@ -717,6 +776,8 @@ infrastructure/
   <div class="check check-done">Admin: gallery management (upload, drag-reorder, edit tags, delete)</div>
   <div class="check check-done">Admin: reviews management (add, edit, delete)</div>
   <div class="check check-done">Admin: site image management (hero + OG with staged preview)</div>
+  <div class="check check-done">Admin: service cards editor (drag-reorder, add/edit/delete, load defaults)</div>
+  <div class="check check-done">Content pages: About Us, Residential, Commercial, FAQ, Terms, Privacy, Cookies</div>
   <div class="check check-done">Login: Cognito auth with NEW_PASSWORD_REQUIRED handling</div>
   <div class="check check-done">Phone number centralized in environment config (+1 country code)</div>
   <div class="check check-done">Admin pages: noindex meta + robots.txt + no public links</div>
@@ -755,8 +816,9 @@ infrastructure/
   <div class="check check-todo">Links/resources page</div>
   <div class="check check-done">Real business address + Google Maps coordinates</div>
   <div class="check check-todo">Google Business Profile link on map/address</div>
-  <div class="check check-todo">Enhanced footer (logo, address, phone, email, social, terms, privacy)</div>
-  <div class="check check-todo">Menu additions (About Us, FAQ, Tips/Links, Coupons)</div>
+  <div class="check check-done">Footer links (FAQ, Privacy, Terms, Cookies)</div>
+  <div class="check check-done">Menu: About Us, Services (Residential/Commercial), Gallery, Reviews, Contact</div>
+  <div class="check check-todo">Enhanced footer (logo, social links, license)</div>
   <div class="check check-done">Contact form (Turnstile + Lambda + SES)</div>
   <div class="check check-todo">Online chat integration</div>
   <div class="check check-todo">Admin pagination (large gallery/review lists)</div>
