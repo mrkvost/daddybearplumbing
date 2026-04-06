@@ -145,7 +145,7 @@
         <span class="badge badge-perm" onclick="toggle('cf-behaviors')">5 behaviors</span>
         <div id="cf-behaviors" class="perm-detail">
           <code>/* (default)</code> &rarr; Site bucket (CachingOptimized)<br>
-          <code>/gallery-images/gallery.json</code> &rarr; Gallery bucket (<strong>CachingDisabled</strong>)<br>
+          <code>/gallery-images/*.json</code> &rarr; Gallery bucket (<strong>CachingDisabled</strong>) — gallery.json + meta.json<br>
           <code>/reviews-data/reviews.json</code> &rarr; Reviews bucket (<strong>CachingDisabled</strong>)<br>
           <code>/gallery-images/*</code> &rarr; Gallery bucket (CachingOptimized)<br>
           <code>/reviews-data/*</code> &rarr; Reviews bucket (CachingOptimized)
@@ -176,7 +176,7 @@
       </div>
       <div class="box green">
         <div class="box-title">Gallery Bucket</div>
-        <div class="box-detail">kvaking-gallery<br>Prefix: gallery-images/<br>Photos + gallery.json</div>
+        <div class="box-detail">kvaking-gallery<br>Prefix: gallery-images/<br>Photos + gallery.json + meta.json<br>meta/ subfolder: hero + OG images</div>
         <span class="badge badge-perm" onclick="toggle('perm-gallery')">policy + CORS</span>
         <div id="perm-gallery" class="perm-detail">
           <code>s3:GetObject</code> &mdash; CloudFront only (OAC)<br>
@@ -294,7 +294,7 @@
       <div class="comp-node page"><div class="comp-name">HomeComponent</div><div class="comp-sel">/</div></div>
       <div class="connector"></div>
       <div style="display: flex; flex-direction: column; gap: 6px; align-items: center;">
-        <div class="comp-node section" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">HeroComponent</div><div class="comp-desc">Grayscale hero + headline</div></div>
+        <div class="comp-node section" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">HeroComponent</div><div class="comp-desc">Grayscale hero + headline<br>Loads from meta.json or fallback</div></div>
         <div class="comp-node section" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">TrustStatsComponent</div><div class="comp-desc">Operational hours</div></div>
         <div class="comp-node section" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">ServicesGridComponent</div><div class="comp-desc">4 services + hover anim</div></div>
         <div class="comp-node section" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">ServiceAreaComponent</div><div class="comp-desc">Google Maps + 6 locations</div></div>
@@ -318,7 +318,7 @@
 
     <!-- Admin -->
     <div class="flex-col">
-      <div class="comp-node admin"><div class="comp-name">AdminComponent</div><div class="comp-sel">/admin</div><div class="comp-desc">Gallery: upload, drag-reorder,<br>edit tags, delete<br>Reviews: add, edit, delete</div></div>
+      <div class="comp-node admin"><div class="comp-name">AdminComponent</div><div class="comp-sel">/admin</div><div class="comp-desc">Gallery: upload, drag-reorder,<br>edit tags, delete<br>Reviews: add, edit, delete<br>Site: hero image, OG image<br>(preview + confirm upload)</div></div>
       <div class="connector"></div>
       <div class="comp-node admin" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">LoginComponent</div><div class="comp-sel">/admin/login</div></div>
     </div>
@@ -409,7 +409,7 @@
       <tr><th>Path Pattern</th><th>Origin (S3 Bucket)</th><th>Cache Policy</th><th>Notes</th></tr>
     </thead>
     <tbody>
-      <tr><td><code>/gallery-images/gallery.json</code></td><td>Gallery</td><td><span class="tag tag-guard">CachingDisabled</span></td><td>Always fresh — admin writes after changes</td></tr>
+      <tr><td><code>/gallery-images/*.json</code></td><td>Gallery</td><td><span class="tag tag-guard">CachingDisabled</span></td><td>Always fresh — gallery.json + meta.json (hero/OG image hashes)</td></tr>
       <tr><td><code>/reviews-data/reviews.json</code></td><td>Reviews</td><td><span class="tag tag-guard">CachingDisabled</span></td><td>Always fresh — admin writes after changes</td></tr>
       <tr><td><code>/gallery-images/*</code></td><td>Gallery</td><td><span class="tag tag-lazy">CachingOptimized</span></td><td>Images (immutable content)</td></tr>
       <tr><td><code>/reviews-data/*</code></td><td>Reviews</td><td><span class="tag tag-lazy">CachingOptimized</span></td><td>Future review assets</td></tr>
@@ -476,6 +476,12 @@
   <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">Types new tag (or clears to revert to filename-inferred tag)</div></div>
   <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">Saves <code>gallery.json</code> with <code>{ "file": "...", "tag": "Custom Tag" }</code></div></div>
 
+  <h2>Admin — Hero / OG Image</h2>
+  <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Admin switches to Site tab &rarr; sees current hero image thumbnail (or default) + OG image</div></div>
+  <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">Selects new image &rarr; staged locally with full grayscale preview (matches homepage look)</div></div>
+  <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">Clicks "Confirm Upload" &rarr; uploads as <code>hero-&lt;hash&gt;.ext</code> to <code>gallery-images/meta/</code><br><small>Old file deleted, <code>meta.json</code> updated with new filename. Hash-based names for cache busting.</small></div></div>
+  <div class="flow-step"><div class="flow-num">4</div><div class="flow-text">HeroComponent on homepage fetches <code>meta.json</code> (uncached) &rarr; loads <code>/gallery-images/meta/hero-&lt;hash&gt;.ext</code><br><small>Falls back to <code>hero.jpg</code> if no custom image set. Only one image request made.</small></div></div>
+
   <h2>Admin — Manage Reviews</h2>
   <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Admin switches to Reviews tab &rarr; loads <code>/reviews-data/reviews.json</code></div></div>
   <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">Click "Add Review" &rarr; form: name, rating (clickable stars), text, location, date</div></div>
@@ -528,6 +534,16 @@ num    Y-m-d-H-M-S          tag slug</pre>
     <li>String entry = tag inferred from filename</li>
     <li>Object entry with <code>tag</code> = custom tag set by admin</li>
     <li>Backward compatible — old string-only format still works</li>
+  </ul>
+
+  <h2>meta.json Format</h2>
+  <pre>{ "hero": "hero-9ae550.png", "og": "og-b3f1c2.jpg" }</pre>
+  <ul>
+    <li>Stored at <code>gallery-images/meta.json</code> in the gallery bucket</li>
+    <li>Tracks current hero and OG image filenames (hash-based for cache busting)</li>
+    <li>Actual images stored in <code>gallery-images/meta/</code> subfolder</li>
+    <li>HeroComponent reads this on page load; falls back to <code>hero.jpg</code> if absent</li>
+    <li>CanonicalService reads <code>og</code> for Open Graph image tag</li>
   </ul>
 
   <h2>Key Files</h2>
@@ -700,13 +716,14 @@ infrastructure/
   <div class="check check-done">Reviews: star ratings, average score, loads from S3</div>
   <div class="check check-done">Admin: gallery management (upload, drag-reorder, edit tags, delete)</div>
   <div class="check check-done">Admin: reviews management (add, edit, delete)</div>
+  <div class="check check-done">Admin: site image management (hero + OG with staged preview)</div>
   <div class="check check-done">Login: Cognito auth with NEW_PASSWORD_REQUIRED handling</div>
   <div class="check check-done">Phone number centralized in environment config (+1 country code)</div>
   <div class="check check-done">Admin pages: noindex meta + robots.txt + no public links</div>
 
   <h2>Goal 2 — Terraform Infrastructure <span class="badge badge-done">Complete</span></h2>
   <div class="check check-done">3 S3 buckets (site, gallery, reviews) — all private, OAC only</div>
-  <div class="check check-done">CloudFront: 3 origins, 5 behaviors (manifests uncached, images cached)</div>
+  <div class="check check-done">CloudFront: 3 origins, 5 behaviors (JSON manifests uncached via *.json pattern, images cached)</div>
   <div class="check check-done">ACM wildcard certificate (DNS validation, us-east-1)</div>
   <div class="check check-done">Route53 hosted zone + A/AAAA alias records</div>
   <div class="check check-done">Cognito User Pool + Identity Pool (no self-signup)</div>
@@ -744,7 +761,7 @@ infrastructure/
   <div class="check check-todo">Online chat integration</div>
   <div class="check check-todo">Admin pagination (large gallery/review lists)</div>
   <div class="check check-todo">Session persistence (tokens in sessionStorage)</div>
-  <div class="check check-todo">Home page real background photo</div>
+  <div class="check check-done">Home page hero image (admin-uploadable with preview, fallback default)</div>
 </div>
 
 <script>

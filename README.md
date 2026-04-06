@@ -104,7 +104,7 @@ e.g.: 0001_2026-02-25-10-30-00_water-heaters.jpg
 **How it works:**
 - Admin writes `gallery.json` after every change (upload, delete, reorder, tag edit)
 - `gallery.json` stores the ordered list with optional custom tags
-- Public gallery page reads `gallery.json` (not cached by CloudFront — instant updates)
+- Public gallery page reads `gallery.json` (not cached — `/gallery-images/*.json` uses CachingDisabled)
 - Images are cached by CloudFront (CachingOptimized)
 
 ---
@@ -130,7 +130,10 @@ See `docs/contact-form-setup.md` for full setup instructions (Turnstile, SES ver
 The `/admin` route is protected by Cognito authentication.
 - Only manually created users can log in (no self-signup)
 - First login requires setting a new password
-- Two tabs: **Gallery** (upload, reorder, tag, delete) and **Reviews** (add, edit, delete)
+- Four tabs: **Gallery** (upload, reorder, tag, delete), **Reviews** (add, edit, delete), **Site** (hero image, OG image), **Settings** (change password)
+- **Hero image**: select file → full grayscale preview (matches homepage look) → confirm upload. Hash-based filenames for cache busting. Falls back to default `hero.jpg` if no custom image set.
+- **OG image**: same flow, used for social media link previews (1200×630 recommended)
+- Both tracked via `meta.json` in the gallery bucket
 - Admin pages are not indexed (noindex meta + robots.txt)
 
 ---
@@ -142,7 +145,7 @@ src/
   app/
     components/        # Reusable UI (navbar, footer, hero, trust-stats, services-grid, service-area)
     pages/             # Route pages (home, gallery, reviews, contact, admin, login)
-    services/          # AuthService, UploadService, GalleryService, ReviewsService
+    services/          # AuthService, UploadService, GalleryService, ReviewsService, CanonicalService
     guards/            # authGuard (protects /admin)
     app.routes.ts      # Route configuration
     app.ts / app.html  # Root layout shell

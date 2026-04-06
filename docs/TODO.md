@@ -19,7 +19,7 @@ Work through them one at a time. Each goal has acceptance criteria that define "
 - Tailwind CSS v3 via PostCSS with "Architectural Minimalist" design system
 - Design: grayscale palette, burnt orange accent (#b02f00), 0px border-radius, Public Sans + Inter fonts
 - Components: Navbar, Hero, TrustStats (operational hours), ServicesGrid, ServiceArea (Google Maps), Footer
-- Pages: Home (composition), Gallery (S3 images + tags + lightbox), Reviews (star ratings), Contact (form + Turnstile + SES), Admin (gallery + reviews management), Login (Cognito auth)
+- Pages: Home (composition), Gallery (S3 images + tags + lightbox), Reviews (star ratings), Contact (form + Turnstile + SES), Admin (gallery + reviews + site image management), Login (Cognito auth)
 - Services: AuthService (Cognito), UploadService (S3 SigV4), GalleryService, ReviewsService
 - Auth guard on /admin route, noindex meta tags on admin pages, robots.txt disallows /admin
 - Phone number + address centralized in environment config
@@ -33,7 +33,7 @@ Work through them one at a time. Each goal has acceptance criteria that define "
 - 3 S3 buckets (site, gallery, reviews) — all private, CloudFront OAC only
 - CloudFront distribution with 3 origins + path behaviors:
   - `/*` → site bucket (CachingOptimized)
-  - `/gallery-images/gallery.json` → gallery bucket (CachingDisabled)
+  - `/gallery-images/*.json` → gallery bucket (CachingDisabled) — gallery.json + meta.json
   - `/reviews-data/reviews.json` → reviews bucket (CachingDisabled)
   - `/gallery-images/*` → gallery bucket (CachingOptimized)
   - `/reviews-data/*` → reviews bucket (CachingOptimized)
@@ -145,7 +145,7 @@ admin user creation, gallery photo convention, project structure.
 
 ## GOAL 6 — Future Work (unstructured)
 
-- [ ] Home page background image (real photo)
+- [x] Home page background image (real photo) — admin-uploadable hero image with preview
 - [x] Business address on the site (service area, contact page, footer)
 - [ ] Enhanced footer (further improvements)
     *   logo, address, phone, email, fb
