@@ -1,17 +1,15 @@
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
 
 @Component({
-  selector: 'app-footer',
+  selector: 'app-faq',
   standalone: true,
-  imports: [RouterLink],
-  templateUrl: './footer.component.html',
+  imports: [RouterModule],
+  templateUrl: './faq.component.html',
 })
-export class FooterComponent {
-  currentYear = new Date().getFullYear();
+export class FaqComponent {
   phone = environment.phone;
   phoneDisplay = environment.phoneDisplay;
   email = environment.email;
-  address = environment.address;
 }

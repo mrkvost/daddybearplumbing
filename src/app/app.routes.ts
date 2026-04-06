@@ -39,6 +39,69 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'about',
+    loadComponent: () =>
+      import('./pages/about/about.component').then((m) => m.AboutComponent),
+    data: {
+      title: 'About Us',
+      description: 'Learn about Daddy Bear Plumbing — a family-owned plumbing company serving Chicago\'s Western Suburbs. Licensed, insured, and all work guaranteed.',
+    },
+  },
+  {
+    path: 'residential',
+    loadComponent: () =>
+      import('./pages/residential/residential.component').then((m) => m.ResidentialComponent),
+    data: {
+      title: 'Residential Services',
+      description: 'Residential plumbing services in Chicago\'s Western Suburbs. Drain cleaning, water heaters, leak repair, sewer service, and more. Free estimates.',
+    },
+  },
+  {
+    path: 'commercial',
+    loadComponent: () =>
+      import('./pages/commercial/commercial.component').then((m) => m.CommercialComponent),
+    data: {
+      title: 'Commercial Services',
+      description: 'Commercial plumbing services for restaurants, offices, apartments, hotels, and healthcare facilities across Chicago\'s Western Suburbs.',
+    },
+  },
+  {
+    path: 'faq',
+    loadComponent: () =>
+      import('./pages/faq/faq.component').then((m) => m.FaqComponent),
+    data: {
+      title: 'FAQ',
+      description: 'Frequently asked questions about Daddy Bear Plumbing — hours, service areas, pricing, warranties, and more.',
+    },
+  },
+  {
+    path: 'terms',
+    loadComponent: () =>
+      import('./pages/terms/terms.component').then((m) => m.TermsComponent),
+    data: {
+      title: 'Terms & Conditions',
+      description: 'Terms and conditions for plumbing services provided by Daddy Bear Plumbing.',
+    },
+  },
+  {
+    path: 'privacy',
+    loadComponent: () =>
+      import('./pages/privacy/privacy.component').then((m) => m.PrivacyComponent),
+    data: {
+      title: 'Privacy Policy',
+      description: 'Privacy policy for Daddy Bear Plumbing — how we collect, use, and protect your personal information.',
+    },
+  },
+  {
+    path: 'cookies',
+    loadComponent: () =>
+      import('./pages/cookies/cookies.component').then((m) => m.CookiesComponent),
+    data: {
+      title: 'Cookies',
+      description: 'Cookie policy for the Daddy Bear Plumbing website — what cookies we use and why.',
+    },
+  },
+  {
     path: 'admin',
     children: [
       {

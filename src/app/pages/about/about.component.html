@@ -1,0 +1,107 @@
+<!-- Page header -->
+<section class="relative h-[300px] flex items-end overflow-hidden bg-black">
+  <div class="relative z-10 w-full max-w-7xl mx-auto px-6 pb-12">
+    <p class="text-white/50 text-[0.7rem] font-bold tracking-[0.3em] uppercase mb-4">Who We Are</p>
+    <h1 class="font-headline font-black text-5xl md:text-7xl text-white leading-[0.9] tracking-tighter uppercase">
+      About Us
+    </h1>
+  </div>
+</section>
+
+<section class="max-w-4xl mx-auto px-6 py-16">
+
+  <!-- Our History -->
+  <h2 class="font-headline font-black text-2xl tracking-tighter uppercase mb-6">Our History</h2>
+  <div class="space-y-4 text-secondary text-sm leading-relaxed mb-16">
+    <p>
+      Daddy Bear Plumbing has established itself as one of the most dependable plumbing service providers
+      in Chicago's Western Suburbs, earning a reputation for delivering high-quality plumbing services
+      to the local community. As a family-owned and operated business, we take great pride in providing
+      prompt and reliable service to our customers.
+    </p>
+    <p>
+      Founded on the belief that honest work speaks for itself, our company was built by hands that
+      understand the trade inside and out. That passion for the plumbing industry drives everything
+      we do — from the smallest faucet repair to a full re-pipe. We are dedicated to providing the
+      same high level of quality work and exceptional customer service that has made Daddy Bear Plumbing
+      a trusted name in the community.
+    </p>
+  </div>
+
+  <!-- Why Choose Us -->
+  <h2 class="font-headline font-black text-2xl tracking-tighter uppercase mb-8">Why Choose Us</h2>
+  <div class="space-y-8 mb-16">
+
+    <div class="ghost-border bg-surface-container-low p-6">
+      <div class="flex items-start gap-4">
+        <span class="material-symbols-outlined text-2xl text-primary-fixed shrink-0 mt-0.5">request_quote</span>
+        <div>
+          <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-2">Free Estimates</h3>
+          <p class="text-secondary text-sm leading-relaxed">
+            We believe in transparency and helping our customers make informed decisions. That's why we
+            offer free estimates for our services. No hidden fees or surprises — just upfront pricing.
+            Let us help you find the best solution for your plumbing needs without breaking the bank.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="ghost-border bg-surface-container-low p-6">
+      <div class="flex items-start gap-4">
+        <span class="material-symbols-outlined text-2xl text-primary-fixed shrink-0 mt-0.5">verified_user</span>
+        <div>
+          <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-2">Licensed &amp; Insured</h3>
+          <p class="text-secondary text-sm leading-relaxed">
+            Our company is fully licensed and insured to provide top-notch plumbing services. You can trust
+            our team to complete every job to the highest standards of quality, and in the unlikely event
+            of an accident or damage, our insurance covers any costs.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="ghost-border bg-surface-container-low p-6">
+      <div class="flex items-start gap-4">
+        <span class="material-symbols-outlined text-2xl text-primary-fixed shrink-0 mt-0.5">workspace_premium</span>
+        <div>
+          <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-2">All Work Guaranteed</h3>
+          <p class="text-secondary text-sm leading-relaxed">
+            Choosing Daddy Bear Plumbing means peace of mind knowing that all work we perform is guaranteed.
+            We stand by our work and take pride in providing high-quality services. With us, you can be
+            confident that the job will be done right the first time.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Our Promise -->
+  <h2 class="font-headline font-black text-2xl tracking-tighter uppercase mb-6">Our Promise</h2>
+  <div class="space-y-4 text-secondary text-sm leading-relaxed mb-16">
+    <p>
+      Our team understands the importance of transparency and honesty when it comes to plumbing services.
+      That's why we always provide our customers with upfront pricing with no hidden fees. We take pride
+      in delivering efficient and customized plumbing solutions to meet our clients' specific needs.
+    </p>
+    <p>
+      When you need a reliable plumber, look no further than Daddy Bear Plumbing. We strive to provide
+      our customers with the highest quality service, and our team is always ready to take on any plumbing
+      issue. Our service areas include La Grange, Villa Park, Brookfield, Westchester, Riverside,
+      Berwyn, Cicero, Lyons, North Riverside, and more communities across Chicago's Western Suburbs.
+    </p>
+  </div>
+
+  <!-- CTA -->
+  <div class="ghost-border bg-surface-container-low p-8 text-center">
+    <h2 class="font-headline font-black text-xl tracking-tighter uppercase mb-3">Call Us Today</h2>
+    <p class="text-secondary text-sm mb-6">We are here for all of your plumbing needs.</p>
+    <a
+      [href]="'tel:' + phone"
+      class="inline-flex items-center gap-2 bg-primary-fixed text-white px-8 py-3 font-headline font-bold text-sm uppercase tracking-widest hover:opacity-90 transition-all"
+    >
+      <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">call</span>
+      Call {{ phoneDisplay }}
+    </a>
+  </div>
+
+</section>
