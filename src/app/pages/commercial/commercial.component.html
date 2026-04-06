@@ -20,107 +20,24 @@
   <h2 class="font-headline font-black text-2xl tracking-tighter uppercase mb-8">Industries We Serve</h2>
 
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-
-    <div class="ghost-border bg-surface-container-low p-8 flex flex-col">
-      <span class="material-symbols-outlined text-4xl text-primary-fixed mb-6">restaurant</span>
-      <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">Restaurants</h3>
-      <p class="text-secondary text-sm leading-relaxed flex-1">
-        We know restaurants like the back of our hand. When it comes to plumbing needs, we understand
-        that time is money and a malfunctioning kitchen sink can derail the whole operation.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-8 flex flex-col">
-      <span class="material-symbols-outlined text-4xl text-primary-fixed mb-6">local_hospital</span>
-      <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">Healthcare Facilities</h3>
-      <p class="text-secondary text-sm leading-relaxed flex-1">
-        We understand the importance of keeping healthcare facilities up and running. Our team ensures
-        your facility meets all code requirements and stays fully operational.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-8 flex flex-col">
-      <span class="material-symbols-outlined text-4xl text-primary-fixed mb-6">business</span>
-      <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">Office Buildings</h3>
-      <p class="text-secondary text-sm leading-relaxed flex-1">
-        A single leaky faucet can disrupt your entire workday. We provide comprehensive office building
-        plumbing services — from routine maintenance to emergency repairs.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-8 flex flex-col">
-      <span class="material-symbols-outlined text-4xl text-primary-fixed mb-6">apartment</span>
-      <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">Apartments &amp; Multi-Unit</h3>
-      <p class="text-secondary text-sm leading-relaxed flex-1">
-        We work with landlords and property managers to provide reliable, efficient plumbing services
-        for multi-unit buildings — from individual unit repairs to building-wide maintenance.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-8 flex flex-col">
-      <span class="material-symbols-outlined text-4xl text-primary-fixed mb-6">hotel</span>
-      <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">Hotels &amp; Motels</h3>
-      <p class="text-secondary text-sm leading-relaxed flex-1">
-        From fixing leaky faucets to upgrading showerheads, we make sure your guests have a
-        comfortable stay with reliable plumbing throughout.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-8 flex flex-col">
-      <span class="material-symbols-outlined text-4xl text-primary-fixed mb-6">sports_soccer</span>
-      <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">Sports Facilities</h3>
-      <p class="text-secondary text-sm leading-relaxed flex-1">
-        Expert plumbing for sports facilities — repairing showers, keeping restrooms operational,
-        so you can focus on the game, not the plumbing.
-      </p>
-    </div>
-
+    @for (card of industries; track card.title) {
+      <div class="ghost-border bg-surface-container-low p-8 flex flex-col">
+        <span class="material-symbols-outlined text-4xl text-primary-fixed mb-6">{{ card.icon }}</span>
+        <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">{{ card.title }}</h3>
+        <p class="text-secondary text-sm leading-relaxed flex-1">{{ card.description }}</p>
+      </div>
+    }
   </div>
 
   <h2 class="font-headline font-black text-2xl tracking-tighter uppercase mb-8">Commercial Services</h2>
 
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-
-    <div class="ghost-border bg-surface-container-low p-6 flex flex-col items-center text-center">
-      <span class="material-symbols-outlined text-3xl text-primary-fixed mb-4">build</span>
-      <h3 class="font-headline font-bold text-xs uppercase tracking-tight">Repairs &amp; Maintenance</h3>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-6 flex flex-col items-center text-center">
-      <span class="material-symbols-outlined text-3xl text-primary-fixed mb-4">water_drop</span>
-      <h3 class="font-headline font-bold text-xs uppercase tracking-tight">Drain Cleaning</h3>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-6 flex flex-col items-center text-center">
-      <span class="material-symbols-outlined text-3xl text-primary-fixed mb-4">water_heater</span>
-      <h3 class="font-headline font-bold text-xs uppercase tracking-tight">Water Heaters</h3>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-6 flex flex-col items-center text-center">
-      <span class="material-symbols-outlined text-3xl text-primary-fixed mb-4">bathroom</span>
-      <h3 class="font-headline font-bold text-xs uppercase tracking-tight">Fixture Repair</h3>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-6 flex flex-col items-center text-center">
-      <span class="material-symbols-outlined text-3xl text-primary-fixed mb-4">emergency</span>
-      <h3 class="font-headline font-bold text-xs uppercase tracking-tight">Emergency Service</h3>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-6 flex flex-col items-center text-center">
-      <span class="material-symbols-outlined text-3xl text-primary-fixed mb-4">waves</span>
-      <h3 class="font-headline font-bold text-xs uppercase tracking-tight">Hydro Jetting</h3>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-6 flex flex-col items-center text-center">
-      <span class="material-symbols-outlined text-3xl text-primary-fixed mb-4">foundation</span>
-      <h3 class="font-headline font-bold text-xs uppercase tracking-tight">Sewer Lines</h3>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-6 flex flex-col items-center text-center">
-      <span class="material-symbols-outlined text-3xl text-primary-fixed mb-4">shield</span>
-      <h3 class="font-headline font-bold text-xs uppercase tracking-tight">Backflow Prevention</h3>
-    </div>
-
+    @for (card of services; track card.title) {
+      <div class="ghost-border bg-surface-container-low p-6 flex flex-col items-center text-center">
+        <span class="material-symbols-outlined text-3xl text-primary-fixed mb-4">{{ card.icon }}</span>
+        <h3 class="font-headline font-bold text-xs uppercase tracking-tight">{{ card.title }}</h3>
+      </div>
+    }
   </div>
 
   <!-- CTA -->

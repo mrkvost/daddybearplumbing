@@ -45,7 +45,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   private meta = inject(Meta);
   private cdr = inject(ChangeDetectorRef);
 
-  activeTab: 'gallery' | 'reviews' | 'site' | 'settings' = 'gallery';
+  activeTab: 'gallery' | 'reviews' | 'site' | 'services' | 'settings' = 'gallery';
 
   /* Gallery state */
   images: AdminGalleryImage[] = [];
@@ -66,6 +66,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.loadImages();
     this.loadReviews();
     this.loadSiteImages();
+    this.loadServiceCards();
   }
 
   ngOnDestroy(): void {
@@ -601,6 +602,194 @@ export class AdminComponent implements OnInit, OnDestroy {
       this.ogError = e.message || 'Delete failed';
     }
     this.cdr.detectChanges();
+  }
+
+  /* ================================================================
+   * SERVICE CARDS (Residential + Commercial)
+   * ================================================================ */
+
+  residentialCards: { icon: string; title: string; description: string }[] = [];
+  commercialIndustries: { icon: string; title: string; description: string }[] = [];
+  commercialServices: { icon: string; title: string; description: string }[] = [];
+  loadingServices = true;
+
+  // Editing state
+  editingList: 'residential' | 'commercial-industries' | 'commercial-services' | null = null;
+  editingIndex = -1; // -1 = adding new
+  cardForm = { icon: '', title: '', description: '' };
+
+  private readonly RES_KEY = 'gallery-images/services-residential.json';
+  private readonly COM_KEY = 'gallery-images/services-commercial.json';
+
+  private resLoaded = false;
+  private comLoaded = false;
+
+  async loadServiceCards(): Promise<void> {
+    this.loadingServices = true;
+    this.cdr.detectChanges();
+    try {
+      const resRes = await fetch(`/gallery-images/services-residential.json?t=${Date.now()}`);
+      if (resRes.ok) {
+        this.residentialCards = await resRes.json();
+        this.resLoaded = true;
+      }
+    } catch { /* empty */ }
+    try {
+      const comRes = await fetch(`/gallery-images/services-commercial.json?t=${Date.now()}`);
+      if (comRes.ok) {
+        const data = await comRes.json();
+        this.commercialIndustries = data.industries || [];
+        this.commercialServices = data.services || [];
+        this.comLoaded = true;
+      }
+    } catch { /* empty */ }
+    this.loadingServices = false;
+    this.cdr.detectChanges();
+  }
+
+  async initResidentialDefaults(): Promise<void> {
+    this.residentialCards = [
+      { icon: 'water_drop', title: 'Drain Cleaning', description: 'Slow or clogged drains are one of the most common plumbing issues. We use professional-grade equipment to clear blockages and restore proper flow.' },
+      { icon: 'plumbing', title: 'Leak Detection & Repair', description: 'Water leaks can cause significant damage if left unaddressed. Our team locates and repairs leaks quickly — in walls, floors, or underground lines.' },
+      { icon: 'water_heater', title: 'Water Heater Service', description: 'Traditional tank or modern tankless — we handle installation, repair, and replacement. We\'ll help you choose the right system for your home and budget.' },
+      { icon: 'bathroom', title: 'Toilet & Faucet Repair', description: 'Running toilets and dripping faucets waste water and money. We repair and replace all types of fixtures quickly and efficiently.' },
+      { icon: 'ac_unit', title: 'Frozen Pipes', description: 'Illinois winters can freeze your pipes. We provide emergency thawing services and can insulate vulnerable pipes to prevent future freeze damage.' },
+      { icon: 'valve', title: 'Sump & Ejector Pumps', description: 'Protect your basement from flooding with properly maintained sump and ejector pumps. We install, repair, and service all pump types.' },
+      { icon: 'gas_meter', title: 'Gas Line Service', description: 'Gas line repair, installation, and leak detection. Safety is our top priority when working with gas systems in your home.' },
+      { icon: 'foundation', title: 'Sewer Repair', description: 'Sewer line repair and replacement, root removal, hydro jetting, and backflow prevention to keep your system running clean.' },
+      { icon: 'delete_sweep', title: 'Garbage Disposals', description: 'Replacement and installation of kitchen garbage disposal units — all major brands.' },
+      { icon: 'speed', title: 'Water Pressure', description: 'Diagnosis and repair of low or high water pressure issues throughout your home.' },
+      { icon: 'flood', title: 'Flood Control', description: 'French drain systems and flood control installations to keep your home dry year-round.' },
+      { icon: 'swap_vert', title: 'Lead Pipe Replacement', description: 'Safe removal and replacement of outdated lead pipes to protect your family\'s health and meet current building codes.' },
+    ];
+    this.resLoaded = true;
+    await this.saveServiceCards();
+    this.cdr.detectChanges();
+  }
+
+  async initCommercialDefaults(): Promise<void> {
+    this.commercialIndustries = [
+      { icon: 'restaurant', title: 'Restaurants', description: 'We know restaurants like the back of our hand. When it comes to plumbing needs, we understand that time is money and a malfunctioning kitchen sink can derail the whole operation.' },
+      { icon: 'local_hospital', title: 'Healthcare Facilities', description: 'We understand the importance of keeping healthcare facilities up and running. Our team ensures your facility meets all code requirements and stays fully operational.' },
+      { icon: 'business', title: 'Office Buildings', description: 'A single leaky faucet can disrupt your entire workday. We provide comprehensive office building plumbing services — from routine maintenance to emergency repairs.' },
+      { icon: 'apartment', title: 'Apartments & Multi-Unit', description: 'We work with landlords and property managers to provide reliable, efficient plumbing services for multi-unit buildings — from individual unit repairs to building-wide maintenance.' },
+      { icon: 'hotel', title: 'Hotels & Motels', description: 'From fixing leaky faucets to upgrading showerheads, we make sure your guests have a comfortable stay with reliable plumbing throughout.' },
+      { icon: 'sports_soccer', title: 'Sports Facilities', description: 'Expert plumbing for sports facilities — repairing showers, keeping restrooms operational, so you can focus on the game, not the plumbing.' },
+    ];
+    this.commercialServices = [
+      { icon: 'build', title: 'Repairs & Maintenance', description: '' },
+      { icon: 'water_drop', title: 'Drain Cleaning', description: '' },
+      { icon: 'water_heater', title: 'Water Heaters', description: '' },
+      { icon: 'bathroom', title: 'Fixture Repair', description: '' },
+      { icon: 'emergency', title: 'Emergency Service', description: '' },
+      { icon: 'waves', title: 'Hydro Jetting', description: '' },
+      { icon: 'foundation', title: 'Sewer Lines', description: '' },
+      { icon: 'shield', title: 'Backflow Prevention', description: '' },
+    ];
+    this.comLoaded = true;
+    await this.saveServiceCards();
+    this.cdr.detectChanges();
+  }
+
+  private getList(key: string): { icon: string; title: string; description: string }[] {
+    if (key === 'residential') return this.residentialCards;
+    if (key === 'commercial-industries') return this.commercialIndustries;
+    return this.commercialServices;
+  }
+
+  openAddCard(list: 'residential' | 'commercial-industries' | 'commercial-services'): void {
+    this.editingList = list;
+    this.editingIndex = -1;
+    this.cardForm = { icon: '', title: '', description: '' };
+    this.cdr.detectChanges();
+  }
+
+  openEditCard(list: 'residential' | 'commercial-industries' | 'commercial-services', index: number): void {
+    this.editingList = list;
+    this.editingIndex = index;
+    const card = this.getList(list)[index];
+    this.cardForm = { ...card };
+    this.cdr.detectChanges();
+  }
+
+  cancelCardForm(): void {
+    this.editingList = null;
+    this.editingIndex = -1;
+    this.cdr.detectChanges();
+  }
+
+  async saveCard(): Promise<void> {
+    if (!this.editingList || !this.cardForm.title.trim()) return;
+    const list = this.getList(this.editingList);
+    const card = { icon: this.cardForm.icon.trim(), title: this.cardForm.title.trim(), description: this.cardForm.description.trim() };
+    if (this.editingIndex >= 0) {
+      list[this.editingIndex] = card;
+    } else {
+      list.push(card);
+    }
+    this.editingList = null;
+    this.editingIndex = -1;
+    await this.saveServiceCards();
+    this.cdr.detectChanges();
+  }
+
+  async deleteCard(list: 'residential' | 'commercial-industries' | 'commercial-services', index: number): Promise<void> {
+    this.getList(list).splice(index, 1);
+    await this.saveServiceCards();
+    this.cdr.detectChanges();
+  }
+
+  /* Drag and drop for service cards */
+  cardDragIndex = -1;
+  cardDragOverIndex = -1;
+  cardDragList: 'residential' | 'commercial-industries' | 'commercial-services' | null = null;
+
+  onCardDragStart(list: 'residential' | 'commercial-industries' | 'commercial-services', index: number): void {
+    this.cardDragList = list;
+    this.cardDragIndex = index;
+    this.cdr.detectChanges();
+  }
+
+  onCardRowDragOver(event: DragEvent, rowIndex: number): void {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const midY = rect.top + rect.height / 2;
+    const insertAt = event.clientY < midY ? rowIndex : rowIndex + 1;
+    if (insertAt !== this.cardDragOverIndex) {
+      this.cardDragOverIndex = insertAt;
+      this.cdr.detectChanges();
+    }
+  }
+
+  onCardDragEnd(): void {
+    this.cardDragIndex = -1;
+    this.cardDragOverIndex = -1;
+    this.cardDragList = null;
+    this.cdr.detectChanges();
+  }
+
+  async onCardDrop(event: DragEvent, list: 'residential' | 'commercial-industries' | 'commercial-services', targetIndex: number): Promise<void> {
+    event.preventDefault();
+    const fromIndex = this.cardDragIndex;
+    const fromList = this.cardDragList;
+    this.cardDragIndex = -1;
+    this.cardDragOverIndex = -1;
+    this.cardDragList = null;
+    this.cdr.detectChanges();
+
+    if (fromList !== list || fromIndex < 0 || fromIndex === targetIndex || fromIndex === targetIndex - 1) return;
+
+    const arr = this.getList(list);
+    const [item] = arr.splice(fromIndex, 1);
+    const insertAt = targetIndex > fromIndex ? targetIndex - 1 : targetIndex;
+    arr.splice(insertAt, 0, item);
+    this.cdr.detectChanges();
+
+    await this.saveServiceCards();
+  }
+
+  private async saveServiceCards(): Promise<void> {
+    await this.uploadService.putJson(this.RES_KEY, this.residentialCards, GALLERY_BUCKET);
+    await this.uploadService.putJson(this.COM_KEY, { industries: this.commercialIndustries, services: this.commercialServices }, GALLERY_BUCKET);
   }
 
   signOut(): void {

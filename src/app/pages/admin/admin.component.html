@@ -32,6 +32,11 @@
         class="px-6 py-4 font-headline font-bold text-xs uppercase tracking-widest transition-colors"
       >Site</button>
       <button
+        (click)="activeTab = 'services'"
+        [class]="activeTab === 'services' ? 'border-b-2 border-primary text-primary' : 'text-secondary hover:text-on-surface'"
+        class="px-6 py-4 font-headline font-bold text-xs uppercase tracking-widest transition-colors"
+      >Services</button>
+      <button
         (click)="activeTab = 'settings'"
         [class]="activeTab === 'settings' ? 'border-b-2 border-primary text-primary' : 'text-secondary hover:text-on-surface'"
         class="px-6 py-4 font-headline font-bold text-xs uppercase tracking-widest transition-colors"
@@ -411,6 +416,225 @@
           <span class="text-secondary text-sm">{{ ogUploading ? 'Uploading...' : 'Select image (JPG, PNG, WebP)' }}</span>
           <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onOgFileSelected($event)" class="hidden" [disabled]="ogUploading" />
         </label>
+      </div>
+    }
+
+    <!-- ==================== SERVICES TAB ==================== -->
+    @if (activeTab === 'services') {
+      <div class="max-w-3xl">
+
+        <!-- Card form (shared for add/edit) -->
+        @if (editingList) {
+          <div class="ghost-border bg-surface-container-low p-6 mb-8">
+            <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-6">
+              {{ editingIndex >= 0 ? 'Edit Card' : 'New Card' }}
+            </p>
+            <div class="grid md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Icon Name</label>
+                <input type="text" [(ngModel)]="cardForm.icon" placeholder="e.g. water_drop"
+                  class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors" />
+                <p class="text-outline text-xs mt-1">
+                  <a href="https://fonts.google.com/icons" target="_blank" rel="noopener" class="text-primary-fixed hover:underline">Browse icons</a>
+                </p>
+              </div>
+              <div>
+                <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Title</label>
+                <input type="text" [(ngModel)]="cardForm.title" placeholder="e.g. Drain Cleaning"
+                  class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors" />
+              </div>
+            </div>
+            <div class="mb-6">
+              <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Description</label>
+              <textarea [(ngModel)]="cardForm.description" rows="3" placeholder="Short description of this service..."
+                class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors resize-y"></textarea>
+              <p class="text-outline text-xs mt-1">Leave empty for compact cards (commercial services).</p>
+            </div>
+            <!-- Preview -->
+            @if (cardForm.icon || cardForm.title) {
+              <div class="ghost-border bg-surface-container-lowest p-6 mb-6 max-w-[220px]">
+                @if (cardForm.icon) {
+                  <span class="material-symbols-outlined text-3xl text-primary-fixed block mb-3">{{ cardForm.icon }}</span>
+                }
+                <p class="font-headline font-bold text-xs uppercase tracking-tight">{{ cardForm.title || 'Title' }}</p>
+                @if (cardForm.description) {
+                  <p class="text-secondary text-xs leading-relaxed mt-2">{{ cardForm.description }}</p>
+                }
+              </div>
+            }
+            <div class="flex gap-4">
+              <button (click)="saveCard()"
+                class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+                {{ editingIndex >= 0 ? 'Update' : 'Add' }}
+              </button>
+              <button (click)="cancelCardForm()"
+                class="text-secondary hover:text-primary text-xs font-headline font-bold uppercase tracking-widest transition-colors">
+                Cancel
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- Residential Cards -->
+        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2 mt-16">Residential Service Cards</p>
+        <p class="text-xs text-outline mb-6">Cards shown on the /residential page.</p>
+
+        <div class="flex justify-end mb-4">
+          <button (click)="openAddCard('residential')"
+            class="bg-primary-fixed text-white px-4 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+            Add Card
+          </button>
+        </div>
+
+        @if (residentialCards.length === 0 && !loadingServices) {
+          <div class="ghost-border bg-surface-container-low p-6 mb-8 text-center">
+            <p class="text-secondary text-sm mb-4">No cards saved yet. The page shows built-in defaults.</p>
+            <button (click)="initResidentialDefaults()"
+              class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+              Load Defaults to Edit
+            </button>
+          </div>
+        }
+
+        @if (residentialCards.length > 0) {
+          <div class="space-y-1 mb-16">
+            @for (card of residentialCards; track $index; let i = $index) {
+              <div class="transition-all overflow-hidden"
+                [style.height.px]="cardDragList === 'residential' && cardDragOverIndex === i && cardDragIndex !== i && cardDragIndex !== i - 1 ? 60 : 0"
+                (dragover)="$event.preventDefault()" (drop)="onCardDrop($event, 'residential', i)">
+                <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
+              </div>
+              <div class="flex items-center gap-4 px-4 py-3 ghost-border bg-surface-container-low cursor-grab active:cursor-grabbing"
+                [class.opacity-30]="cardDragList === 'residential' && cardDragIndex === i"
+                draggable="true" (dragstart)="onCardDragStart('residential', i)" (dragend)="onCardDragEnd()" (dragover)="onCardRowDragOver($event, i)">
+                <span class="text-xs text-outline w-6 text-center font-body shrink-0">{{ i + 1 }}</span>
+                <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
+                <span class="material-symbols-outlined text-xl text-primary-fixed shrink-0">{{ card.icon }}</span>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate">{{ card.title }}</p>
+                  <p class="text-[0.65rem] text-secondary truncate">{{ card.description }}</p>
+                </div>
+                <button (click)="openEditCard('residential', i)" class="p-1 text-secondary hover:text-primary transition-colors shrink-0" title="Edit">
+                  <span class="material-symbols-outlined text-lg">edit</span>
+                </button>
+                <button (click)="deleteCard('residential', i)" class="p-1 text-secondary hover:text-error transition-colors shrink-0" title="Delete">
+                  <span class="material-symbols-outlined text-lg">delete</span>
+                </button>
+              </div>
+            }
+            <div class="transition-all overflow-hidden"
+              [style.height.px]="cardDragList === 'residential' && cardDragOverIndex === residentialCards.length && cardDragIndex !== residentialCards.length - 1 ? 60 : 0"
+              (dragover)="$event.preventDefault()" (drop)="onCardDrop($event, 'residential', residentialCards.length)">
+              <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
+            </div>
+          </div>
+        }
+
+        <!-- Commercial Industries -->
+        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2">Commercial Industries</p>
+        <p class="text-xs text-outline mb-6">"Industries We Serve" cards on the /commercial page.</p>
+
+        <div class="flex justify-end mb-4">
+          <button (click)="openAddCard('commercial-industries')"
+            class="bg-primary-fixed text-white px-4 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+            Add Card
+          </button>
+        </div>
+
+        @if (commercialIndustries.length === 0 && commercialServices.length === 0 && !loadingServices) {
+          <div class="ghost-border bg-surface-container-low p-6 mb-8 text-center">
+            <p class="text-secondary text-sm mb-4">No cards saved yet. The page shows built-in defaults.</p>
+            <button (click)="initCommercialDefaults()"
+              class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+              Load Defaults to Edit
+            </button>
+          </div>
+        }
+
+        @if (commercialIndustries.length > 0) {
+          <div class="space-y-1 mb-16">
+            @for (card of commercialIndustries; track $index; let i = $index) {
+              <div class="transition-all overflow-hidden"
+                [style.height.px]="cardDragList === 'commercial-industries' && cardDragOverIndex === i && cardDragIndex !== i && cardDragIndex !== i - 1 ? 60 : 0"
+                (dragover)="$event.preventDefault()" (drop)="onCardDrop($event, 'commercial-industries', i)">
+                <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
+              </div>
+              <div class="flex items-center gap-4 px-4 py-3 ghost-border bg-surface-container-low cursor-grab active:cursor-grabbing"
+                [class.opacity-30]="cardDragList === 'commercial-industries' && cardDragIndex === i"
+                draggable="true" (dragstart)="onCardDragStart('commercial-industries', i)" (dragend)="onCardDragEnd()" (dragover)="onCardRowDragOver($event, i)">
+                <span class="text-xs text-outline w-6 text-center font-body shrink-0">{{ i + 1 }}</span>
+                <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
+                <span class="material-symbols-outlined text-xl text-primary-fixed shrink-0">{{ card.icon }}</span>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate">{{ card.title }}</p>
+                  <p class="text-[0.65rem] text-secondary truncate">{{ card.description }}</p>
+                </div>
+                <button (click)="openEditCard('commercial-industries', i)" class="p-1 text-secondary hover:text-primary transition-colors shrink-0" title="Edit">
+                  <span class="material-symbols-outlined text-lg">edit</span>
+                </button>
+                <button (click)="deleteCard('commercial-industries', i)" class="p-1 text-secondary hover:text-error transition-colors shrink-0" title="Delete">
+                  <span class="material-symbols-outlined text-lg">delete</span>
+                </button>
+              </div>
+            }
+            <div class="transition-all overflow-hidden"
+              [style.height.px]="cardDragList === 'commercial-industries' && cardDragOverIndex === commercialIndustries.length && cardDragIndex !== commercialIndustries.length - 1 ? 60 : 0"
+              (dragover)="$event.preventDefault()" (drop)="onCardDrop($event, 'commercial-industries', commercialIndustries.length)">
+              <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
+            </div>
+          </div>
+        }
+
+        <!-- Commercial Services -->
+        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2">Commercial Services</p>
+        <p class="text-xs text-outline mb-6">Compact service cards on the /commercial page. Description is optional.</p>
+
+        <div class="flex justify-end mb-4">
+          <button (click)="openAddCard('commercial-services')"
+            class="bg-primary-fixed text-white px-4 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+            Add Card
+          </button>
+        </div>
+
+        @if (commercialServices.length === 0 && commercialIndustries.length > 0 && !loadingServices) {
+          <div class="ghost-border bg-surface-container-low p-6 mb-8 text-center">
+            <p class="text-secondary text-sm">No compact service cards yet.</p>
+          </div>
+        }
+
+        @if (commercialServices.length > 0) {
+          <div class="space-y-1 mb-8">
+            @for (card of commercialServices; track $index; let i = $index) {
+              <div class="transition-all overflow-hidden"
+                [style.height.px]="cardDragList === 'commercial-services' && cardDragOverIndex === i && cardDragIndex !== i && cardDragIndex !== i - 1 ? 60 : 0"
+                (dragover)="$event.preventDefault()" (drop)="onCardDrop($event, 'commercial-services', i)">
+                <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
+              </div>
+              <div class="flex items-center gap-4 px-4 py-3 ghost-border bg-surface-container-low cursor-grab active:cursor-grabbing"
+                [class.opacity-30]="cardDragList === 'commercial-services' && cardDragIndex === i"
+                draggable="true" (dragstart)="onCardDragStart('commercial-services', i)" (dragend)="onCardDragEnd()" (dragover)="onCardRowDragOver($event, i)">
+                <span class="text-xs text-outline w-6 text-center font-body shrink-0">{{ i + 1 }}</span>
+                <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
+                <span class="material-symbols-outlined text-xl text-primary-fixed shrink-0">{{ card.icon }}</span>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate">{{ card.title }}</p>
+                </div>
+                <button (click)="openEditCard('commercial-services', i)" class="p-1 text-secondary hover:text-primary transition-colors shrink-0" title="Edit">
+                  <span class="material-symbols-outlined text-lg">edit</span>
+                </button>
+                <button (click)="deleteCard('commercial-services', i)" class="p-1 text-secondary hover:text-error transition-colors shrink-0" title="Delete">
+                  <span class="material-symbols-outlined text-lg">delete</span>
+                </button>
+              </div>
+            }
+            <div class="transition-all overflow-hidden"
+              [style.height.px]="cardDragList === 'commercial-services' && cardDragOverIndex === commercialServices.length && cardDragIndex !== commercialServices.length - 1 ? 60 : 0"
+              (dragover)="$event.preventDefault()" (drop)="onCardDrop($event, 'commercial-services', commercialServices.length)">
+              <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
+            </div>
+          </div>
+        }
+
       </div>
     }
 

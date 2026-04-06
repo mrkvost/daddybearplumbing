@@ -19,112 +19,13 @@
   <h2 class="font-headline font-black text-2xl tracking-tighter uppercase mb-8">Our Services</h2>
 
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-
-    <div class="ghost-border bg-surface-container-low p-8 flex flex-col">
-      <span class="material-symbols-outlined text-4xl text-primary-fixed mb-6">water_drop</span>
-      <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">Drain Cleaning</h3>
-      <p class="text-secondary text-sm leading-relaxed flex-1">
-        Slow or clogged drains are one of the most common plumbing issues. We use professional-grade
-        equipment to clear blockages and restore proper flow.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-8 flex flex-col">
-      <span class="material-symbols-outlined text-4xl text-primary-fixed mb-6">plumbing</span>
-      <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">Leak Detection &amp; Repair</h3>
-      <p class="text-secondary text-sm leading-relaxed flex-1">
-        Water leaks can cause significant damage if left unaddressed. Our team locates and repairs
-        leaks quickly — in walls, floors, or underground lines.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-8 flex flex-col">
-      <span class="material-symbols-outlined text-4xl text-primary-fixed mb-6">water_heater</span>
-      <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">Water Heater Service</h3>
-      <p class="text-secondary text-sm leading-relaxed flex-1">
-        Traditional tank or modern tankless — we handle installation, repair, and replacement.
-        We'll help you choose the right system for your home and budget.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-8 flex flex-col">
-      <span class="material-symbols-outlined text-4xl text-primary-fixed mb-6">bathroom</span>
-      <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">Toilet &amp; Faucet Repair</h3>
-      <p class="text-secondary text-sm leading-relaxed flex-1">
-        Running toilets and dripping faucets waste water and money. We repair and replace all types
-        of fixtures quickly and efficiently.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-8 flex flex-col">
-      <span class="material-symbols-outlined text-4xl text-primary-fixed mb-6">ac_unit</span>
-      <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">Frozen Pipes</h3>
-      <p class="text-secondary text-sm leading-relaxed flex-1">
-        Illinois winters can freeze your pipes. We provide emergency thawing services and can
-        insulate vulnerable pipes to prevent future freeze damage.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-8 flex flex-col">
-      <span class="material-symbols-outlined text-4xl text-primary-fixed mb-6">valve</span>
-      <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">Sump &amp; Ejector Pumps</h3>
-      <p class="text-secondary text-sm leading-relaxed flex-1">
-        Protect your basement from flooding with properly maintained sump and ejector pumps.
-        We install, repair, and service all pump types.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-8 flex flex-col">
-      <span class="material-symbols-outlined text-4xl text-primary-fixed mb-6">gas_meter</span>
-      <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">Gas Line Service</h3>
-      <p class="text-secondary text-sm leading-relaxed flex-1">
-        Gas line repair, installation, and leak detection. Safety is our top priority when working
-        with gas systems in your home.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-8 flex flex-col">
-      <span class="material-symbols-outlined text-4xl text-primary-fixed mb-6">foundation</span>
-      <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">Sewer Repair</h3>
-      <p class="text-secondary text-sm leading-relaxed flex-1">
-        Sewer line repair and replacement, root removal, hydro jetting, and backflow prevention
-        to keep your system running clean.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-8 flex flex-col">
-      <span class="material-symbols-outlined text-4xl text-primary-fixed mb-6">delete_sweep</span>
-      <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">Garbage Disposals</h3>
-      <p class="text-secondary text-sm leading-relaxed flex-1">
-        Replacement and installation of kitchen garbage disposal units — all major brands.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-8 flex flex-col">
-      <span class="material-symbols-outlined text-4xl text-primary-fixed mb-6">speed</span>
-      <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">Water Pressure</h3>
-      <p class="text-secondary text-sm leading-relaxed flex-1">
-        Diagnosis and repair of low or high water pressure issues throughout your home.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-8 flex flex-col">
-      <span class="material-symbols-outlined text-4xl text-primary-fixed mb-6">flood</span>
-      <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">Flood Control</h3>
-      <p class="text-secondary text-sm leading-relaxed flex-1">
-        French drain systems and flood control installations to keep your home dry year-round.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-8 flex flex-col">
-      <span class="material-symbols-outlined text-4xl text-primary-fixed mb-6">swap_vert</span>
-      <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">Lead Pipe Replacement</h3>
-      <p class="text-secondary text-sm leading-relaxed flex-1">
-        Safe removal and replacement of outdated lead pipes to protect your family's health
-        and meet current building codes.
-      </p>
-    </div>
-
+    @for (card of cards; track card.title) {
+      <div class="ghost-border bg-surface-container-low p-8 flex flex-col">
+        <span class="material-symbols-outlined text-4xl text-primary-fixed mb-6">{{ card.icon }}</span>
+        <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">{{ card.title }}</h3>
+        <p class="text-secondary text-sm leading-relaxed flex-1">{{ card.description }}</p>
+      </div>
+    }
   </div>
 
   <!-- CTA -->
