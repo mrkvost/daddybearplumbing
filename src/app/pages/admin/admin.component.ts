@@ -45,7 +45,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   private meta = inject(Meta);
   private cdr = inject(ChangeDetectorRef);
 
-  activeTab: 'gallery' | 'reviews' | 'seo' | 'settings' = 'gallery';
+  activeTab: 'gallery' | 'reviews' | 'site' | 'settings' = 'gallery';
 
   /* Gallery state */
   images: AdminGalleryImage[] = [];
@@ -65,7 +65,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.meta.addTag({ name: 'robots', content: 'noindex, nofollow' });
     this.loadImages();
     this.loadReviews();
-    this.loadOgImage();
+    this.loadSiteImages();
   }
 
   ngOnDestroy(): void {
@@ -441,23 +441,117 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   /* ================================================================
-   * SEO (OG Image)
+   * SITE (Hero Image + OG Image)
+   * Hash-based cache busting: files stored as hero-<hash>.jpg,
+   * og-<hash>.jpg. meta.json tracks current filenames.
    * ================================================================ */
+
+  heroImageUrl: string | null = null;
+  heroUploading = false;
+  heroSuccess = false;
+  heroError = '';
+  heroStagedFile: File | null = null;
+  heroStagedPreview: string | null = null;
 
   ogImageUrl: string | null = null;
   ogUploading = false;
   ogSuccess = false;
   ogError = '';
 
-  private readonly OG_IMAGE_KEY = 'gallery-images/meta/og-image.jpg';
-  private readonly OG_IMAGE_PUBLIC = '/gallery-images/meta/og-image.jpg';
+  private siteMeta: { hero?: string; og?: string } = {};
+  private readonly META_JSON_KEY = 'gallery-images/meta.json';
+  private readonly META_PREFIX = '/gallery-images/meta/';
 
-  async loadOgImage(): Promise<void> {
+  private randomHash(): string {
+    return Array.from(crypto.getRandomValues(new Uint8Array(3)))
+      .map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  private async loadMeta(): Promise<void> {
     try {
-      const res = await fetch(`${this.OG_IMAGE_PUBLIC}?t=${Date.now()}`, { method: 'HEAD' });
-      this.ogImageUrl = res.ok ? `${this.OG_IMAGE_PUBLIC}?t=${Date.now()}` : null;
-    } catch {
-      this.ogImageUrl = null;
+      const res = await fetch(`/gallery-images/meta.json?t=${Date.now()}`);
+      if (res.ok) this.siteMeta = await res.json();
+    } catch { /* empty meta */ }
+  }
+
+  private async saveMeta(): Promise<void> {
+    await this.uploadService.putJson(this.META_JSON_KEY, this.siteMeta, GALLERY_BUCKET);
+  }
+
+  async loadSiteImages(): Promise<void> {
+    await this.loadMeta();
+    this.heroImageUrl = this.siteMeta.hero ? `${this.META_PREFIX}${this.siteMeta.hero}` : null;
+    this.ogImageUrl = this.siteMeta.og ? `${this.META_PREFIX}${this.siteMeta.og}` : null;
+    this.cdr.detectChanges();
+  }
+
+  onHeroFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+
+    this.heroError = '';
+    this.heroSuccess = false;
+
+    // Revoke previous staged preview
+    if (this.heroStagedPreview) URL.revokeObjectURL(this.heroStagedPreview);
+
+    this.heroStagedFile = input.files[0];
+    this.heroStagedPreview = URL.createObjectURL(this.heroStagedFile);
+    input.value = '';
+    this.cdr.detectChanges();
+  }
+
+  cancelHeroStaged(): void {
+    if (this.heroStagedPreview) URL.revokeObjectURL(this.heroStagedPreview);
+    this.heroStagedFile = null;
+    this.heroStagedPreview = null;
+    this.cdr.detectChanges();
+  }
+
+  async confirmHeroUpload(): Promise<void> {
+    if (!this.heroStagedFile) return;
+
+    this.heroUploading = true;
+    this.heroError = '';
+    this.heroSuccess = false;
+    this.cdr.detectChanges();
+
+    try {
+      const ext = this.heroStagedFile.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const newName = `hero-${this.randomHash()}.${ext}`;
+      await this.uploadService.upload(this.heroStagedFile, `gallery-images/meta/${newName}`, GALLERY_BUCKET);
+      // Delete old file
+      if (this.siteMeta.hero) {
+        await this.uploadService.delete(`gallery-images/meta/${this.siteMeta.hero}`, GALLERY_BUCKET).catch(() => {});
+      }
+      this.siteMeta.hero = newName;
+      await this.saveMeta();
+      this.heroImageUrl = `${this.META_PREFIX}${newName}`;
+      this.heroSuccess = true;
+    } catch (e: any) {
+      this.heroError = e.message || 'Upload failed';
+    }
+
+    if (this.heroStagedPreview) URL.revokeObjectURL(this.heroStagedPreview);
+    this.heroStagedFile = null;
+    this.heroStagedPreview = null;
+    this.heroUploading = false;
+    this.cdr.detectChanges();
+  }
+
+  async deleteHeroImage(): Promise<void> {
+    this.heroError = '';
+    this.heroSuccess = false;
+    try {
+      if (this.siteMeta.hero) {
+        await this.uploadService.delete(`gallery-images/meta/${this.siteMeta.hero}`, GALLERY_BUCKET);
+      }
+      delete this.siteMeta.hero;
+      await this.saveMeta();
+      // Re-fetch from server to confirm deletion persisted
+      await this.loadSiteImages();
+    } catch (e: any) {
+      this.heroError = e.message || 'Delete failed';
     }
     this.cdr.detectChanges();
   }
@@ -475,8 +569,15 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
 
     try {
-      await this.uploadService.upload(file, this.OG_IMAGE_KEY, GALLERY_BUCKET);
-      this.ogImageUrl = `${this.OG_IMAGE_PUBLIC}?t=${Date.now()}`;
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const newName = `og-${this.randomHash()}.${ext}`;
+      await this.uploadService.upload(file, `gallery-images/meta/${newName}`, GALLERY_BUCKET);
+      if (this.siteMeta.og) {
+        await this.uploadService.delete(`gallery-images/meta/${this.siteMeta.og}`, GALLERY_BUCKET).catch(() => {});
+      }
+      this.siteMeta.og = newName;
+      await this.saveMeta();
+      this.ogImageUrl = `${this.META_PREFIX}${newName}`;
       this.ogSuccess = true;
     } catch (e: any) {
       this.ogError = e.message || 'Upload failed';
@@ -490,7 +591,11 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.ogError = '';
     this.ogSuccess = false;
     try {
-      await this.uploadService.delete(this.OG_IMAGE_KEY, GALLERY_BUCKET);
+      if (this.siteMeta.og) {
+        await this.uploadService.delete(`gallery-images/meta/${this.siteMeta.og}`, GALLERY_BUCKET);
+      }
+      delete this.siteMeta.og;
+      await this.saveMeta();
       this.ogImageUrl = null;
     } catch (e: any) {
       this.ogError = e.message || 'Delete failed';

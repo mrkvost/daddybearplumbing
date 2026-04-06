@@ -27,10 +27,10 @@
         class="px-6 py-4 font-headline font-bold text-xs uppercase tracking-widest transition-colors"
       >Reviews ({{ reviews.length }})</button>
       <button
-        (click)="activeTab = 'seo'"
-        [class]="activeTab === 'seo' ? 'border-b-2 border-primary text-primary' : 'text-secondary hover:text-on-surface'"
+        (click)="activeTab = 'site'"
+        [class]="activeTab === 'site' ? 'border-b-2 border-primary text-primary' : 'text-secondary hover:text-on-surface'"
         class="px-6 py-4 font-headline font-bold text-xs uppercase tracking-widest transition-colors"
-      >SEO</button>
+      >Site</button>
       <button
         (click)="activeTab = 'settings'"
         [class]="activeTab === 'settings' ? 'border-b-2 border-primary text-primary' : 'text-secondary hover:text-on-surface'"
@@ -303,11 +303,76 @@
       }
     }
 
-    <!-- ==================== SEO TAB ==================== -->
-    @if (activeTab === 'seo') {
+    <!-- ==================== SITE TAB ==================== -->
+    @if (activeTab === 'site') {
       <div class="max-w-lg">
+
+        <!-- Hero Image -->
+        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2">Hero Image</p>
+        <p class="text-xs text-outline mb-8">The background image on the homepage banner. Use a wide, high-quality photo.</p>
+
+        @if (heroSuccess) {
+          <div class="bg-surface-container-low ghost-border px-4 py-3 mb-6 text-sm" style="border-color: rgba(46, 125, 50, 0.3);">
+            <span class="material-symbols-outlined text-sm align-middle" style="color: #2e7d32;">check_circle</span>
+            Hero image uploaded successfully.
+          </div>
+        }
+
+        @if (heroError) {
+          <div class="bg-error-container text-on-error-container text-sm px-4 py-3 mb-6 ghost-border">
+            {{ heroError }}
+          </div>
+        }
+
+        <!-- Staged preview -->
+        @if (heroStagedPreview) {
+          <div class="mb-6">
+            <p class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold mb-2">New Image Preview</p>
+            <div class="ghost-border bg-black overflow-hidden">
+              <img [src]="heroStagedPreview" alt="Staged hero preview" class="w-full object-contain grayscale-filter opacity-60" />
+            </div>
+            <div class="flex gap-4 mt-3">
+              <button (click)="confirmHeroUpload()" [disabled]="heroUploading"
+                class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50">
+                {{ heroUploading ? 'Uploading...' : 'Confirm Upload' }}
+              </button>
+              <button (click)="cancelHeroStaged()" [disabled]="heroUploading"
+                class="text-secondary hover:text-error text-xs font-headline font-bold uppercase tracking-widest transition-colors disabled:opacity-50">
+                Cancel
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- Current image (always shown) -->
+        <div class="mb-6">
+          <p class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold mb-2">Current Image</p>
+          @if (heroImageUrl) {
+            <div class="ghost-border bg-black p-2 inline-block">
+              <img [src]="heroImageUrl" alt="Current hero" class="h-20 object-cover grayscale-filter opacity-60" />
+            </div>
+            <button (click)="deleteHeroImage()"
+              class="mt-3 text-secondary hover:text-error text-xs font-headline font-bold uppercase tracking-widest transition-colors flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">delete</span> Remove
+            </button>
+          } @else {
+            <div class="ghost-border bg-black p-2 inline-block">
+              <img src="/gallery-images/meta/hero.jpg" alt="Default hero" class="h-20 object-cover grayscale-filter opacity-60" />
+            </div>
+            <p class="text-outline text-xs mt-2">Using default image.</p>
+          }
+        </div>
+
+        <label class="flex items-center justify-center gap-3 ghost-border bg-surface-container-low hover:bg-surface-container-lowest transition-colors cursor-pointer px-6 py-3 mb-16"
+          [class.opacity-50]="heroUploading" [class.pointer-events-none]="heroUploading">
+          <span class="material-symbols-outlined text-xl text-outline-variant">cloud_upload</span>
+          <span class="text-secondary text-sm">{{ heroUploading ? 'Uploading...' : 'Select image (JPG, PNG, WebP)' }}</span>
+          <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onHeroFileSelected($event)" class="hidden" [disabled]="heroUploading" />
+        </label>
+
+        <!-- OG Image -->
         <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2">Open Graph Image</p>
-        <p class="text-xs text-outline mb-8">This image appears when your site is shared on Facebook, LinkedIn, Slack, iMessage, etc. Recommended size: 1200 &times; 630 px.</p>
+        <p class="text-xs text-outline mb-8">Appears when your site is shared on Facebook, LinkedIn, Slack, iMessage, etc. Recommended: 1200 &times; 630 px.</p>
 
         @if (ogSuccess) {
           <div class="bg-surface-container-low ghost-border px-4 py-3 mb-6 text-sm" style="border-color: rgba(46, 125, 50, 0.3);">
@@ -322,7 +387,6 @@
           </div>
         }
 
-        <!-- Current image preview -->
         @if (ogImageUrl) {
           <div class="mb-6">
             <p class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold mb-2">Current Image</p>
@@ -341,7 +405,6 @@
           </div>
         }
 
-        <!-- Upload -->
         <label class="flex items-center justify-center gap-3 ghost-border bg-surface-container-low hover:bg-surface-container-lowest transition-colors cursor-pointer px-6 py-3"
           [class.opacity-50]="ogUploading" [class.pointer-events-none]="ogUploading">
           <span class="material-symbols-outlined text-xl text-outline-variant">cloud_upload</span>

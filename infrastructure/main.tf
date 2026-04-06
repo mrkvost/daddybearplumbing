@@ -271,9 +271,9 @@ resource "aws_cloudfront_distribution" "site" {
     cache_policy_id        = data.aws_cloudfront_cache_policy.caching_optimized.id
   }
 
-  # Gallery manifest: no cache so changes are instant
+  # Gallery JSON manifests (gallery.json, meta.json): no cache so changes are instant
   ordered_cache_behavior {
-    path_pattern           = "/gallery-images/gallery.json"
+    path_pattern           = "/gallery-images/*.json"
     target_origin_id       = "s3-${var.project}-gallery"
     viewer_protocol_policy = "redirect-to-https"
     allowed_methods        = ["GET", "HEAD"]

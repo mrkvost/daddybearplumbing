@@ -1,10 +1,12 @@
 <section class="relative h-[600px] flex items-center overflow-hidden bg-black">
   <div class="absolute inset-0 z-0">
-    <img
-      alt="Professional plumber at work"
-      class="w-full h-full object-cover grayscale-filter opacity-60"
-      src="https://lh3.googleusercontent.com/aida-public/AB6AXuBB1CVCW0ees4gCvQVw6g9M63Hd-DF_wrpl_SCSlTcwdKbwGU1GZPo4x7JT22yL7KgsQXDJTM7Bt-LAQDG_M6FVyHUXBmmcW9-XMVG74oO4mc-MrVWHTs7XRQs0uugwCnrUen9CMM661HJqis3Gk81bebLyo-7zLjMJ4K6JjFNZaN_js2GL1X6BwcCrnO7b6MLbnGoPylfxPrUkG7pFoBl_fKZwbo11sA3Tovap9eZUjHfobZ_rrk6FqePIUhmF4WdU5oly_saQY80"
-    />
+    @if (heroImage) {
+      <img
+        alt="Professional plumber at work"
+        class="w-full h-full object-cover grayscale-filter opacity-60"
+        [src]="heroImage"
+      />
+    }
   </div>
   <div class="relative z-10 w-full max-w-7xl mx-auto px-6">
     <div class="max-w-3xl">

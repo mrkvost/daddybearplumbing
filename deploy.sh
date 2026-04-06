@@ -16,6 +16,10 @@ aws s3 cp "$DIST/index.html" "$BUCKET/index.html" --cache-control "no-cache"
 aws s3 cp "$DIST/robots.txt" "$BUCKET/robots.txt" --cache-control "no-cache"
 aws s3 cp "$DIST/sitemap.xml" "$BUCKET/sitemap.xml" --cache-control "no-cache"
 
+echo "Uploading meta placeholders to gallery bucket (skip if already custom)..."
+aws s3 sync meta/ s3://kvaking-gallery/gallery-images/meta/ --no-progress \
+  --cache-control "public, max-age=31536000, immutable"
+
 echo "Invalidating CloudFront cache..."
 aws cloudfront create-invalidation --distribution-id E13CC4GUW5MN29 --paths "/*"
 

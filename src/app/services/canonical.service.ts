@@ -6,6 +6,7 @@ import { filter, map, mergeMap } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 const BRAND = 'Daddy Bear Plumbing';
+const OG_FALLBACK = '/gallery-images/meta/og-image.jpg';
 
 @Injectable({ providedIn: 'root' })
 export class CanonicalService {
@@ -15,7 +16,17 @@ export class CanonicalService {
   private meta = inject(Meta);
   private doc = inject(DOCUMENT);
 
+  private ogImagePath = OG_FALLBACK;
+
   init(): void {
+    // Load current OG image filename from meta.json
+    fetch(`/gallery-images/meta.json?t=${Date.now()}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(meta => {
+        if (meta?.og) this.ogImagePath = `/gallery-images/meta/${meta.og}`;
+      })
+      .catch(() => {});
+
     this.router.events.pipe(
       filter(e => e instanceof NavigationEnd),
       map(() => {
@@ -47,12 +58,11 @@ export class CanonicalService {
         const fullUrl = `https://${environment.domain}${cleanPath}`;
         this.setCanonical(fullUrl);
 
-        // Open Graph tags
         const ogTitle = pageTitle ? `${BRAND} | ${pageTitle}` : BRAND;
         this.meta.updateTag({ property: 'og:title', content: ogTitle });
         this.meta.updateTag({ property: 'og:description', content: description || '' });
         this.meta.updateTag({ property: 'og:url', content: fullUrl });
-        this.meta.updateTag({ property: 'og:image', content: `https://${environment.domain}/gallery-images/meta/og-image.jpg` });
+        this.meta.updateTag({ property: 'og:image', content: `https://${environment.domain}${this.ogImagePath}` });
       }
     });
   }
