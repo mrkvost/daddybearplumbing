@@ -2,26 +2,49 @@
   <div class="max-w-7xl mx-auto">
     <div class="flex justify-between items-end mb-16 border-b border-outline-variant/20 pb-8">
       <div>
-        <p class="text-secondary text-[0.7rem] font-bold tracking-[0.3em] uppercase mb-4">Core Disciplines</p>
-        <h2 class="font-headline font-black text-4xl tracking-tighter uppercase">Specialized Solutions</h2>
+        <p class="text-secondary text-[0.7rem] font-bold tracking-[0.3em] uppercase mb-4">What We Do</p>
+        <h2 class="font-headline font-black text-4xl tracking-tighter uppercase">Our Services</h2>
       </div>
       <div class="hidden md:block text-right">
-        <p class="text-secondary font-body text-[0.7rem]">ISO 9001 COMPLIANT</p>
-        <p class="text-secondary font-body text-[0.7rem]">LICENSED &amp; BONDED</p>
+        <p class="text-secondary font-body text-[0.7rem]">LICENSED &amp; INSURED</p>
+        <p class="text-secondary font-body text-[0.7rem]">ALL WORK GUARANTEED</p>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-0 ghost-border">
-      @for (service of services; track service.title) {
-        <div class="group p-8 border-r border-b md:border-b-0 border-outline-variant/20 bg-surface-container-low hover:bg-surface-container-lowest transition-all last:border-r-0">
-          <div class="mb-12">
-            <span class="material-symbols-outlined text-4xl text-primary">{{ service.icon }}</span>
-          </div>
-          <h3 class="font-headline font-bold text-lg mb-4 uppercase tracking-tight">{{ service.title }}</h3>
-          <p class="text-secondary text-sm leading-relaxed mb-8">{{ service.subtitle }}</p>
-          <div class="h-1 w-0 group-hover:w-full bg-primary-fixed transition-all duration-500"></div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-0 ghost-border">
+      <a routerLink="/residential"
+        class="group p-10 border-r border-outline-variant/20 bg-surface-container-low hover:bg-surface-container-lowest transition-all">
+        <div class="mb-8">
+          <span class="material-symbols-outlined text-5xl text-primary">home</span>
         </div>
-      }
+        <h3 class="font-headline font-bold text-xl mb-4 uppercase tracking-tight">Residential</h3>
+        <p class="text-secondary text-sm leading-relaxed mb-6">
+          Drain cleaning, water heaters, leak repair, frozen pipes, sump pumps, sewer service,
+          and more — for homeowners across the Western Suburbs.
+        </p>
+        <div class="flex items-center gap-2 text-primary-fixed text-xs font-headline font-bold uppercase tracking-widest">
+          View Services
+          <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </div>
+        <div class="h-1 w-0 group-hover:w-full bg-primary-fixed transition-all duration-500 mt-6"></div>
+      </a>
+
+      <a routerLink="/commercial"
+        class="group p-10 bg-surface-container-low hover:bg-surface-container-lowest transition-all">
+        <div class="mb-8">
+          <span class="material-symbols-outlined text-5xl text-primary">business</span>
+        </div>
+        <h3 class="font-headline font-bold text-xl mb-4 uppercase tracking-tight">Commercial</h3>
+        <p class="text-secondary text-sm leading-relaxed mb-6">
+          Restaurants, offices, apartments, hotels, healthcare, and sports facilities —
+          reliable plumbing to keep your business running.
+        </p>
+        <div class="flex items-center gap-2 text-primary-fixed text-xs font-headline font-bold uppercase tracking-widest">
+          View Services
+          <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </div>
+        <div class="h-1 w-0 group-hover:w-full bg-primary-fixed transition-all duration-500 mt-6"></div>
+      </a>
     </div>
   </div>
 </section>
