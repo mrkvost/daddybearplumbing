@@ -156,7 +156,7 @@ admin user creation, gallery photo convention, project structure.
     *   https://www.chicago.gov/city/en/sites/guide-to-building-permits/home/instructions/EPP/PLUMB.html
 - [ ] Online chat integration - more complex
 - [ ] Pagination for admin gallery and reviews lists
-- [ ] Session persistence (ctrl+shift+r loses login — store tokens in sessionStorage)
+- [x] Session persistence (tokens in sessionStorage + auto-refresh)
 - [x] Google Maps: update to real business coordinates
 - [ ] Google Business Profile link on map/address
 

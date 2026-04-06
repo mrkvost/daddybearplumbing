@@ -331,7 +331,7 @@
 
   <h2>Services</h2>
   <div class="box-grid">
-    <div class="box purple"><div class="box-title">AuthService</div><div class="box-detail">Cognito sign-in (USER_PASSWORD_AUTH)<br>NEW_PASSWORD_REQUIRED flow<br>GetCredentialsForIdentity</div></div>
+    <div class="box purple"><div class="box-title">AuthService</div><div class="box-detail">Cognito sign-in (USER_PASSWORD_AUTH)<br>NEW_PASSWORD_REQUIRED flow<br>GetCredentialsForIdentity<br>Session: sessionStorage + auto-refresh</div></div>
     <div class="box purple"><div class="box-title">UploadService</div><div class="box-detail">S3 PUT/DELETE/COPY<br>SigV4 signing in browser<br>putJson for manifests</div></div>
     <div class="box purple"><div class="box-title">GalleryService</div><div class="box-detail">Fetch gallery.json via CloudFront<br>Parse entries (string or object)<br>Custom tags + filename inference</div></div>
     <div class="box purple"><div class="box-title">ReviewsService</div><div class="box-detail">Fetch reviews.json via CloudFront<br>Returns Review[] array</div></div>
@@ -457,8 +457,8 @@
   <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Admin navigates to <code>/admin</code></div></div>
   <div class="flow-step"><div class="flow-num">2</div><div class="flow-text"><code>authGuard</code> checks: not authenticated &rarr; redirect to <code>/admin/login</code></div></div>
   <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">Admin enters username + password &rarr; AuthService calls Cognito <code>InitiateAuth</code><br><small>If first login: NEW_PASSWORD_REQUIRED challenge &rarr; show new password + confirm fields</small></div></div>
-  <div class="flow-step"><div class="flow-num">4</div><div class="flow-text">Cognito returns JWT tokens (ID, Access, Refresh)</div></div>
-  <div class="flow-step"><div class="flow-num">5</div><div class="flow-text">Redirect to <code>/admin</code> &rarr; guard passes &rarr; AdminComponent loads</div></div>
+  <div class="flow-step"><div class="flow-num">4</div><div class="flow-text">Cognito returns JWT tokens (ID, Access, Refresh) &rarr; saved to sessionStorage<br><small>ID/Access tokens expire after 1h (auto-refreshed). Refresh token valid 30 days. Cleared on tab close.</small></div></div>
+  <div class="flow-step"><div class="flow-num">5</div><div class="flow-text">Redirect to <code>/admin</code> &rarr; guard passes &rarr; AdminComponent loads<br><small>Page refresh restores session from sessionStorage. Expired tokens silently refreshed.</small></div></div>
 
   <h2>Admin — Upload Photo</h2>
   <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Admin sets tag, selects files &rarr; filenames auto-generated<br><small>Format: <code>0011_2026-03-29-17-00-00_water-heaters.jpg</code></small></div></div>
@@ -760,7 +760,7 @@ infrastructure/
   <div class="check check-done">Contact form (Turnstile + Lambda + SES)</div>
   <div class="check check-todo">Online chat integration</div>
   <div class="check check-todo">Admin pagination (large gallery/review lists)</div>
-  <div class="check check-todo">Session persistence (tokens in sessionStorage)</div>
+  <div class="check check-done">Session persistence (sessionStorage + auto-refresh via refresh token)</div>
   <div class="check check-done">Home page hero image (admin-uploadable with preview, fallback default)</div>
 </div>
 
