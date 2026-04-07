@@ -66,6 +66,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.loadImages();
     this.loadReviews();
     this.loadSiteImages();
+    this.loadLocations();
     this.loadServiceCards();
   }
 
@@ -345,6 +346,48 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
+  /* Review drag and drop */
+  reviewDragIndex = -1;
+  reviewDragOverIndex = -1;
+
+  onReviewDragStart(index: number): void {
+    this.reviewDragIndex = index;
+    this.cdr.detectChanges();
+  }
+
+  onReviewRowDragOver(event: DragEvent, rowIndex: number): void {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const midY = rect.top + rect.height / 2;
+    const insertAt = event.clientY < midY ? rowIndex : rowIndex + 1;
+    if (insertAt !== this.reviewDragOverIndex) {
+      this.reviewDragOverIndex = insertAt;
+      this.cdr.detectChanges();
+    }
+  }
+
+  onReviewDragEnd(): void {
+    this.reviewDragIndex = -1;
+    this.reviewDragOverIndex = -1;
+    this.cdr.detectChanges();
+  }
+
+  async onReviewDrop(event: DragEvent, targetIndex: number): Promise<void> {
+    event.preventDefault();
+    const fromIndex = this.reviewDragIndex;
+    this.reviewDragIndex = -1;
+    this.reviewDragOverIndex = -1;
+    this.cdr.detectChanges();
+
+    if (fromIndex < 0 || fromIndex === targetIndex || fromIndex === targetIndex - 1) return;
+
+    const [item] = this.reviews.splice(fromIndex, 1);
+    const insertAt = targetIndex > fromIndex ? targetIndex - 1 : targetIndex;
+    this.reviews.splice(insertAt, 0, item);
+    this.cdr.detectChanges();
+
+    await this.saveReviews();
+  }
+
   /* ================================================================
    * S3 LIST (shared)
    * ================================================================ */
@@ -602,6 +645,116 @@ export class AdminComponent implements OnInit, OnDestroy {
       this.ogError = e.message || 'Delete failed';
     }
     this.cdr.detectChanges();
+  }
+
+  /* ================================================================
+   * LOCATIONS
+   * ================================================================ */
+
+  locations: string[] = [];
+  loadingLocations = true;
+  newLocation = '';
+  editingLocationIndex = -1;
+  editingLocationValue = '';
+
+  locationDragIndex = -1;
+  locationDragOverIndex = -1;
+
+  private readonly LOC_KEY = 'gallery-images/locations.json';
+
+  async loadLocations(): Promise<void> {
+    this.loadingLocations = true;
+    this.cdr.detectChanges();
+    try {
+      const res = await fetch(`/gallery-images/locations.json?t=${Date.now()}`);
+      if (res.ok) this.locations = await res.json();
+    } catch { /* empty */ }
+    this.loadingLocations = false;
+    this.cdr.detectChanges();
+  }
+
+  async initLocationDefaults(): Promise<void> {
+    this.locations = ['Brookfield, IL', 'La Grange, IL', 'Villa Park, IL', 'Western Springs', 'Elmhurst, IL', 'Countryside', 'Oak Brook'];
+    await this.saveLocations();
+    this.cdr.detectChanges();
+  }
+
+  async addLocation(): Promise<void> {
+    const loc = this.newLocation.trim();
+    if (!loc) return;
+    this.locations.push(loc);
+    this.newLocation = '';
+    await this.saveLocations();
+    this.cdr.detectChanges();
+  }
+
+  startEditLocation(index: number): void {
+    this.editingLocationIndex = index;
+    this.editingLocationValue = this.locations[index];
+    this.cdr.detectChanges();
+  }
+
+  async saveEditLocation(index: number, value: string): Promise<void> {
+    this.editingLocationIndex = -1;
+    const trimmed = value.trim();
+    if (trimmed && trimmed !== this.locations[index]) {
+      this.locations[index] = trimmed;
+      await this.saveLocations();
+    }
+    this.cdr.detectChanges();
+  }
+
+  cancelEditLocation(): void {
+    this.editingLocationIndex = -1;
+    this.cdr.detectChanges();
+  }
+
+  async deleteLocation(index: number): Promise<void> {
+    this.locations.splice(index, 1);
+    await this.saveLocations();
+    this.cdr.detectChanges();
+  }
+
+  onLocationDragStart(index: number): void {
+    this.locationDragIndex = index;
+    this.cdr.detectChanges();
+  }
+
+  onLocationRowDragOver(event: DragEvent, rowIndex: number): void {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const midY = rect.top + rect.height / 2;
+    const insertAt = event.clientY < midY ? rowIndex : rowIndex + 1;
+    if (insertAt !== this.locationDragOverIndex) {
+      this.locationDragOverIndex = insertAt;
+      this.cdr.detectChanges();
+    }
+  }
+
+  onLocationDragEnd(): void {
+    this.locationDragIndex = -1;
+    this.locationDragOverIndex = -1;
+    this.cdr.detectChanges();
+  }
+
+  async onLocationDrop(event: DragEvent, targetIndex: number): Promise<void> {
+    event.preventDefault();
+    const fromIndex = this.locationDragIndex;
+    this.locationDragIndex = -1;
+    this.locationDragOverIndex = -1;
+    this.cdr.detectChanges();
+
+    if (fromIndex < 0 || fromIndex === targetIndex || fromIndex === targetIndex - 1) return;
+
+    const [item] = this.locations.splice(fromIndex, 1);
+    const insertAt = targetIndex > fromIndex ? targetIndex - 1 : targetIndex;
+    this.locations.splice(insertAt, 0, item);
+    this.cdr.detectChanges();
+
+    await this.saveLocations();
+  }
+
+  private async saveLocations(): Promise<void> {
+    await this.uploadService.putJson(this.LOC_KEY, this.locations, GALLERY_BUCKET);
   }
 
   /* ================================================================

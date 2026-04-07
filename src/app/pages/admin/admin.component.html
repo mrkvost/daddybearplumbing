@@ -274,11 +274,24 @@
 
       <!-- Reviews list -->
       @if (!loadingReviews && reviews.length > 0) {
-        <div class="space-y-2">
-          @for (review of reviews; track review.id) {
-            <div class="flex items-start gap-4 px-4 py-4 ghost-border bg-surface-container-low" [class.opacity-50]="review.deleting">
+        <div class="space-y-1">
+          @for (review of reviews; track review.id; let i = $index) {
+            <!-- Drop indicator -->
+            <div class="transition-all overflow-hidden"
+              [style.height.px]="reviewDragOverIndex === i && reviewDragIndex !== i && reviewDragIndex !== i - 1 ? 60 : 0"
+              (dragover)="$event.preventDefault()" (drop)="onReviewDrop($event, i)">
+              <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
+            </div>
+            <div class="flex items-center gap-4 px-4 py-3 ghost-border bg-surface-container-low cursor-grab active:cursor-grabbing"
+              [class.opacity-30]="reviewDragIndex === i"
+              [class.opacity-50]="review.deleting"
+              draggable="true" (dragstart)="onReviewDragStart(i)" (dragend)="onReviewDragEnd()" (dragover)="onReviewRowDragOver($event, i)">
+              <!-- Position number -->
+              <span class="text-xs text-outline w-6 text-center font-body shrink-0">{{ i + 1 }}</span>
+              <!-- Drag handle -->
+              <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
               <!-- Stars -->
-              <div class="flex gap-0.5 shrink-0 mt-1">
+              <div class="flex gap-0.5 shrink-0">
                 @for (s of [1,2,3,4,5]; track s) {
                   <span class="material-symbols-outlined text-xs"
                     [style.color]="s <= review.rating ? '#b02f00' : '#c6c6c6'" [style.font-variation-settings]="s <= review.rating ? '\'FILL\' 1' : '\'FILL\' 0'">star</span>
@@ -286,7 +299,7 @@
               </div>
               <!-- Content -->
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-body text-on-surface leading-relaxed mb-1">{{ review.text }}</p>
+                <p class="text-sm font-body text-on-surface leading-relaxed truncate">{{ review.text }}</p>
                 <p class="text-[0.65rem] text-secondary">
                   <span class="font-headline font-bold uppercase tracking-tight">{{ review.name }}</span>
                   @if (review.location) { <span> &middot; {{ review.location }}</span> }
@@ -294,16 +307,20 @@
                 </p>
               </div>
               <!-- Actions -->
-              <div class="flex items-center gap-2 shrink-0">
-                <button (click)="openEditReview(review)" class="p-1 text-secondary hover:text-primary transition-colors" title="Edit">
-                  <span class="material-symbols-outlined text-lg">edit</span>
-                </button>
-                <button (click)="deleteReview(review)" [disabled]="review.deleting" class="p-1 text-secondary hover:text-error transition-colors disabled:opacity-50" title="Delete">
-                  <span class="material-symbols-outlined text-lg">delete</span>
-                </button>
-              </div>
+              <button (click)="openEditReview(review)" class="p-1 text-secondary hover:text-primary transition-colors shrink-0" title="Edit">
+                <span class="material-symbols-outlined text-lg">edit</span>
+              </button>
+              <button (click)="deleteReview(review)" [disabled]="review.deleting" class="p-1 text-secondary hover:text-error transition-colors shrink-0 disabled:opacity-50" title="Delete">
+                <span class="material-symbols-outlined text-lg">delete</span>
+              </button>
             </div>
           }
+          <!-- Drop indicator after last -->
+          <div class="transition-all overflow-hidden"
+            [style.height.px]="reviewDragOverIndex === reviews.length && reviewDragIndex !== reviews.length - 1 ? 60 : 0"
+            (dragover)="$event.preventDefault()" (drop)="onReviewDrop($event, reviews.length)">
+            <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
+          </div>
         </div>
       }
     }
@@ -416,6 +433,70 @@
           <span class="text-secondary text-sm">{{ ogUploading ? 'Uploading...' : 'Select image (JPG, PNG, WebP)' }}</span>
           <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onOgFileSelected($event)" class="hidden" [disabled]="ogUploading" />
         </label>
+
+        <!-- Locations -->
+        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2 mt-16">Service Area Locations</p>
+        <p class="text-xs text-outline mb-8">Locations listed on the homepage service area section.</p>
+
+        @if (locations.length === 0 && !loadingLocations) {
+          <div class="ghost-border bg-surface-container-low p-6 mb-6 text-center">
+            <p class="text-secondary text-sm mb-4">No locations saved yet. The page shows built-in defaults.</p>
+            <button (click)="initLocationDefaults()"
+              class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+              Load Defaults to Edit
+            </button>
+          </div>
+        }
+
+        @if (locations.length > 0) {
+          <div class="space-y-1 mb-6">
+            @for (loc of locations; track $index; let i = $index) {
+              <div class="transition-all overflow-hidden"
+                [style.height.px]="locationDragOverIndex === i && locationDragIndex !== i && locationDragIndex !== i - 1 ? 48 : 0"
+                (dragover)="$event.preventDefault()" (drop)="onLocationDrop($event, i)">
+                <div class="flex items-center gap-4 px-4 py-2 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
+              </div>
+              <div class="flex items-center gap-4 px-4 py-2.5 ghost-border bg-surface-container-low cursor-grab active:cursor-grabbing"
+                [class.opacity-30]="locationDragIndex === i"
+                draggable="true" (dragstart)="onLocationDragStart(i)" (dragend)="onLocationDragEnd()" (dragover)="onLocationRowDragOver($event, i)">
+                <span class="text-xs text-outline w-6 text-center font-body shrink-0">{{ i + 1 }}</span>
+                <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
+                <span class="material-symbols-outlined text-sm text-secondary shrink-0">location_on</span>
+                @if (editingLocationIndex === i) {
+                  <input type="text" [value]="editingLocationValue"
+                    (keydown.enter)="saveEditLocation(i, $any($event.target).value)"
+                    (keydown.escape)="cancelEditLocation()"
+                    (blur)="saveEditLocation(i, $any($event.target).value)"
+                    class="flex-1 bg-surface-container-lowest border border-outline-variant/20 px-2 py-1 text-sm font-body text-on-surface focus:border-primary focus:ring-0"
+                    autofocus />
+                } @else {
+                  <span class="flex-1 font-headline font-bold text-sm uppercase tracking-tight text-on-surface cursor-pointer hover:text-primary-fixed transition-colors"
+                    (click)="startEditLocation(i)" title="Click to edit">{{ loc }}</span>
+                }
+                <button (click)="deleteLocation(i)" class="p-1 text-secondary hover:text-error transition-colors shrink-0" title="Delete">
+                  <span class="material-symbols-outlined text-lg">delete</span>
+                </button>
+              </div>
+            }
+            <div class="transition-all overflow-hidden"
+              [style.height.px]="locationDragOverIndex === locations.length && locationDragIndex !== locations.length - 1 ? 48 : 0"
+              (dragover)="$event.preventDefault()" (drop)="onLocationDrop($event, locations.length)">
+              <div class="flex items-center gap-4 px-4 py-2 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
+            </div>
+          </div>
+        }
+
+        <!-- Add location -->
+        <div class="flex gap-3">
+          <input type="text" [(ngModel)]="newLocation" placeholder="e.g. Riverside, IL"
+            (keydown.enter)="addLocation()"
+            class="flex-1 bg-surface-container-lowest border border-outline-variant/20 px-4 py-2.5 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors" />
+          <button (click)="addLocation()"
+            class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all shrink-0">
+            Add
+          </button>
+        </div>
+
       </div>
     }
 
