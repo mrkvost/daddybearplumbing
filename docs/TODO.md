@@ -17,13 +17,13 @@ Work through them one at a time. Each goal has acceptance criteria that define "
 **What was built:**
 - Angular 21 SPA with standalone components (no NgModules)
 - Tailwind CSS v3 via PostCSS with "Architectural Minimalist" design system
-- Design: grayscale palette, burnt orange accent (#b02f00), 0px border-radius, Public Sans + Inter fonts
+- Design: grayscale palette, burnt orange accent (#b02f00), 0px border-radius, Public Sans + Inter fonts (self-hosted)
 - Components: Navbar, Hero, TrustStats (operational hours), ServicesGrid, ServiceArea (Google Maps), Footer
 - Pages: Home (composition), Gallery (S3 images + tags + lightbox), Reviews (star ratings), Contact (form + Turnstile + SES), About Us, Residential Services, Commercial Services, FAQ, Terms, Privacy, Cookies, Admin (gallery + reviews + site images + service cards), Login (Cognito auth)
 - Services: AuthService (Cognito), UploadService (S3 SigV4), GalleryService, ReviewsService
 - Auth guard on /admin route, noindex meta tags on admin pages, robots.txt disallows /admin
 - Phone number + address centralized in environment config
-- All routes lazy-loaded
+- All routes lazy-loaded, scroll-to-top on navigation
 
 ---
 
@@ -85,8 +85,9 @@ with some external steps that cannot be automated.
 - [x] Add `<link rel="canonical">` per page (CanonicalService, auto on navigation, skips /admin)
 - [ ] Evaluate Angular pre-rendering (`ng build` with `prerender` option) so crawlers receive
       real HTML instead of a blank JS shell — enable if straightforward, document if deferred
+- [x] Self-host Public Sans + Inter fonts (eliminates Google Fonts round-trip for text fonts)
 - [ ] Verify Core Web Vitals: lazy-load the Google Maps iframe (`loading="lazy"`),
-      self-host or defer non-critical fonts, minimize render-blocking resources
+      minimize render-blocking resources
 
 **Sub-tasks (external — checklist only, no code):**
 - [ ] Claim and complete **Google Business Profile** (address, phone, hours, photos, service areas)
@@ -151,8 +152,7 @@ admin user creation, gallery photo convention, project structure.
 - [x] Menu additions: About Us, Services (Residential / Commercial), Gallery, Reviews, Contact
 - [x] Content pages: About Us, Residential Services, Commercial Services, FAQ, Terms, Privacy, Cookies
 - [x] Admin service cards editor (drag-and-drop reorder, add/edit/delete, load defaults)
-- [ ] Enhanced footer (further improvements)
-    *   logo, fb, license
+- [x] Enhanced footer (5-column layout: brand, services, navigate, information, accreditation with license numbers)
 - [ ] Tips/Links page
     *   https://www.chicago.gov/city/en/sites/guide-to-building-permits/home/instructions/EPP/PLUMB.html
 - [ ] Online chat integration - more complex
@@ -162,9 +162,6 @@ admin user creation, gallery photo convention, project structure.
 - [ ] Google Business Profile link on map/address
 
 ---
-
--   footer like in https://firstchicagoplumbing.com/
--   !!!list of areas!!!
 
 ## Notes
 

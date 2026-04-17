@@ -152,6 +152,7 @@ src/
     app.routes.ts      # Route configuration
     app.ts / app.html  # Root layout shell
   environments/        # AWS config (Cognito IDs, bucket names, phone number)
+  fonts.css            # Self-hosted @font-face (Public Sans + Inter)
   styles.css           # Tailwind directives + custom utilities
   index.html           # HTML entry point
 infrastructure/
@@ -170,7 +171,9 @@ deploy.sh              # S3 sync + CloudFront invalidation
 docker_build.sh        # Build Angular in Docker
 docker_serve.sh        # Serve dist/ via nginx locally
 public/
+  fonts/               # Self-hosted Public Sans + Inter (woff2, latin + latin-ext)
   robots.txt           # Disallows /admin
+  sitemap.xml          # Public routes for search engines
   favicon.ico          # Bear paw favicon
 ```
 

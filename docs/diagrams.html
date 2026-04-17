@@ -297,7 +297,7 @@
         <div class="comp-node section" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">HeroComponent</div><div class="comp-desc">Grayscale hero + headline<br>Loads from meta.json or fallback</div></div>
         <div class="comp-node section" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">TrustStatsComponent</div><div class="comp-desc">Operational hours</div></div>
         <div class="comp-node section" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">ServicesGridComponent</div><div class="comp-desc">4 services + hover anim</div></div>
-        <div class="comp-node section" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">ServiceAreaComponent</div><div class="comp-desc">Google Maps + 6 locations</div></div>
+        <div class="comp-node section" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">ServiceAreaComponent</div><div class="comp-desc">Google Maps + locations<br>(data-driven from S3)</div></div>
       </div>
     </div>
 
@@ -348,7 +348,7 @@
 
     <!-- Footer -->
     <div class="flex-col">
-      <div class="comp-node layout"><div class="comp-name">FooterComponent</div><div class="comp-desc">Copyright + links</div></div>
+      <div class="comp-node layout"><div class="comp-name">FooterComponent</div><div class="comp-desc">5-col: brand, services,<br>navigate, info, accreditation<br>License numbers + copyright</div></div>
     </div>
   </div>
 
@@ -358,6 +358,7 @@
     <div class="box purple"><div class="box-title">UploadService</div><div class="box-detail">S3 PUT/DELETE/COPY<br>SigV4 signing in browser<br>putJson for manifests</div></div>
     <div class="box purple"><div class="box-title">GalleryService</div><div class="box-detail">Fetch gallery.json via CloudFront<br>Parse entries (string or object)<br>Custom tags + filename inference</div></div>
     <div class="box purple"><div class="box-title">ReviewsService</div><div class="box-detail">Fetch reviews.json via CloudFront<br>Returns Review[] array</div></div>
+    <div class="box purple"><div class="box-title">CanonicalService</div><div class="box-detail">Per-route title, description, canonical<br>Open Graph tags (og:title, og:image)<br>Loads OG image from meta.json</div></div>
   </div>
 
   <h2>Design System</h2>
@@ -367,7 +368,7 @@
       <div class="box-detail" style="text-align: left;">
         Grayscale palette + burnt orange (#b02f00) accent<br>
         0px border-radius everywhere (sharp corners)<br>
-        Public Sans (headlines) + Inter (body)<br>
+        Public Sans (headlines) + Inter (body) — self-hosted<br>
         Ghost borders (1px @ 20% opacity)<br>
         Zero shadows, tonal stepping for depth<br>
         Thin Material Symbols icons (wght 300)
@@ -398,8 +399,10 @@
   main-XXXXXXXX.js        # App bootstrap + providers
   styles-XXXXXXXX.css     # Tailwind output
   chunk-XXXXXXXX.js       # Lazy: home, gallery, admin, login, reviews
+  fonts/                  # Self-hosted Public Sans + Inter (woff2)
   favicon.ico             # Bear paw favicon
-  robots.txt              # Disallow /admin</pre>
+  robots.txt              # Disallow /admin
+  sitemap.xml             # Public routes for search engines</pre>
 </div>
 
 <!-- ==================== 4. ROUTES ==================== -->
@@ -801,7 +804,9 @@ infrastructure/
   <div class="check check-done">sitemap.xml + robots.txt Sitemap directive</div>
   <div class="check check-done">Canonical tags (CanonicalService, auto on navigation)</div>
   <div class="check check-todo">Pre-rendering evaluation</div>
-  <div class="check check-todo">Core Web Vitals optimization</div>
+  <div class="check check-done">Self-hosted text fonts (Public Sans + Inter)</div>
+  <div class="check check-done">Scroll-to-top on navigation</div>
+  <div class="check check-todo">Core Web Vitals optimization (remaining)</div>
   <div class="check check-todo">Google Business Profile</div>
   <div class="check check-todo">Google Search Console</div>
 
@@ -818,7 +823,7 @@ infrastructure/
   <div class="check check-todo">Google Business Profile link on map/address</div>
   <div class="check check-done">Footer links (FAQ, Privacy, Terms, Cookies)</div>
   <div class="check check-done">Menu: About Us, Services (Residential/Commercial), Gallery, Reviews, Contact</div>
-  <div class="check check-todo">Enhanced footer (logo, social links, license)</div>
+  <div class="check check-done">Enhanced footer (5-col: brand, services, navigate, info, accreditation + license numbers)</div>
   <div class="check check-done">Contact form (Turnstile + Lambda + SES)</div>
   <div class="check check-todo">Online chat integration</div>
   <div class="check check-todo">Admin pagination (large gallery/review lists)</div>
