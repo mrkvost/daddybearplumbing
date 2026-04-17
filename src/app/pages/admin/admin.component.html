@@ -327,7 +327,7 @@
 
     <!-- ==================== SITE TAB ==================== -->
     @if (activeTab === 'site') {
-      <div class="max-w-lg">
+      <div class="max-w-2xl">
 
         <!-- Hero Image -->
         <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2">Hero Image</p>
@@ -350,8 +350,8 @@
         @if (heroStagedPreview) {
           <div class="mb-6">
             <p class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold mb-2">New Image Preview</p>
-            <div class="ghost-border bg-black overflow-hidden">
-              <img [src]="heroStagedPreview" alt="Staged hero preview" class="w-full object-contain grayscale-filter opacity-60" />
+            <div class="ghost-border overflow-hidden">
+              <app-hero [imageUrl]="heroStagedPreview" [compact]="true" />
             </div>
             <div class="flex gap-4 mt-3">
               <button (click)="confirmHeroUpload()" [disabled]="heroUploading"
@@ -366,21 +366,18 @@
           </div>
         }
 
-        <!-- Current image (always shown) -->
+        <!-- Current image — full hero preview -->
         <div class="mb-6">
           <p class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold mb-2">Current Image</p>
+          <div class="ghost-border overflow-hidden">
+            <app-hero [imageUrl]="heroImageUrl || '/gallery-images/meta/hero.jpg'" [compact]="true" />
+          </div>
           @if (heroImageUrl) {
-            <div class="ghost-border bg-black p-2 inline-block">
-              <img [src]="heroImageUrl" alt="Current hero" class="h-20 object-cover grayscale-filter opacity-60" />
-            </div>
             <button (click)="deleteHeroImage()"
               class="mt-3 text-secondary hover:text-error text-xs font-headline font-bold uppercase tracking-widest transition-colors flex items-center gap-1">
               <span class="material-symbols-outlined text-sm">delete</span> Remove
             </button>
           } @else {
-            <div class="ghost-border bg-black p-2 inline-block">
-              <img src="/gallery-images/meta/hero.jpg" alt="Default hero" class="h-20 object-cover grayscale-filter opacity-60" />
-            </div>
             <p class="text-outline text-xs mt-2">Using default image.</p>
           }
         </div>

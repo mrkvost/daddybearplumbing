@@ -8,6 +8,7 @@ import { UploadService } from '../../services/upload.service';
 import { GalleryService, GalleryImage, GalleryEntry } from '../../services/gallery.service';
 import { Review } from '../../services/reviews.service';
 import { environment } from '../../../environments/environment';
+import { HeroComponent } from '../../components/hero/hero.component';
 
 interface AdminGalleryImage extends GalleryImage {
   deleting?: boolean;
@@ -34,7 +35,7 @@ const REGION = environment.aws.region;
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HeroComponent],
   templateUrl: './admin.component.html',
 })
 export class AdminComponent implements OnInit, OnDestroy {

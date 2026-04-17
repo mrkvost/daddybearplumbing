@@ -155,6 +155,9 @@ admin user creation, gallery photo convention, project structure.
 - [x] Enhanced footer (5-column layout: brand, services, navigate, information, accreditation with license numbers)
 - [ ] Tips/Links page
     *   https://www.chicago.gov/city/en/sites/guide-to-building-permits/home/instructions/EPP/PLUMB.html
+- [ ] Admin-triggered rebuild: button in admin to trigger AWS build pipeline (CodeBuild or Lambda)
+      so that hero image + locations are statically embedded in the HTML at build time
+      (improves SEO — crawlers see real content instead of JS-fetched data)
 - [ ] Online chat integration - more complex
 - [ ] Pagination for admin gallery and reviews lists
 - [x] Session persistence (tokens in sessionStorage + auto-refresh)
