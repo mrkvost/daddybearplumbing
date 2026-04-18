@@ -136,7 +136,21 @@
                 (dragover)="onRowDragOver($event, i)"
               >
                 <!-- Position number -->
-                <span class="text-xs text-outline w-6 text-center font-body shrink-0">{{ i + 1 }}</span>
+                @if (editingPositionList === 'gallery' && editingPositionIndex === i) {
+                  <input type="number" min="1" [max]="images.length" [value]="i + 1"
+                    class="w-8 text-xs text-center font-body bg-surface-container-lowest border border-primary px-0 py-0.5 shrink-0"
+                    (keydown.enter)="applyPosition('gallery', i, $any($event.target).valueAsNumber)"
+                    (keydown.escape)="cancelEditPosition()"
+                    (blur)="applyPosition('gallery', i, $any($event.target).valueAsNumber)"
+                    (click)="$event.stopPropagation()" (mousedown)="$event.stopPropagation()"
+                    #posInput
+                  />
+                } @else {
+                  <span class="text-xs text-outline w-6 text-center font-body shrink-0 cursor-pointer hover:text-primary hover:font-bold transition-colors"
+                    (click)="startEditPosition('gallery', i); $event.stopPropagation()"
+                    (mousedown)="$event.stopPropagation()"
+                    title="Click to change position">{{ i + 1 }}</span>
+                }
                 <!-- Drag handle -->
                 <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
                 <!-- Thumbnail -->
@@ -287,7 +301,20 @@
               [class.opacity-50]="review.deleting"
               draggable="true" (dragstart)="onReviewDragStart(i)" (dragend)="onReviewDragEnd()" (dragover)="onReviewRowDragOver($event, i)">
               <!-- Position number -->
-              <span class="text-xs text-outline w-6 text-center font-body shrink-0">{{ i + 1 }}</span>
+              @if (editingPositionList === 'reviews' && editingPositionIndex === i) {
+                <input type="number" min="1" [max]="reviews.length" [value]="i + 1"
+                  class="w-8 text-xs text-center font-body bg-surface-container-lowest border border-primary px-0 py-0.5 shrink-0"
+                  (keydown.enter)="applyPosition('reviews', i, $any($event.target).valueAsNumber)"
+                  (keydown.escape)="cancelEditPosition()"
+                  (blur)="applyPosition('reviews', i, $any($event.target).valueAsNumber)"
+                  (click)="$event.stopPropagation()" (mousedown)="$event.stopPropagation()"
+                />
+              } @else {
+                <span class="text-xs text-outline w-6 text-center font-body shrink-0 cursor-pointer hover:text-primary hover:font-bold transition-colors"
+                  (click)="startEditPosition('reviews', i); $event.stopPropagation()"
+                  (mousedown)="$event.stopPropagation()"
+                  title="Click to change position">{{ i + 1 }}</span>
+              }
               <!-- Drag handle -->
               <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
               <!-- Stars -->
@@ -456,7 +483,20 @@
               <div class="flex items-center gap-4 px-4 py-2.5 ghost-border bg-surface-container-low cursor-grab active:cursor-grabbing"
                 [class.opacity-30]="locationDragIndex === i"
                 draggable="true" (dragstart)="onLocationDragStart(i)" (dragend)="onLocationDragEnd()" (dragover)="onLocationRowDragOver($event, i)">
-                <span class="text-xs text-outline w-6 text-center font-body shrink-0">{{ i + 1 }}</span>
+                @if (editingPositionList === 'locations' && editingPositionIndex === i) {
+                  <input type="number" min="1" [max]="locations.length" [value]="i + 1"
+                    class="w-8 text-xs text-center font-body bg-surface-container-lowest border border-primary px-0 py-0.5 shrink-0"
+                    (keydown.enter)="applyPosition('locations', i, $any($event.target).valueAsNumber)"
+                    (keydown.escape)="cancelEditPosition()"
+                    (blur)="applyPosition('locations', i, $any($event.target).valueAsNumber)"
+                    (click)="$event.stopPropagation()" (mousedown)="$event.stopPropagation()"
+                  />
+                } @else {
+                  <span class="text-xs text-outline w-6 text-center font-body shrink-0 cursor-pointer hover:text-primary hover:font-bold transition-colors"
+                    (click)="startEditPosition('locations', i); $event.stopPropagation()"
+                    (mousedown)="$event.stopPropagation()"
+                    title="Click to change position">{{ i + 1 }}</span>
+                }
                 <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
                 <span class="material-symbols-outlined text-sm text-secondary shrink-0">location_on</span>
                 @if (editingLocationIndex === i) {
@@ -585,7 +625,20 @@
               <div class="flex items-center gap-4 px-4 py-3 ghost-border bg-surface-container-low cursor-grab active:cursor-grabbing"
                 [class.opacity-30]="cardDragList === 'residential' && cardDragIndex === i"
                 draggable="true" (dragstart)="onCardDragStart('residential', i)" (dragend)="onCardDragEnd()" (dragover)="onCardRowDragOver($event, i)">
-                <span class="text-xs text-outline w-6 text-center font-body shrink-0">{{ i + 1 }}</span>
+                @if (editingPositionList === 'residential' && editingPositionIndex === i) {
+                  <input type="number" min="1" [max]="residentialCards.length" [value]="i + 1"
+                    class="w-8 text-xs text-center font-body bg-surface-container-lowest border border-primary px-0 py-0.5 shrink-0"
+                    (keydown.enter)="applyPosition('residential', i, $any($event.target).valueAsNumber)"
+                    (keydown.escape)="cancelEditPosition()"
+                    (blur)="applyPosition('residential', i, $any($event.target).valueAsNumber)"
+                    (click)="$event.stopPropagation()" (mousedown)="$event.stopPropagation()"
+                  />
+                } @else {
+                  <span class="text-xs text-outline w-6 text-center font-body shrink-0 cursor-pointer hover:text-primary hover:font-bold transition-colors"
+                    (click)="startEditPosition('residential', i); $event.stopPropagation()"
+                    (mousedown)="$event.stopPropagation()"
+                    title="Click to change position">{{ i + 1 }}</span>
+                }
                 <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
                 <span class="material-symbols-outlined text-xl text-primary-fixed shrink-0">{{ card.icon }}</span>
                 <div class="flex-1 min-w-0">
@@ -640,7 +693,20 @@
               <div class="flex items-center gap-4 px-4 py-3 ghost-border bg-surface-container-low cursor-grab active:cursor-grabbing"
                 [class.opacity-30]="cardDragList === 'commercial-industries' && cardDragIndex === i"
                 draggable="true" (dragstart)="onCardDragStart('commercial-industries', i)" (dragend)="onCardDragEnd()" (dragover)="onCardRowDragOver($event, i)">
-                <span class="text-xs text-outline w-6 text-center font-body shrink-0">{{ i + 1 }}</span>
+                @if (editingPositionList === 'commercialIndustries' && editingPositionIndex === i) {
+                  <input type="number" min="1" [max]="commercialIndustries.length" [value]="i + 1"
+                    class="w-8 text-xs text-center font-body bg-surface-container-lowest border border-primary px-0 py-0.5 shrink-0"
+                    (keydown.enter)="applyPosition('commercialIndustries', i, $any($event.target).valueAsNumber)"
+                    (keydown.escape)="cancelEditPosition()"
+                    (blur)="applyPosition('commercialIndustries', i, $any($event.target).valueAsNumber)"
+                    (click)="$event.stopPropagation()" (mousedown)="$event.stopPropagation()"
+                  />
+                } @else {
+                  <span class="text-xs text-outline w-6 text-center font-body shrink-0 cursor-pointer hover:text-primary hover:font-bold transition-colors"
+                    (click)="startEditPosition('commercialIndustries', i); $event.stopPropagation()"
+                    (mousedown)="$event.stopPropagation()"
+                    title="Click to change position">{{ i + 1 }}</span>
+                }
                 <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
                 <span class="material-symbols-outlined text-xl text-primary-fixed shrink-0">{{ card.icon }}</span>
                 <div class="flex-1 min-w-0">
@@ -691,7 +757,20 @@
               <div class="flex items-center gap-4 px-4 py-3 ghost-border bg-surface-container-low cursor-grab active:cursor-grabbing"
                 [class.opacity-30]="cardDragList === 'commercial-services' && cardDragIndex === i"
                 draggable="true" (dragstart)="onCardDragStart('commercial-services', i)" (dragend)="onCardDragEnd()" (dragover)="onCardRowDragOver($event, i)">
-                <span class="text-xs text-outline w-6 text-center font-body shrink-0">{{ i + 1 }}</span>
+                @if (editingPositionList === 'commercialServices' && editingPositionIndex === i) {
+                  <input type="number" min="1" [max]="commercialServices.length" [value]="i + 1"
+                    class="w-8 text-xs text-center font-body bg-surface-container-lowest border border-primary px-0 py-0.5 shrink-0"
+                    (keydown.enter)="applyPosition('commercialServices', i, $any($event.target).valueAsNumber)"
+                    (keydown.escape)="cancelEditPosition()"
+                    (blur)="applyPosition('commercialServices', i, $any($event.target).valueAsNumber)"
+                    (click)="$event.stopPropagation()" (mousedown)="$event.stopPropagation()"
+                  />
+                } @else {
+                  <span class="text-xs text-outline w-6 text-center font-body shrink-0 cursor-pointer hover:text-primary hover:font-bold transition-colors"
+                    (click)="startEditPosition('commercialServices', i); $event.stopPropagation()"
+                    (mousedown)="$event.stopPropagation()"
+                    title="Click to change position">{{ i + 1 }}</span>
+                }
                 <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
                 <span class="material-symbols-outlined text-xl text-primary-fixed shrink-0">{{ card.icon }}</span>
                 <div class="flex-1 min-w-0">

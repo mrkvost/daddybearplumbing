@@ -124,6 +124,59 @@ export class AdminComponent implements OnInit, OnDestroy {
     await this.uploadService.putJson('gallery-images/gallery.json', entries, GALLERY_BUCKET);
   }
 
+  /* Position editing state */
+  editingPositionList: string | null = null;
+  editingPositionIndex = -1;
+
+  startEditPosition(list: string, index: number): void {
+    this.editingPositionList = list;
+    this.editingPositionIndex = index;
+  }
+
+  cancelEditPosition(): void {
+    this.editingPositionList = null;
+    this.editingPositionIndex = -1;
+  }
+
+  async applyPosition(list: string, fromIndex: number, newPos: number): Promise<void> {
+    this.cancelEditPosition();
+    const arr = this.getListArray(list);
+    if (!arr || arr.length === 0) return;
+
+    // Clamp to valid range (1-based input)
+    let toIndex = Math.max(0, Math.min(newPos - 1, arr.length - 1));
+    if (toIndex === fromIndex) return;
+
+    const [item] = arr.splice(fromIndex, 1);
+    arr.splice(toIndex, 0, item);
+    this.cdr.detectChanges();
+
+    await this.saveListArray(list);
+  }
+
+  private getListArray(list: string): any[] | null {
+    switch (list) {
+      case 'gallery': return this.images;
+      case 'reviews': return this.reviews;
+      case 'locations': return this.locations;
+      case 'residential': return this.residentialCards;
+      case 'commercialIndustries': return this.commercialIndustries;
+      case 'commercialServices': return this.commercialServices;
+      default: return null;
+    }
+  }
+
+  private async saveListArray(list: string): Promise<void> {
+    switch (list) {
+      case 'gallery': await this.saveGalleryManifest(); break;
+      case 'reviews': await this.saveReviews(); break;
+      case 'locations': await this.saveLocations(); break;
+      case 'residential':
+      case 'commercialIndustries':
+      case 'commercialServices': await this.saveServiceCards(); break;
+    }
+  }
+
   /* Drag and drop state */
   dragIndex = -1;
   dragOverIndex = -1;
