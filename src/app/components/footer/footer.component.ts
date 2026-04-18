@@ -14,4 +14,7 @@ export class FooterComponent {
   phoneDisplay = environment.phoneDisplay;
   email = environment.email;
   address = environment.address;
+  mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    `${environment.address.line1}, ${environment.address.city}, ${environment.address.state} ${environment.address.zip}`
+  )}`;
 }

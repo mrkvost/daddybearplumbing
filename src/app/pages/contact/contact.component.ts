@@ -1,6 +1,7 @@
 import { Component, inject, ChangeDetectorRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
 
 declare global {
@@ -18,6 +19,16 @@ declare global {
   }
 }
 
+const DEFAULT_LOCATIONS = [
+  'Brookfield, IL',
+  'La Grange, IL',
+  'Villa Park, IL',
+  'Western Springs',
+  'Elmhurst, IL',
+  'Countryside',
+  'Oak Brook',
+];
+
 @Component({
   selector: 'app-contact',
   standalone: true,
@@ -26,11 +37,22 @@ declare global {
 })
 export class ContactComponent implements AfterViewInit {
   private cdr = inject(ChangeDetectorRef);
+  private sanitizer = inject(DomSanitizer);
 
   phone = environment.phone;
   phoneDisplay = environment.phoneDisplay;
   email = environment.email;
   address = environment.address;
+  mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    `${environment.address.line1}, ${environment.address.city}, ${environment.address.state} ${environment.address.zip}`
+  )}`;
+  safeEmbedUrl: SafeResourceUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
+    `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(
+      `${environment.address.line1}, ${environment.address.city}, ${environment.address.state} ${environment.address.zip}`
+    )}&zoom=14`
+  );
+
+  locations = DEFAULT_LOCATIONS;
 
   form = { name: '', email: '', phone: '', message: '', website: '' };
   turnstileToken = '';
@@ -41,6 +63,20 @@ export class ContactComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.loadTurnstile();
+    this.loadLocations();
+  }
+
+  private async loadLocations(): Promise<void> {
+    try {
+      const res = await fetch(`/gallery-images/locations.json?t=${Date.now()}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          this.locations = data;
+          this.cdr.detectChanges();
+        }
+      }
+    } catch { /* use defaults */ }
   }
 
   private loadTurnstile(): void {
