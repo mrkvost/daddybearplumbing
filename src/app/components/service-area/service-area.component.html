@@ -25,9 +25,16 @@
         <div>
           <h4 class="font-headline font-bold text-xs uppercase tracking-[0.2em] text-secondary mb-4">Service Radius</h4>
           <ul class="grid grid-cols-2 gap-y-2">
-            @for (loc of locations; track loc) {
+            @for (loc of locations.slice(0, 7); track loc) {
               <li class="flex items-center gap-2 text-sm font-bold uppercase tracking-tight">
                 <span class="w-1.5 h-1.5 bg-primary-fixed shrink-0"></span> {{ loc }}
+              </li>
+            }
+            @if (locations.length > 7) {
+              <li>
+                <a routerLink="/contact" class="flex items-center gap-2 text-sm font-bold uppercase tracking-tight text-primary-fixed hover:opacity-80 transition-colors">
+                  <span class="w-1.5 h-1.5 bg-primary-fixed shrink-0"></span> and more...
+                </a>
               </li>
             }
           </ul>
