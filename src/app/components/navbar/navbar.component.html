@@ -1,6 +1,8 @@
-<header class="fixed top-0 w-full z-50 bg-surface-container-lowest border-b border-outline-variant/20">
+<!-- Top bar -->
+<header class="fixed md:relative top-0 w-full z-50 bg-surface-container-lowest border-b border-outline-variant/20">
   <div class="flex flex-row justify-between items-center px-4 py-3 w-full max-w-7xl mx-auto gap-4">
-    <div class="flex items-center gap-2">
+    <!-- Mobile: burger + left-aligned title -->
+    <div class="flex items-center gap-2 md:hidden">
       <button
         (click)="toggleMenu()"
         class="p-2 hover:bg-surface-container-high transition-colors shrink-0"
@@ -12,18 +14,35 @@
       </a>
     </div>
 
+    <!-- Desktop: centered title -->
+    <div class="hidden md:block flex-1"></div>
+    <a routerLink="/" class="hidden md:block font-headline tracking-tighter uppercase font-black text-xl text-primary leading-tight text-center">
+      DADDY BEAR PLUMBING
+    </a>
+    <div class="hidden md:flex flex-1 justify-end">
+      <a
+        [href]="'tel:' + phone"
+        class="bg-primary-fixed text-white px-4 py-3 font-headline font-bold text-xs tracking-tight flex items-center justify-center gap-2 hover:opacity-90 transition-all shrink-0 min-w-[140px]"
+      >
+        <span class="material-symbols-outlined text-sm shrink-0" style="font-variation-settings: 'FILL' 1;">call</span>
+        <span class="text-center leading-tight">CALL {{ phoneDisplay }}</span>
+      </a>
+    </div>
+
+    <!-- Mobile: call button -->
     <a
       [href]="'tel:' + phone"
-      class="bg-primary-fixed text-white px-4 py-3 font-headline font-bold text-xs tracking-tight flex items-center justify-center gap-2 hover:opacity-90 transition-all shrink-0 min-w-[140px]"
+      class="md:hidden bg-primary-fixed text-white px-4 py-3 font-headline font-bold text-xs tracking-tight flex items-center justify-center gap-2 hover:opacity-90 transition-all shrink-0 min-w-[140px]"
     >
       <span class="material-symbols-outlined text-sm shrink-0" style="font-variation-settings: 'FILL' 1;">call</span>
       <span class="text-center leading-tight">CALL {{ phoneDisplay }}</span>
     </a>
   </div>
 
+  <!-- Mobile dropdown menu -->
   <div
     [class.hidden]="!isMenuOpen"
-    class="absolute top-full left-0 w-full bg-surface-container-lowest border-b border-outline-variant/20"
+    class="md:hidden absolute top-full left-0 w-full bg-surface-container-lowest border-b border-outline-variant/20"
   >
     <nav class="flex flex-col max-w-7xl mx-auto px-6 py-4 gap-1">
       <a routerLink="/" (click)="closeMenu()" class="font-headline font-bold text-sm uppercase tracking-widest py-3 px-2 hover:bg-surface-container-low transition-colors">Home</a>
@@ -39,3 +58,29 @@
     </nav>
   </div>
 </header>
+
+<!-- Desktop sub-navigation -->
+<nav class="hidden md:flex justify-center bg-surface-container-lowest border-b border-outline-variant/20 py-4 gap-12">
+  <a routerLink="/" routerLinkActive="text-primary border-b-2 border-primary" [routerLinkActiveOptions]="{exact: true}"
+    class="font-body text-sm uppercase tracking-widest text-secondary hover:text-primary transition-colors">Home</a>
+  <a routerLink="/about" routerLinkActive="text-primary border-b-2 border-primary"
+    class="font-body text-sm uppercase tracking-widest text-secondary hover:text-primary transition-colors">About Us</a>
+  <div class="group relative">
+    <span class="font-body text-sm uppercase tracking-widest text-secondary hover:text-primary transition-colors cursor-pointer flex items-center gap-1"
+      routerLinkActive="text-primary border-b-2 border-primary">
+      Services <span class="material-symbols-outlined text-sm">expand_more</span>
+    </span>
+    <div class="absolute top-full left-1/2 -translate-x-1/2 min-w-[240px] hidden group-hover:block z-50 pt-4">
+      <div class="bg-surface-container-lowest py-4 border border-outline-variant/20">
+      <a routerLink="/residential" class="block px-6 py-3 hover:bg-surface-container-low text-secondary hover:text-primary text-sm uppercase tracking-widest transition-colors">Residential</a>
+      <a routerLink="/commercial" class="block px-6 py-3 hover:bg-surface-container-low text-secondary hover:text-primary text-sm uppercase tracking-widest transition-colors">Commercial</a>
+      </div>
+    </div>
+  </div>
+  <a routerLink="/gallery" routerLinkActive="text-primary border-b-2 border-primary"
+    class="font-body text-sm uppercase tracking-widest text-secondary hover:text-primary transition-colors">Gallery</a>
+  <a routerLink="/reviews" routerLinkActive="text-primary border-b-2 border-primary"
+    class="font-body text-sm uppercase tracking-widest text-secondary hover:text-primary transition-colors">Reviews</a>
+  <a routerLink="/contact" routerLinkActive="text-primary border-b-2 border-primary"
+    class="font-body text-sm uppercase tracking-widest text-secondary hover:text-primary transition-colors">Contact</a>
+</nav>
