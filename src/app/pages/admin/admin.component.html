@@ -1,3 +1,49 @@
+<!-- Shared pagination buttons template -->
+<ng-template #paginationTpl let-list="list" let-arr="arr">
+  @if (totalPages(arr) > 1) {
+    <div class="flex items-center gap-2">
+      <button (click)="setPage(list, getPage(list) - 1)" [disabled]="getPage(list) <= 1"
+        class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Prev</button>
+      @for (p of pageRange(arr); track p) {
+        <button (click)="setPage(list, p)"
+          class="w-8 h-8 text-xs font-bold transition-colors"
+          [class.bg-primary]="p === getPage(list)" [class.text-white]="p === getPage(list)"
+          [class.text-secondary]="p !== getPage(list)" [class.hover:text-primary]="p !== getPage(list)">{{ p }}</button>
+      }
+      <button (click)="setPage(list, getPage(list) + 1)" [disabled]="getPage(list) >= totalPages(arr)"
+        class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Next</button>
+    </div>
+  }
+</ng-template>
+
+<!-- Combined list header: count + pagination + refresh + optional extra actions -->
+<ng-template #listHeaderTpl let-list="list" let-arr="arr" let-label="label" let-extraActions="extraActions">
+  <div class="flex items-center justify-between flex-wrap gap-4 mb-6">
+    <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary whitespace-nowrap">
+      {{ arr.length }} {{ label }}{{ arr.length !== 1 ? 's' : '' }}
+    </p>
+    <ng-container [ngTemplateOutlet]="paginationTpl" [ngTemplateOutletContext]="{ list: list, arr: arr }" />
+    <div class="flex gap-4 items-center">
+      <button (click)="refreshList(list)"
+        class="text-secondary hover:text-primary text-xs font-headline font-bold uppercase tracking-widest transition-colors flex items-center gap-1">
+        <span class="material-symbols-outlined text-sm">refresh</span> Refresh
+      </button>
+      @if (extraActions) {
+        <ng-container [ngTemplateOutlet]="extraActions" />
+      }
+    </div>
+  </div>
+</ng-template>
+
+<!-- Bottom pagination wrapper: centers the buttons below the list -->
+<ng-template #paginationBottomTpl let-list="list" let-arr="arr">
+  @if (totalPages(arr) > 1) {
+    <div class="flex justify-center mt-4">
+      <ng-container [ngTemplateOutlet]="paginationTpl" [ngTemplateOutletContext]="{ list: list, arr: arr }" />
+    </div>
+  }
+</ng-template>
+
 <!-- Admin top bar -->
 <header class="bg-surface-container-lowest border-b border-outline-variant/20 w-full">
   <div class="flex flex-row justify-between items-center px-4 py-3 w-full max-w-7xl mx-auto gap-4">
@@ -92,7 +138,17 @@
 
     <!-- ==================== GALLERY TAB ==================== -->
     @if (activeTab === 'gallery') {
+      <!-- Header line -->
+      <ng-template #galleryExtraActions>
+        <button (click)="showUploadForm = !showUploadForm"
+          class="bg-primary-fixed text-white px-4 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+          {{ showUploadForm ? 'Close' : 'Add Photos' }}
+        </button>
+      </ng-template>
+      <ng-container [ngTemplateOutlet]="listHeaderTpl" [ngTemplateOutletContext]="{ list: 'gallery', arr: images, label: 'photo', extraActions: galleryExtraActions }" />
+
       <!-- Upload -->
+      @if (showUploadForm) {
       <div class="mb-16">
         <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-6">Upload New Photos</p>
         <div class="grid md:grid-cols-[1fr_2fr] gap-6 mb-6">
@@ -134,18 +190,10 @@
           </button>
         }
       </div>
+      }
 
       <!-- Image list -->
       <div class="border-t border-outline-variant/20 pt-12">
-        <div class="flex justify-between items-center mb-8">
-          <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary">
-            {{ images.length }} photo{{ images.length !== 1 ? 's' : '' }}
-          </p>
-          <button (click)="loadImages()" class="text-secondary hover:text-primary text-xs font-headline font-bold uppercase tracking-widest transition-colors flex items-center gap-1">
-            <span class="material-symbols-outlined text-sm">refresh</span> Refresh
-          </button>
-        </div>
-
         @if (loadingImages) {
           <div class="text-center py-16">
             <span class="material-symbols-outlined text-4xl text-outline-variant animate-pulse block mb-3">photo_library</span>
@@ -240,21 +288,7 @@
               <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
             </div>
           </div>
-          <!-- Gallery pagination -->
-          @if (totalPages(images) > 1) {
-            <div class="flex items-center justify-center gap-2 mt-4">
-              <button (click)="setPage('gallery', getPage('gallery') - 1)" [disabled]="getPage('gallery') <= 1"
-                class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Prev</button>
-              @for (p of pageRange(images); track p) {
-                <button (click)="setPage('gallery', p)"
-                  class="w-8 h-8 text-xs font-bold transition-colors"
-                  [class.bg-primary]="p === getPage('gallery')" [class.text-white]="p === getPage('gallery')"
-                  [class.text-secondary]="p !== getPage('gallery')" [class.hover:text-primary]="p !== getPage('gallery')">{{ p }}</button>
-              }
-              <button (click)="setPage('gallery', getPage('gallery') + 1)" [disabled]="getPage('gallery') >= totalPages(images)"
-                class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Next</button>
-            </div>
-          }
+          <ng-container [ngTemplateOutlet]="paginationBottomTpl" [ngTemplateOutletContext]="{ list: 'gallery', arr: images }" />
         }
       </div>
     }
@@ -262,20 +296,12 @@
     <!-- ==================== REVIEWS TAB ==================== -->
     @if (activeTab === 'reviews') {
 
-      <!-- Add button -->
-      <div class="flex justify-between items-center mb-8">
-        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary">
-          {{ reviews.length }} review{{ reviews.length !== 1 ? 's' : '' }}
-        </p>
-        <div class="flex gap-4">
-          <button (click)="loadReviews()" class="text-secondary hover:text-primary text-xs font-headline font-bold uppercase tracking-widest transition-colors flex items-center gap-1">
-            <span class="material-symbols-outlined text-sm">refresh</span> Refresh
-          </button>
-          <button (click)="openNewReview()" class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
-            Add Review
-          </button>
-        </div>
-      </div>
+      <ng-template #reviewsExtraActions>
+        <button (click)="showReviewForm ? cancelReviewForm() : openNewReview()" class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+          {{ showReviewForm ? 'Close' : 'Add Review' }}
+        </button>
+      </ng-template>
+      <ng-container [ngTemplateOutlet]="listHeaderTpl" [ngTemplateOutletContext]="{ list: 'reviews', arr: reviews, label: 'review', extraActions: reviewsExtraActions }" />
 
       <!-- Review form (add/edit) -->
       @if (showReviewForm) {
@@ -407,21 +433,7 @@
             <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
           </div>
         </div>
-        <!-- Reviews pagination -->
-        @if (totalPages(reviews) > 1) {
-          <div class="flex items-center justify-center gap-2 mt-4">
-            <button (click)="setPage('reviews', getPage('reviews') - 1)" [disabled]="getPage('reviews') <= 1"
-              class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Prev</button>
-            @for (p of pageRange(reviews); track p) {
-              <button (click)="setPage('reviews', p)"
-                class="w-8 h-8 text-xs font-bold transition-colors"
-                [class.bg-primary]="p === getPage('reviews')" [class.text-white]="p === getPage('reviews')"
-                [class.text-secondary]="p !== getPage('reviews')" [class.hover:text-primary]="p !== getPage('reviews')">{{ p }}</button>
-            }
-            <button (click)="setPage('reviews', getPage('reviews') + 1)" [disabled]="getPage('reviews') >= totalPages(reviews)"
-              class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Next</button>
-          </div>
-        }
+        <ng-container [ngTemplateOutlet]="paginationBottomTpl" [ngTemplateOutletContext]="{ list: 'reviews', arr: reviews }" />
       }
     }
 
@@ -546,8 +558,8 @@
       <div class="max-w-2xl">
 
         <!-- Locations -->
-        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2">Service Area Locations</p>
-        <p class="text-xs text-outline mb-8">Locations listed on the homepage service area section.</p>
+        <p class="text-xs text-outline mb-6">Locations listed on the homepage service area section.</p>
+        <ng-container [ngTemplateOutlet]="listHeaderTpl" [ngTemplateOutletContext]="{ list: 'locations', arr: locations, label: 'location' }" />
 
         @if (locations.length === 0 && !loadingLocations) {
           <div class="ghost-border bg-surface-container-low p-6 mb-6 text-center">
@@ -608,20 +620,7 @@
               <div class="flex items-center gap-4 px-4 py-2 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
             </div>
           </div>
-          @if (totalPages(locations) > 1) {
-            <div class="flex items-center justify-center gap-2 mt-4">
-              <button (click)="setPage('locations', getPage('locations') - 1)" [disabled]="getPage('locations') <= 1"
-                class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Prev</button>
-              @for (p of pageRange(locations); track p) {
-                <button (click)="setPage('locations', p)"
-                  class="w-8 h-8 text-xs font-bold transition-colors"
-                  [class.bg-primary]="p === getPage('locations')" [class.text-white]="p === getPage('locations')"
-                  [class.text-secondary]="p !== getPage('locations')" [class.hover:text-primary]="p !== getPage('locations')">{{ p }}</button>
-              }
-              <button (click)="setPage('locations', getPage('locations') + 1)" [disabled]="getPage('locations') >= totalPages(locations)"
-                class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Next</button>
-            </div>
-          }
+          <ng-container [ngTemplateOutlet]="paginationBottomTpl" [ngTemplateOutletContext]="{ list: 'locations', arr: locations }" />
         }
 
         <!-- Add location -->
@@ -640,71 +639,75 @@
 
     <!-- ==================== RESIDENTIAL / COMMERCIAL TABS ==================== -->
     @if (activeTab === 'residential' || activeTab === 'commercial') {
-      <div class="max-w-3xl">
-
-        <!-- Card form (shared for add/edit) -->
-        @if (editingList) {
-          <div class="ghost-border bg-surface-container-low p-6 mb-8">
-            <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-6">
-              {{ editingIndex >= 0 ? 'Edit Card' : 'New Card' }}
-            </p>
-            <div class="grid md:grid-cols-2 gap-6 mb-6">
-              <div>
-                <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Icon Name</label>
-                <input type="text" [(ngModel)]="cardForm.icon" placeholder="e.g. water_drop"
-                  class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors" />
-                <p class="text-outline text-xs mt-1">
-                  <a href="https://fonts.google.com/icons" target="_blank" rel="noopener" class="text-primary-fixed hover:underline">Browse icons</a>
-                </p>
-              </div>
-              <div>
-                <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Title</label>
-                <input type="text" [(ngModel)]="cardForm.title" placeholder="e.g. Drain Cleaning"
-                  class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors" />
-              </div>
+      <!-- Card form template (shared, rendered below the relevant section header) -->
+      <ng-template #cardFormTpl>
+        <div class="ghost-border bg-surface-container-low p-6 mb-8">
+          <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-6">
+            {{ editingIndex >= 0 ? 'Edit Card' : 'New Card' }}
+          </p>
+          <div class="grid md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Icon Name</label>
+              <input type="text" [(ngModel)]="cardForm.icon" placeholder="e.g. water_drop"
+                class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors" />
+              <p class="text-outline text-xs mt-1">
+                <a href="https://fonts.google.com/icons" target="_blank" rel="noopener" class="text-primary-fixed hover:underline">Browse icons</a>
+              </p>
             </div>
-            <div class="mb-6">
-              <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Description</label>
-              <textarea [(ngModel)]="cardForm.description" rows="3" placeholder="Short description of this service..."
-                class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors resize-y"></textarea>
-              <p class="text-outline text-xs mt-1">Leave empty for compact cards (commercial services).</p>
-            </div>
-            <!-- Preview -->
-            @if (cardForm.icon || cardForm.title) {
-              <div class="ghost-border bg-surface-container-lowest p-6 mb-6 max-w-[220px]">
-                @if (cardForm.icon) {
-                  <span class="material-symbols-outlined text-3xl text-primary-fixed block mb-3">{{ cardForm.icon }}</span>
-                }
-                <p class="font-headline font-bold text-xs uppercase tracking-tight">{{ cardForm.title || 'Title' }}</p>
-                @if (cardForm.description) {
-                  <p class="text-secondary text-xs leading-relaxed mt-2">{{ cardForm.description }}</p>
-                }
-              </div>
-            }
-            <div class="flex gap-4">
-              <button (click)="saveCard()"
-                class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
-                {{ editingIndex >= 0 ? 'Update' : 'Add' }}
-              </button>
-              <button (click)="cancelCardForm()"
-                class="text-secondary hover:text-primary text-xs font-headline font-bold uppercase tracking-widest transition-colors">
-                Cancel
-              </button>
+            <div>
+              <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Title</label>
+              <input type="text" [(ngModel)]="cardForm.title" placeholder="e.g. Drain Cleaning"
+                class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors" />
             </div>
           </div>
-        }
+          <div class="mb-6">
+            <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Description</label>
+            <textarea [(ngModel)]="cardForm.description" rows="3" placeholder="Short description of this service..."
+              class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors resize-y"></textarea>
+            <p class="text-outline text-xs mt-1">Leave empty for compact cards (commercial services).</p>
+          </div>
+          <!-- Preview -->
+          @if (cardForm.icon || cardForm.title) {
+            <div class="ghost-border bg-surface-container-lowest p-6 mb-6 max-w-[220px]">
+              @if (cardForm.icon) {
+                <span class="material-symbols-outlined text-3xl text-primary-fixed block mb-3">{{ cardForm.icon }}</span>
+              }
+              <p class="font-headline font-bold text-xs uppercase tracking-tight">{{ cardForm.title || 'Title' }}</p>
+              @if (cardForm.description) {
+                <p class="text-secondary text-xs leading-relaxed mt-2">{{ cardForm.description }}</p>
+              }
+            </div>
+          }
+          <div class="flex gap-4">
+            <button (click)="saveCard()"
+              class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+              {{ editingIndex >= 0 ? 'Update' : 'Add' }}
+            </button>
+            <button (click)="cancelCardForm()"
+              class="text-secondary hover:text-primary text-xs font-headline font-bold uppercase tracking-widest transition-colors">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </ng-template>
+
+      <div class="max-w-3xl">
 
         <!-- Residential Cards -->
         @if (activeTab === 'residential') {
-        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2">Residential Service Cards</p>
         <p class="text-xs text-outline mb-6">Cards shown on the /residential page.</p>
 
-        <div class="flex justify-end mb-4">
-          <button (click)="openAddCard('residential')"
+        <ng-template #residentialExtraActions>
+          <button (click)="editingList === 'residential' ? cancelCardForm() : openAddCard('residential')"
             class="bg-primary-fixed text-white px-4 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
-            Add Card
+            {{ editingList === 'residential' ? 'Close' : 'Add Card' }}
           </button>
-        </div>
+        </ng-template>
+        <ng-container [ngTemplateOutlet]="listHeaderTpl" [ngTemplateOutletContext]="{ list: 'residential', arr: residentialCards, label: 'card', extraActions: residentialExtraActions }" />
+
+        @if (editingList === 'residential') {
+          <ng-container [ngTemplateOutlet]="cardFormTpl" />
+        }
 
         @if (residentialCards.length === 0 && !loadingServices) {
           <div class="ghost-border bg-surface-container-low p-6 mb-8 text-center">
@@ -761,20 +764,7 @@
               <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
             </div>
           </div>
-          @if (totalPages(residentialCards) > 1) {
-            <div class="flex items-center justify-center gap-2 mt-4">
-              <button (click)="setPage('residential', getPage('residential') - 1)" [disabled]="getPage('residential') <= 1"
-                class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Prev</button>
-              @for (p of pageRange(residentialCards); track p) {
-                <button (click)="setPage('residential', p)"
-                  class="w-8 h-8 text-xs font-bold transition-colors"
-                  [class.bg-primary]="p === getPage('residential')" [class.text-white]="p === getPage('residential')"
-                  [class.text-secondary]="p !== getPage('residential')" [class.hover:text-primary]="p !== getPage('residential')">{{ p }}</button>
-              }
-              <button (click)="setPage('residential', getPage('residential') + 1)" [disabled]="getPage('residential') >= totalPages(residentialCards)"
-                class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Next</button>
-            </div>
-          }
+          <ng-container [ngTemplateOutlet]="paginationBottomTpl" [ngTemplateOutletContext]="{ list: 'residential', arr: residentialCards }" />
         }
 
         }
@@ -784,12 +774,17 @@
         <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2">Commercial Industries</p>
         <p class="text-xs text-outline mb-6">"Industries We Serve" cards on the /commercial page.</p>
 
-        <div class="flex justify-end mb-4">
-          <button (click)="openAddCard('commercial-industries')"
+        <ng-template #commercialIndustriesExtraActions>
+          <button (click)="editingList === 'commercial-industries' ? cancelCardForm() : openAddCard('commercial-industries')"
             class="bg-primary-fixed text-white px-4 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
-            Add Card
+            {{ editingList === 'commercial-industries' ? 'Close' : 'Add Card' }}
           </button>
-        </div>
+        </ng-template>
+        <ng-container [ngTemplateOutlet]="listHeaderTpl" [ngTemplateOutletContext]="{ list: 'commercialIndustries', arr: commercialIndustries, label: 'card', extraActions: commercialIndustriesExtraActions }" />
+
+        @if (editingList === 'commercial-industries') {
+          <ng-container [ngTemplateOutlet]="cardFormTpl" />
+        }
 
         @if (commercialIndustries.length === 0 && commercialServices.length === 0 && !loadingServices) {
           <div class="ghost-border bg-surface-container-low p-6 mb-8 text-center">
@@ -846,32 +841,24 @@
               <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
             </div>
           </div>
-          @if (totalPages(commercialIndustries) > 1) {
-            <div class="flex items-center justify-center gap-2 mt-4">
-              <button (click)="setPage('commercialIndustries', getPage('commercialIndustries') - 1)" [disabled]="getPage('commercialIndustries') <= 1"
-                class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Prev</button>
-              @for (p of pageRange(commercialIndustries); track p) {
-                <button (click)="setPage('commercialIndustries', p)"
-                  class="w-8 h-8 text-xs font-bold transition-colors"
-                  [class.bg-primary]="p === getPage('commercialIndustries')" [class.text-white]="p === getPage('commercialIndustries')"
-                  [class.text-secondary]="p !== getPage('commercialIndustries')" [class.hover:text-primary]="p !== getPage('commercialIndustries')">{{ p }}</button>
-              }
-              <button (click)="setPage('commercialIndustries', getPage('commercialIndustries') + 1)" [disabled]="getPage('commercialIndustries') >= totalPages(commercialIndustries)"
-                class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Next</button>
-            </div>
-          }
+          <ng-container [ngTemplateOutlet]="paginationBottomTpl" [ngTemplateOutletContext]="{ list: 'commercialIndustries', arr: commercialIndustries }" />
         }
 
         <!-- Commercial Services -->
         <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2">Commercial Services</p>
         <p class="text-xs text-outline mb-6">Compact service cards on the /commercial page. Description is optional.</p>
 
-        <div class="flex justify-end mb-4">
-          <button (click)="openAddCard('commercial-services')"
+        <ng-template #commercialServicesExtraActions>
+          <button (click)="editingList === 'commercial-services' ? cancelCardForm() : openAddCard('commercial-services')"
             class="bg-primary-fixed text-white px-4 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
-            Add Card
+            {{ editingList === 'commercial-services' ? 'Close' : 'Add Card' }}
           </button>
-        </div>
+        </ng-template>
+        <ng-container [ngTemplateOutlet]="listHeaderTpl" [ngTemplateOutletContext]="{ list: 'commercialServices', arr: commercialServices, label: 'card', extraActions: commercialServicesExtraActions }" />
+
+        @if (editingList === 'commercial-services') {
+          <ng-container [ngTemplateOutlet]="cardFormTpl" />
+        }
 
         @if (commercialServices.length === 0 && commercialIndustries.length > 0 && !loadingServices) {
           <div class="ghost-border bg-surface-container-low p-6 mb-8 text-center">
@@ -923,20 +910,7 @@
               <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
             </div>
           </div>
-          @if (totalPages(commercialServices) > 1) {
-            <div class="flex items-center justify-center gap-2 mt-4">
-              <button (click)="setPage('commercialServices', getPage('commercialServices') - 1)" [disabled]="getPage('commercialServices') <= 1"
-                class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Prev</button>
-              @for (p of pageRange(commercialServices); track p) {
-                <button (click)="setPage('commercialServices', p)"
-                  class="w-8 h-8 text-xs font-bold transition-colors"
-                  [class.bg-primary]="p === getPage('commercialServices')" [class.text-white]="p === getPage('commercialServices')"
-                  [class.text-secondary]="p !== getPage('commercialServices')" [class.hover:text-primary]="p !== getPage('commercialServices')">{{ p }}</button>
-              }
-              <button (click)="setPage('commercialServices', getPage('commercialServices') + 1)" [disabled]="getPage('commercialServices') >= totalPages(commercialServices)"
-                class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Next</button>
-            </div>
-          }
+          <ng-container [ngTemplateOutlet]="paginationBottomTpl" [ngTemplateOutletContext]="{ list: 'commercialServices', arr: commercialServices }" />
         }
         }
 

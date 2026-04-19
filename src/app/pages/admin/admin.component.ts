@@ -86,6 +86,19 @@ export class AdminComponent implements OnInit, OnDestroy {
     return Array.from({ length: end - start }, (_, i) => start + i);
   }
 
+  /** Dispatch refresh action by list name */
+  refreshList(list: string): void {
+    switch (list) {
+      case 'gallery': this.loadImages(); break;
+      case 'reviews': this.loadReviews(); break;
+      case 'locations': this.loadLocations(); break;
+      case 'residential':
+      case 'commercialIndustries':
+      case 'commercialServices':
+        this.loadServiceCards(); break;
+    }
+  }
+
   /* Gallery state */
   images: AdminGalleryImage[] = [];
   uploads: UploadItem[] = [];
@@ -97,6 +110,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   reviews: AdminReview[] = [];
   loadingReviews = true;
   showReviewForm = false;
+  showUploadForm = false;
   editingReview: AdminReview | null = null;
   reviewForm = { name: '', rating: 5, text: '', location: '', date: '' };
 
@@ -367,6 +381,10 @@ export class AdminComponent implements OnInit, OnDestroy {
       this.images.push(this.galleryService.parseFilename(fn) as AdminGalleryImage);
     }
     await this.saveGalleryManifest();
+    // Close the upload form if everything uploaded successfully
+    if (this.uploads.length === 0) {
+      this.showUploadForm = false;
+    }
     this.cdr.detectChanges();
   }
 
