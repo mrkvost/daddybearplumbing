@@ -19,3 +19,8 @@ infrastructure/terraform.tfvars
 infrastructure/.terraform/
 infrastructure/.terraform.lock.hcl
 infrastructure/*.tfstate*
+infrastructure/lambda/contact_form.zip
+
+
+# build files
+dist/
