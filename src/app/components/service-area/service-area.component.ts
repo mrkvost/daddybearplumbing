@@ -1,16 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { environment } from '../../../environments/environment';
-
-const DEFAULT_LOCATIONS = [
-  'Brookfield, IL',
-  'La Grange, IL',
-  'Villa Park, IL',
-  'Western Springs',
-  'Elmhurst, IL',
-  'Countryside',
-  'Oak Brook',
-];
+import { DEFAULT_LOCATIONS } from '../../defaults/locations';
 
 @Component({
   selector: 'app-service-area',

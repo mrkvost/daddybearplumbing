@@ -9,6 +9,7 @@ import { GalleryService, GalleryImage, GalleryEntry } from '../../services/galle
 import { Review } from '../../services/reviews.service';
 import { environment } from '../../../environments/environment';
 import { HeroComponent } from '../../components/hero/hero.component';
+import { DEFAULT_LOCATIONS } from '../../defaults/locations';
 
 interface AdminGalleryImage extends GalleryImage {
   deleting?: boolean;
@@ -789,7 +790,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   async initLocationDefaults(): Promise<void> {
-    this.locations = ['Brookfield, IL', 'La Grange, IL', 'Villa Park, IL', 'Western Springs', 'Elmhurst, IL', 'Countryside', 'Oak Brook'];
+    this.locations = [...DEFAULT_LOCATIONS];
     await this.saveLocations();
     this.cdr.detectChanges();
   }

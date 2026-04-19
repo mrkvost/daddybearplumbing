@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
+import { DEFAULT_LOCATIONS } from '../../defaults/locations';
 
 declare global {
   interface Window {
@@ -18,16 +19,6 @@ declare global {
     };
   }
 }
-
-const DEFAULT_LOCATIONS = [
-  'Brookfield, IL',
-  'La Grange, IL',
-  'Villa Park, IL',
-  'Western Springs',
-  'Elmhurst, IL',
-  'Countryside',
-  'Oak Brook',
-];
 
 @Component({
   selector: 'app-contact',
