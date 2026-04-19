@@ -4,6 +4,7 @@ import { GalleryService, GalleryImage } from '../../services/gallery.service';
 import { environment } from '../../../environments/environment';
 
 const BATCH_SIZE = 18;
+const FILTERS = ['All', 'Commercial', 'Residential', 'Kitchen', 'Bathroom', 'Heaters'];
 
 @Component({
   selector: 'app-gallery',
@@ -18,7 +19,7 @@ export class GalleryComponent implements OnInit {
   phone = environment.phone;
   phoneDisplay = environment.phoneDisplay;
   allImages: GalleryImage[] = [];
-  tags: string[] = [];
+  tags: string[] = FILTERS;
   activeTag = 'All';
   visibleCount = BATCH_SIZE;
   loading = true;
@@ -27,9 +28,6 @@ export class GalleryComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     try {
       this.allImages = await this.galleryService.listImages();
-      const uniqueTags = [...new Set(this.allImages.map(img => img.tagLabel))]
-        .filter(t => t !== 'Uncategorized');
-      this.tags = ['All', ...uniqueTags.sort()];
       this.loading = false;
     } catch {
       this.loading = false;
@@ -40,7 +38,8 @@ export class GalleryComponent implements OnInit {
 
   get filteredImages(): GalleryImage[] {
     if (this.activeTag === 'All') return this.allImages;
-    return this.allImages.filter(img => img.tagLabel === this.activeTag);
+    const needle = this.activeTag.toLowerCase();
+    return this.allImages.filter(img => img.tagLabel.toLowerCase().includes(needle));
   }
 
   get visibleImages(): GalleryImage[] {
