@@ -46,7 +46,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   private meta = inject(Meta);
   private cdr = inject(ChangeDetectorRef);
 
-  activeTab: 'gallery' | 'reviews' | 'site' | 'services' | 'settings' = 'gallery';
+  activeTab: 'dashboard' | 'hero' | 'og' | 'about' | 'residential' | 'commercial' | 'gallery' | 'reviews' | 'locations' | 'settings' = 'dashboard';
 
   /* Pagination */
   pageSize = 10;

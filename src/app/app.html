@@ -1,5 +1,9 @@
-<app-navbar />
-<main class="pt-[60px] md:pt-0 bg-surface text-on-surface">
+@if (!isAdminRoute) {
+  <app-navbar />
+}
+<main class="bg-surface text-on-surface" [class.pt-[60px]]="!isAdminRoute" [class.md:pt-0]="!isAdminRoute">
   <router-outlet />
 </main>
-<app-footer />
+@if (!isAdminRoute) {
+  <app-footer />
+}

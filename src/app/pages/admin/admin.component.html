@@ -1,50 +1,94 @@
-<section class="min-h-[calc(100vh-60px)] bg-surface">
-  <!-- Header -->
-  <div class="bg-black text-white px-6 py-8">
-    <div class="max-w-5xl mx-auto flex justify-between items-end">
-      <div>
-        <p class="text-white/50 text-[0.7rem] font-bold tracking-[0.3em] uppercase mb-2">Admin Panel</p>
-        <h1 class="font-headline font-black text-3xl tracking-tighter uppercase">Content</h1>
-      </div>
-      <button
-        (click)="signOut()"
-        class="text-white/50 hover:text-white text-xs font-headline font-bold uppercase tracking-widest transition-colors"
-      >Sign out</button>
+<!-- Admin top bar -->
+<header class="bg-surface-container-lowest border-b border-outline-variant/20 w-full">
+  <div class="flex flex-row justify-between items-center px-4 py-3 w-full max-w-7xl mx-auto gap-4">
+    <div class="flex-1 hidden md:block"></div>
+    <a class="font-headline tracking-tighter uppercase font-black text-lg md:text-xl text-primary leading-tight">
+      DADDY BEAR PLUMBING
+    </a>
+    <div class="flex-1 flex justify-end items-center gap-2">
+      <button (click)="activeTab = 'settings'"
+        [class.text-primary]="activeTab === 'settings'"
+        class="p-2 text-secondary hover:text-primary transition-colors" title="Settings">
+        <span class="material-symbols-outlined">settings</span>
+      </button>
+      <button (click)="signOut()"
+        class="bg-primary-fixed text-white px-4 py-3 font-headline font-bold text-xs tracking-tight flex items-center justify-center gap-2 hover:opacity-90 transition-all shrink-0">
+        <span class="material-symbols-outlined text-sm shrink-0">logout</span>
+        <span class="text-center leading-tight">SIGN OUT</span>
+      </button>
     </div>
   </div>
+</header>
 
-  <!-- Tabs -->
-  <div class="border-b border-outline-variant/20 bg-surface-container-lowest">
-    <div class="max-w-5xl mx-auto px-6 flex gap-0">
-      <button
-        (click)="activeTab = 'gallery'"
-        [class]="activeTab === 'gallery' ? 'border-b-2 border-primary text-primary' : 'text-secondary hover:text-on-surface'"
-        class="px-6 py-4 font-headline font-bold text-xs uppercase tracking-widest transition-colors"
-      >Gallery ({{ images.length }})</button>
-      <button
-        (click)="activeTab = 'reviews'"
-        [class]="activeTab === 'reviews' ? 'border-b-2 border-primary text-primary' : 'text-secondary hover:text-on-surface'"
-        class="px-6 py-4 font-headline font-bold text-xs uppercase tracking-widest transition-colors"
-      >Reviews ({{ reviews.length }})</button>
-      <button
-        (click)="activeTab = 'site'"
-        [class]="activeTab === 'site' ? 'border-b-2 border-primary text-primary' : 'text-secondary hover:text-on-surface'"
-        class="px-6 py-4 font-headline font-bold text-xs uppercase tracking-widest transition-colors"
-      >Site</button>
-      <button
-        (click)="activeTab = 'services'"
-        [class]="activeTab === 'services' ? 'border-b-2 border-primary text-primary' : 'text-secondary hover:text-on-surface'"
-        class="px-6 py-4 font-headline font-bold text-xs uppercase tracking-widest transition-colors"
-      >Services</button>
-      <button
-        (click)="activeTab = 'settings'"
-        [class]="activeTab === 'settings' ? 'border-b-2 border-primary text-primary' : 'text-secondary hover:text-on-surface'"
-        class="px-6 py-4 font-headline font-bold text-xs uppercase tracking-widest transition-colors"
-      >Settings</button>
-    </div>
-  </div>
+<!-- Admin sub-navigation -->
+<nav class="hidden md:flex justify-center bg-surface-container-lowest border-b border-outline-variant/20 py-4 gap-8 overflow-x-auto">
+  <button (click)="activeTab = 'dashboard'"
+    [class]="activeTab === 'dashboard' ? 'text-primary border-b-2 border-primary' : 'text-secondary hover:text-primary'"
+    class="font-body text-sm uppercase tracking-widest transition-colors whitespace-nowrap">Dashboard</button>
+  <button (click)="activeTab = 'hero'"
+    [class]="activeTab === 'hero' ? 'text-primary border-b-2 border-primary' : 'text-secondary hover:text-primary'"
+    class="font-body text-sm uppercase tracking-widest transition-colors whitespace-nowrap">Hero</button>
+  <button (click)="activeTab = 'og'"
+    [class]="activeTab === 'og' ? 'text-primary border-b-2 border-primary' : 'text-secondary hover:text-primary'"
+    class="font-body text-sm uppercase tracking-widest transition-colors whitespace-nowrap">OG</button>
+  <button (click)="activeTab = 'about'"
+    [class]="activeTab === 'about' ? 'text-primary border-b-2 border-primary' : 'text-secondary hover:text-primary'"
+    class="font-body text-sm uppercase tracking-widest transition-colors whitespace-nowrap">About</button>
+  <button (click)="activeTab = 'residential'"
+    [class]="activeTab === 'residential' ? 'text-primary border-b-2 border-primary' : 'text-secondary hover:text-primary'"
+    class="font-body text-sm uppercase tracking-widest transition-colors whitespace-nowrap">Residential</button>
+  <button (click)="activeTab = 'commercial'"
+    [class]="activeTab === 'commercial' ? 'text-primary border-b-2 border-primary' : 'text-secondary hover:text-primary'"
+    class="font-body text-sm uppercase tracking-widest transition-colors whitespace-nowrap">Commercial</button>
+  <button (click)="activeTab = 'gallery'"
+    [class]="activeTab === 'gallery' ? 'text-primary border-b-2 border-primary' : 'text-secondary hover:text-primary'"
+    class="font-body text-sm uppercase tracking-widest transition-colors whitespace-nowrap">Gallery</button>
+  <button (click)="activeTab = 'reviews'"
+    [class]="activeTab === 'reviews' ? 'text-primary border-b-2 border-primary' : 'text-secondary hover:text-primary'"
+    class="font-body text-sm uppercase tracking-widest transition-colors whitespace-nowrap">Reviews</button>
+  <button (click)="activeTab = 'locations'"
+    [class]="activeTab === 'locations' ? 'text-primary border-b-2 border-primary' : 'text-secondary hover:text-primary'"
+    class="font-body text-sm uppercase tracking-widest transition-colors whitespace-nowrap">Locations</button>
+</nav>
 
+<!-- Mobile tab selector (dropdown) -->
+<nav class="md:hidden border-b border-outline-variant/20 bg-surface-container-lowest px-4 py-3">
+  <select [ngModel]="activeTab" (ngModelChange)="activeTab = $event"
+    class="w-full bg-surface-container-low border border-outline-variant/20 px-3 py-2 text-sm font-headline font-bold uppercase tracking-widest">
+    <option value="dashboard">Dashboard</option>
+    <option value="hero">Hero</option>
+    <option value="og">OG</option>
+    <option value="about">About</option>
+    <option value="residential">Residential</option>
+    <option value="commercial">Commercial</option>
+    <option value="gallery">Gallery</option>
+    <option value="reviews">Reviews</option>
+    <option value="locations">Locations</option>
+    <option value="settings">Settings</option>
+  </select>
+</nav>
+
+<section class="min-h-[calc(100vh-120px)] bg-surface">
   <div class="max-w-5xl mx-auto px-6 py-12">
+
+    <!-- ==================== DASHBOARD TAB ==================== -->
+    @if (activeTab === 'dashboard') {
+      <div>
+        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-4">Dashboard</p>
+        <h2 class="font-headline font-black text-3xl tracking-tighter uppercase mb-4">Welcome</h2>
+        <p class="text-secondary text-sm">Use the navigation above to manage site content.</p>
+      </div>
+    }
+
+    <!-- ==================== ABOUT TAB ==================== -->
+    @if (activeTab === 'about') {
+      <div>
+        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-4">About Page</p>
+        <h2 class="font-headline font-black text-3xl tracking-tighter uppercase mb-4">Edit About Us</h2>
+        <p class="text-secondary text-sm">Editor coming soon.</p>
+      </div>
+    }
+
 
     <!-- ==================== GALLERY TAB ==================== -->
     @if (activeTab === 'gallery') {
@@ -381,8 +425,8 @@
       }
     }
 
-    <!-- ==================== SITE TAB ==================== -->
-    @if (activeTab === 'site') {
+    <!-- ==================== HERO TAB ==================== -->
+    @if (activeTab === 'hero') {
       <div class="max-w-2xl">
 
         <!-- Hero Image -->
@@ -445,6 +489,13 @@
           <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onHeroFileSelected($event)" class="hidden" [disabled]="heroUploading" />
         </label>
 
+      </div>
+    }
+
+    <!-- ==================== OG TAB ==================== -->
+    @if (activeTab === 'og') {
+      <div class="max-w-2xl">
+
         <!-- OG Image -->
         <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2">Open Graph Image</p>
         <p class="text-xs text-outline mb-8">Appears when your site is shared on Facebook, LinkedIn, Slack, iMessage, etc. Recommended: 1200 &times; 630 px.</p>
@@ -487,8 +538,15 @@
           <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onOgFileSelected($event)" class="hidden" [disabled]="ogUploading" />
         </label>
 
+      </div>
+    }
+
+    <!-- ==================== LOCATIONS TAB ==================== -->
+    @if (activeTab === 'locations') {
+      <div class="max-w-2xl">
+
         <!-- Locations -->
-        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2 mt-16">Service Area Locations</p>
+        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2">Service Area Locations</p>
         <p class="text-xs text-outline mb-8">Locations listed on the homepage service area section.</p>
 
         @if (locations.length === 0 && !loadingLocations) {
@@ -580,8 +638,8 @@
       </div>
     }
 
-    <!-- ==================== SERVICES TAB ==================== -->
-    @if (activeTab === 'services') {
+    <!-- ==================== RESIDENTIAL / COMMERCIAL TABS ==================== -->
+    @if (activeTab === 'residential' || activeTab === 'commercial') {
       <div class="max-w-3xl">
 
         <!-- Card form (shared for add/edit) -->
@@ -637,7 +695,8 @@
         }
 
         <!-- Residential Cards -->
-        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2 mt-16">Residential Service Cards</p>
+        @if (activeTab === 'residential') {
+        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2">Residential Service Cards</p>
         <p class="text-xs text-outline mb-6">Cards shown on the /residential page.</p>
 
         <div class="flex justify-end mb-4">
@@ -718,7 +777,10 @@
           }
         }
 
+        }
+
         <!-- Commercial Industries -->
+        @if (activeTab === 'commercial') {
         <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2">Commercial Industries</p>
         <p class="text-xs text-outline mb-6">"Industries We Serve" cards on the /commercial page.</p>
 
@@ -875,6 +937,7 @@
                 class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Next</button>
             </div>
           }
+        }
         }
 
       </div>
