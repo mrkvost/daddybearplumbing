@@ -297,7 +297,7 @@
     @if (activeTab === 'reviews') {
 
       <ng-template #reviewsExtraActions>
-        <button (click)="showReviewForm ? cancelReviewForm() : openNewReview()" class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+        <button (click)="showReviewForm ? cancelReviewForm() : openNewReview()" class="bg-primary-fixed text-white px-4 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
           {{ showReviewForm ? 'Close' : 'Add Review' }}
         </button>
       </ng-template>
@@ -439,7 +439,7 @@
 
     <!-- ==================== HERO TAB ==================== -->
     @if (activeTab === 'hero') {
-      <div class="max-w-2xl">
+      <div>
 
         <!-- Hero Image -->
         <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2">Hero Image</p>
@@ -506,7 +506,7 @@
 
     <!-- ==================== OG TAB ==================== -->
     @if (activeTab === 'og') {
-      <div class="max-w-2xl">
+      <div>
 
         <!-- OG Image -->
         <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2">Open Graph Image</p>
@@ -555,11 +555,29 @@
 
     <!-- ==================== LOCATIONS TAB ==================== -->
     @if (activeTab === 'locations') {
-      <div class="max-w-2xl">
+      <div>
 
         <!-- Locations -->
         <p class="text-xs text-outline mb-6">Locations listed on the homepage service area section.</p>
-        <ng-container [ngTemplateOutlet]="listHeaderTpl" [ngTemplateOutletContext]="{ list: 'locations', arr: locations, label: 'location' }" />
+        <ng-template #locationsExtraActions>
+          <button (click)="showLocationForm = !showLocationForm"
+            class="bg-primary-fixed text-white px-4 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+            {{ showLocationForm ? 'Close' : 'Add Location' }}
+          </button>
+        </ng-template>
+        <ng-container [ngTemplateOutlet]="listHeaderTpl" [ngTemplateOutletContext]="{ list: 'locations', arr: locations, label: 'location', extraActions: locationsExtraActions }" />
+
+        @if (showLocationForm) {
+          <div class="flex gap-3 mb-8">
+            <input type="text" [(ngModel)]="newLocation" placeholder="e.g. Riverside, IL"
+              (keydown.enter)="addLocation()"
+              class="flex-1 bg-surface-container-lowest border border-outline-variant/20 px-4 py-2.5 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors" />
+            <button (click)="addLocation()"
+              class="bg-primary-fixed text-white px-4 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all shrink-0">
+              Add
+            </button>
+          </div>
+        }
 
         @if (locations.length === 0 && !loadingLocations) {
           <div class="ghost-border bg-surface-container-low p-6 mb-6 text-center">
@@ -623,17 +641,6 @@
           <ng-container [ngTemplateOutlet]="paginationBottomTpl" [ngTemplateOutletContext]="{ list: 'locations', arr: locations }" />
         }
 
-        <!-- Add location -->
-        <div class="flex gap-3">
-          <input type="text" [(ngModel)]="newLocation" placeholder="e.g. Riverside, IL"
-            (keydown.enter)="addLocation()"
-            class="flex-1 bg-surface-container-lowest border border-outline-variant/20 px-4 py-2.5 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors" />
-          <button (click)="addLocation()"
-            class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all shrink-0">
-            Add
-          </button>
-        </div>
-
       </div>
     }
 
@@ -691,7 +698,7 @@
         </div>
       </ng-template>
 
-      <div class="max-w-3xl">
+      <div>
 
         <!-- Residential Cards -->
         @if (activeTab === 'residential') {

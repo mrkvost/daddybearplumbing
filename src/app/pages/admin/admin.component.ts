@@ -764,6 +764,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   locations: string[] = [];
   loadingLocations = true;
   newLocation = '';
+  showLocationForm = false;
   editingLocationIndex = -1;
   editingLocationValue = '';
 
