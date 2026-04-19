@@ -159,7 +159,7 @@ admin user creation, gallery photo convention, project structure.
       so that hero image + locations are statically embedded in the HTML at build time
       (improves SEO — crawlers see real content instead of JS-fetched data)
 - [ ] Online chat integration - more complex
-- [ ] Pagination for admin gallery and reviews lists
+- [x] Pagination for admin gallery and reviews lists (+ editable position numbers)
 - [x] Session persistence (tokens in sessionStorage + auto-refresh)
 - [x] Google Maps: update to real business coordinates
 - [ ] Google Business Profile link on map/address

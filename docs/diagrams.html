@@ -279,14 +279,14 @@
   </div>
 
   <div class="flex-col">
-    <div class="comp-node root"><div class="comp-name">AppComponent</div><div class="comp-sel">&lt;app-root&gt;</div><div class="comp-desc">navbar + router-outlet + footer</div></div>
+    <div class="comp-node root"><div class="comp-name">AppComponent</div><div class="comp-sel">&lt;app-root&gt;</div><div class="comp-desc">navbar + router-outlet + footer<br>(navbar/footer hidden on /admin routes)</div></div>
     <div class="connector"></div>
   </div>
 
   <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 8px;">
     <!-- Navbar -->
     <div class="flex-col">
-      <div class="comp-node layout"><div class="comp-name">NavbarComponent</div><div class="comp-desc">Fixed header, dropdown menu, call CTA</div></div>
+      <div class="comp-node layout"><div class="comp-name">NavbarComponent</div><div class="comp-desc">Mobile: fixed burger + call CTA<br>Desktop: non-sticky centered title<br>+ sub-nav with Services hover dropdown</div></div>
     </div>
 
     <!-- Home -->
@@ -294,10 +294,10 @@
       <div class="comp-node page"><div class="comp-name">HomeComponent</div><div class="comp-sel">/</div></div>
       <div class="connector"></div>
       <div style="display: flex; flex-direction: column; gap: 6px; align-items: center;">
-        <div class="comp-node section" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">HeroComponent</div><div class="comp-desc">Grayscale hero + headline<br>Loads from meta.json or fallback</div></div>
+        <div class="comp-node section" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">HeroComponent</div><div class="comp-desc">Shared: imageUrl + compact inputs<br>Loads from meta.json or fallback<br>Reused in admin Hero tab preview</div></div>
         <div class="comp-node section" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">TrustStatsComponent</div><div class="comp-desc">Operational hours</div></div>
         <div class="comp-node section" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">ServicesGridComponent</div><div class="comp-desc">4 services + hover anim</div></div>
-        <div class="comp-node section" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">ServiceAreaComponent</div><div class="comp-desc">Google Maps + locations<br>(data-driven from S3)</div></div>
+        <div class="comp-node section" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">ServiceAreaComponent</div><div class="comp-desc">Contact CTA + address card<br>First 7 locations + "and more..."<br>(full map moved to /contact)</div></div>
       </div>
     </div>
 
@@ -313,7 +313,7 @@
 
     <!-- Contact -->
     <div class="flex-col">
-      <div class="comp-node page"><div class="comp-name">ContactComponent</div><div class="comp-sel">/contact</div><div class="comp-desc">Form + Turnstile + honeypot<br>Lambda → SES email</div></div>
+      <div class="comp-node page"><div class="comp-name">ContactComponent</div><div class="comp-sel">/contact</div><div class="comp-desc">Form + Turnstile + honeypot<br>Lambda → SES email<br>Embedded Google Maps + full location list<br>Clickable address → Google Maps</div></div>
     </div>
 
     <!-- Content Pages -->
@@ -341,7 +341,7 @@
 
     <!-- Admin -->
     <div class="flex-col">
-      <div class="comp-node admin"><div class="comp-name">AdminComponent</div><div class="comp-sel">/admin</div><div class="comp-desc">Gallery: upload, drag-reorder,<br>edit tags, delete<br>Reviews: add, edit, delete<br>Site: hero image, OG image<br>Services: card editor (drag-reorder)</div></div>
+      <div class="comp-node admin"><div class="comp-name">AdminComponent</div><div class="comp-sel">/admin</div><div class="comp-desc">Own navbar (centered title + settings + sign out)<br>9 tabs: Dashboard, Hero, OG, About,<br>Residential, Commercial, Gallery, Reviews, Locations<br>Unified pagination (10/page, top + bottom)<br>Editable position numbers + drag-reorder</div></div>
       <div class="connector"></div>
       <div class="comp-node admin" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">LoginComponent</div><div class="comp-sel">/admin/login</div></div>
     </div>
@@ -510,13 +510,13 @@
   <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">Saves <code>gallery.json</code> with <code>{ "file": "...", "tag": "Custom Tag" }</code></div></div>
 
   <h2>Admin — Hero / OG Image</h2>
-  <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Admin switches to Site tab &rarr; sees current hero image thumbnail (or default) + OG image</div></div>
+  <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Admin switches to Hero or OG tab &rarr; sees current image (Hero tab: full-size HeroComponent preview)</div></div>
   <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">Selects new image &rarr; staged locally with full grayscale preview (matches homepage look)</div></div>
   <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">Clicks "Confirm Upload" &rarr; uploads as <code>hero-&lt;hash&gt;.ext</code> to <code>gallery-images/meta/</code><br><small>Old file deleted, <code>meta.json</code> updated with new filename. Hash-based names for cache busting.</small></div></div>
   <div class="flow-step"><div class="flow-num">4</div><div class="flow-text">HeroComponent on homepage fetches <code>meta.json</code> (uncached) &rarr; loads <code>/gallery-images/meta/hero-&lt;hash&gt;.ext</code><br><small>Falls back to <code>hero.jpg</code> if no custom image set. Only one image request made.</small></div></div>
 
   <h2>Admin — Service Cards</h2>
-  <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Admin switches to Services tab &rarr; three card lists: Residential, Commercial Industries, Commercial Services</div></div>
+  <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Admin switches to Residential or Commercial tab &rarr; card lists (Commercial has Industries + Services)</div></div>
   <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">If no cards saved yet &rarr; "Load Defaults to Edit" populates lists from hardcoded defaults and saves to S3</div></div>
   <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">Add/edit cards: icon name (Material Symbols), title, description &mdash; with live preview<br><small>Drag-and-drop reorder (same pattern as gallery photos: numbered rows, drag handle, blue drop indicators)</small></div></div>
   <div class="flow-step"><div class="flow-num">4</div><div class="flow-text">Saves to <code>services-residential.json</code> and <code>services-commercial.json</code> in gallery bucket<br><small>Residential/Commercial pages load from JSON on init; fall back to hardcoded defaults if no JSON exists</small></div></div>
@@ -798,17 +798,19 @@ infrastructure/
   <h2>Goal 3 — SEO</h2>
   <div class="check check-todo">LocalBusiness JSON-LD structured data</div>
   <div class="check check-done">Title + meta description per page (route data + CanonicalService)</div>
-  <div class="check check-done">Open Graph tags (CanonicalService + Admin SEO tab for OG image)</div>
+  <div class="check check-done">Open Graph tags (CanonicalService + Admin OG tab for image)</div>
+  <div class="check check-todo">OG placeholder image (1200×630)</div>
   <div class="check check-todo">Heading hierarchy audit</div>
+  <div class="check check-todo">Image alt text audit</div>
   <div class="check check-done">robots.txt (created, disallows /admin)</div>
   <div class="check check-done">sitemap.xml + robots.txt Sitemap directive</div>
   <div class="check check-done">Canonical tags (CanonicalService, auto on navigation)</div>
   <div class="check check-todo">Pre-rendering evaluation</div>
   <div class="check check-done">Self-hosted text fonts (Public Sans + Inter)</div>
   <div class="check check-done">Scroll-to-top on navigation</div>
-  <div class="check check-todo">Core Web Vitals optimization (remaining)</div>
+  <div class="check check-todo">Lazy-load Google Maps iframe</div>
   <div class="check check-todo">Google Business Profile</div>
-  <div class="check check-todo">Google Search Console</div>
+  <div class="check check-todo">Google Search Console + Bing Webmaster Tools</div>
 
   <h2>Goal 4 — README <span class="badge badge-done">Complete</span></h2>
   <div class="check check-done">Prerequisites, local dev, build, deploy, infra setup, admin, gallery, reviews, project structure</div>
@@ -826,7 +828,8 @@ infrastructure/
   <div class="check check-done">Enhanced footer (5-col: brand, services, navigate, info, accreditation + license numbers)</div>
   <div class="check check-done">Contact form (Turnstile + Lambda + SES)</div>
   <div class="check check-todo">Online chat integration</div>
-  <div class="check check-todo">Admin pagination (large gallery/review lists)</div>
+  <div class="check check-done">Admin pagination (top + bottom, 10/page, editable position numbers)</div>
+  <div class="check check-todo">Admin-triggered AWS rebuild (static hero + locations at build time)</div>
   <div class="check check-done">Session persistence (sessionStorage + auto-refresh via refresh token)</div>
   <div class="check check-done">Home page hero image (admin-uploadable with preview, fallback default)</div>
 </div>
