@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Meta } from '@angular/platform-browser';
 import { AuthService } from '../../services/auth.service';
 import { UploadService } from '../../services/upload.service';
@@ -35,7 +35,7 @@ const REGION = environment.aws.region;
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeroComponent],
+  imports: [CommonModule, FormsModule, HeroComponent, RouterLink],
   templateUrl: './admin.component.html',
 })
 export class AdminComponent implements OnInit, OnDestroy {
