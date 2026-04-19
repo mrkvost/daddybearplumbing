@@ -160,6 +160,7 @@ admin user creation, gallery photo convention, project structure.
       (improves SEO — crawlers see real content instead of JS-fetched data)
 - [ ] Online chat integration - more complex
 - [x] Pagination for admin gallery and reviews lists (+ editable position numbers)
+- [x] Admin FAQ editor (question + answer + optional bullet list, reorder, pagination)
 - [x] Session persistence (tokens in sessionStorage + auto-refresh)
 - [x] Google Maps: update to real business coordinates
 - [ ] Google Business Profile link on map/address

@@ -12,125 +12,24 @@
 
   <div class="space-y-6">
 
-    <div class="ghost-border bg-surface-container-low p-6">
-      <h2 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">What are your operating hours?</h2>
-      <p class="text-secondary text-sm leading-relaxed">
-        We are available Monday through Friday, 8 AM to 8 PM, and Saturday through Sunday, 8 AM to 6 PM.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-6">
-      <h2 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">Do you offer emergency plumbing services?</h2>
-      <p class="text-secondary text-sm leading-relaxed">
-        Yes, we offer emergency plumbing services. Our typical response time is within 1 hour, though
-        this may vary depending on the situation and current demand. Call us immediately if you have
-        a plumbing emergency.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-6">
-      <h2 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">What areas do you serve?</h2>
-      <p class="text-secondary text-sm leading-relaxed">
-        We serve Chicago's Western Suburbs including La Grange, Villa Park, Brookfield, Westchester,
-        Riverside, Berwyn, Cicero, Lyons, North Riverside, and surrounding communities. Contact us to
-        confirm service availability for your specific location.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-6">
-      <h2 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">How do I schedule an appointment?</h2>
-      <p class="text-secondary text-sm leading-relaxed">
-        You can schedule an appointment by calling us at
-        <a [href]="'tel:' + phone" class="text-primary-fixed hover:underline">{{ phoneDisplay }}</a>,
-        emailing us at
-        <a [href]="'mailto:' + email" class="text-primary-fixed hover:underline">{{ email }}</a>,
-        or using our online contact form.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-6">
-      <h2 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">What is your cancellation policy?</h2>
-      <p class="text-secondary text-sm leading-relaxed">
-        We require 48 hours' notice for cancellations. For Monday appointments, please cancel by Friday
-        at 9 AM. Late cancellations may be subject to a cancellation fee.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-6">
-      <h2 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">Are your plumbers licensed?</h2>
-      <p class="text-secondary text-sm leading-relaxed">
-        Yes, all of our plumbers are fully licensed, insured, and experienced professionals.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-6">
-      <h2 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">What services do you offer?</h2>
-      <div class="text-secondary text-sm leading-relaxed">
-        <p class="mb-3">We offer a wide range of plumbing services including:</p>
-        <ul class="space-y-1.5 ml-4">
-          <li class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-xs text-primary-fixed">check</span>
-            Fixture installation &amp; repair
-          </li>
-          <li class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-xs text-primary-fixed">check</span>
-            Leak detection &amp; repair
-          </li>
-          <li class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-xs text-primary-fixed">check</span>
-            Drain cleaning
-          </li>
-          <li class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-xs text-primary-fixed">check</span>
-            Water heater installation &amp; repair
-          </li>
-          <li class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-xs text-primary-fixed">check</span>
-            Remodeling &amp; new construction plumbing
-          </li>
-          <li class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-xs text-primary-fixed">check</span>
-            Gas line work
-          </li>
-          <li class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-xs text-primary-fixed">check</span>
-            Sewer repair &amp; replacement
-          </li>
-        </ul>
+    @for (item of items; track $index) {
+      <div class="ghost-border bg-surface-container-low p-6">
+        <h2 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">{{ item.question }}</h2>
+        <div class="text-secondary text-sm leading-relaxed">
+          <p [class.mb-3]="item.bullets?.length">{{ item.answer }}</p>
+          @if (item.bullets?.length) {
+            <ul class="space-y-1.5 ml-4">
+              @for (bullet of item.bullets; track $index) {
+                <li class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-xs text-primary-fixed">check</span>
+                  {{ bullet }}
+                </li>
+              }
+            </ul>
+          }
+        </div>
       </div>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-6">
-      <h2 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">How does pricing work?</h2>
-      <p class="text-secondary text-sm leading-relaxed">
-        We offer free estimates, on-site assessments, and flat-fee quotes so you know exactly what
-        to expect before any work begins. No hidden fees or surprises.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-6">
-      <h2 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">What payment methods do you accept?</h2>
-      <p class="text-secondary text-sm leading-relaxed">
-        We accept cash, check, Zelle, and all major credit cards. Please note that credit card payments
-        are subject to a 3.5% processing fee.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-6">
-      <h2 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">Do you offer warranties?</h2>
-      <p class="text-secondary text-sm leading-relaxed">
-        Yes, we offer a 3-year labor warranty on most services and a 30-day warranty on drain cleaning.
-        Material and parts are covered under the manufacturer's warranty.
-      </p>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-6">
-      <h2 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">Can I see references or reviews?</h2>
-      <p class="text-secondary text-sm leading-relaxed">
-        Absolutely. You can find our reviews on Google, Yelp, and Angie's List, or check out our
-        <a routerLink="/reviews" class="text-primary-fixed hover:underline">reviews page</a>.
-      </p>
-    </div>
+    }
 
   </div>
 

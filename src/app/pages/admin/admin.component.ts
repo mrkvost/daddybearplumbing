@@ -46,7 +46,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   private meta = inject(Meta);
   private cdr = inject(ChangeDetectorRef);
 
-  activeTab: 'dashboard' | 'hero' | 'og' | 'about' | 'residential' | 'commercial' | 'gallery' | 'reviews' | 'locations' | 'settings' = 'dashboard';
+  activeTab: 'dashboard' | 'hero' | 'og' | 'about' | 'residential' | 'commercial' | 'gallery' | 'reviews' | 'locations' | 'faq' | 'settings' = 'dashboard';
 
   /* Pagination */
   pageSize = 10;
@@ -92,6 +92,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       case 'gallery': this.loadImages(); break;
       case 'reviews': this.loadReviews(); break;
       case 'locations': this.loadLocations(); break;
+      case 'faq': this.loadFaq(); break;
       case 'residential':
       case 'commercialIndustries':
       case 'commercialServices':
@@ -121,6 +122,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.loadSiteImages();
     this.loadLocations();
     this.loadServiceCards();
+    this.loadFaq();
   }
 
   ngOnDestroy(): void {
@@ -211,6 +213,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       case 'gallery': return this.images;
       case 'reviews': return this.reviews;
       case 'locations': return this.locations;
+      case 'faq': return this.faqItems;
       case 'residential': return this.residentialCards;
       case 'commercialIndustries': return this.commercialIndustries;
       case 'commercialServices': return this.commercialServices;
@@ -223,6 +226,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       case 'gallery': await this.saveGalleryManifest(); break;
       case 'reviews': await this.saveReviews(); break;
       case 'locations': await this.saveLocations(); break;
+      case 'faq': await this.saveFaq(); break;
       case 'residential':
       case 'commercialIndustries':
       case 'commercialServices': await this.saveServiceCards(); break;
@@ -1054,6 +1058,154 @@ export class AdminComponent implements OnInit, OnDestroy {
   private async saveServiceCards(): Promise<void> {
     await this.uploadService.putJson(this.RES_KEY, this.residentialCards, GALLERY_BUCKET);
     await this.uploadService.putJson(this.COM_KEY, { industries: this.commercialIndustries, services: this.commercialServices }, GALLERY_BUCKET);
+  }
+
+  /* ================================================================
+   * FAQ
+   * ================================================================ */
+
+  faqItems: { question: string; answer: string; bullets?: string[] }[] = [];
+  loadingFaq = true;
+  editingFaqIndex = -1; // -1 when closed, -2 when adding, >=0 when editing existing
+  faqForm = { question: '', answer: '', bulletsText: '' };
+
+  faqDragIndex = -1;
+  faqDragOverIndex = -1;
+
+  private readonly FAQ_KEY = 'gallery-images/faq.json';
+
+  async loadFaq(): Promise<void> {
+    this.loadingFaq = true;
+    this.cdr.detectChanges();
+    try {
+      const res = await fetch(`/gallery-images/faq.json?t=${Date.now()}`);
+      if (res.ok) this.faqItems = await res.json();
+    } catch { /* empty */ }
+    this.loadingFaq = false;
+    this.cdr.detectChanges();
+  }
+
+  async initFaqDefaults(): Promise<void> {
+    this.faqItems = [
+      { question: 'What are your operating hours?', answer: 'We are available Monday through Friday, 8 AM to 8 PM, and Saturday through Sunday, 8 AM to 6 PM.' },
+      { question: 'Do you offer emergency plumbing services?', answer: 'Yes, we offer emergency plumbing services. Our typical response time is within 1 hour, though this may vary depending on the situation and current demand. Call us immediately if you have a plumbing emergency.' },
+      { question: 'What areas do you serve?', answer: "We serve Chicago's Western Suburbs including La Grange, Villa Park, Brookfield, Westchester, Riverside, Berwyn, Cicero, Lyons, North Riverside, and surrounding communities. Contact us to confirm service availability for your specific location." },
+      { question: 'How do I schedule an appointment?', answer: `You can schedule an appointment by calling us at ${environment.phoneDisplay}, emailing us at ${environment.email}, or using our online contact form.` },
+      { question: 'What is your cancellation policy?', answer: "We require 48 hours' notice for cancellations. For Monday appointments, please cancel by Friday at 9 AM. Late cancellations may be subject to a cancellation fee." },
+      { question: 'Are your plumbers licensed?', answer: 'Yes, all of our plumbers are fully licensed, insured, and experienced professionals.' },
+      {
+        question: 'What services do you offer?',
+        answer: 'We offer a wide range of plumbing services including:',
+        bullets: [
+          'Fixture installation & repair',
+          'Leak detection & repair',
+          'Drain cleaning',
+          'Water heater installation & repair',
+          'Remodeling & new construction plumbing',
+          'Gas line work',
+          'Sewer repair & replacement',
+        ],
+      },
+      { question: 'How does pricing work?', answer: 'We offer free estimates, on-site assessments, and flat-fee quotes so you know exactly what to expect before any work begins. No hidden fees or surprises.' },
+      { question: 'What payment methods do you accept?', answer: 'We accept cash, check, Zelle, and all major credit cards. Please note that credit card payments are subject to a 3.5% processing fee.' },
+      { question: 'Do you offer warranties?', answer: "Yes, we offer a 3-year labor warranty on most services and a 30-day warranty on drain cleaning. Material and parts are covered under the manufacturer's warranty." },
+      { question: 'Can I see references or reviews?', answer: "Absolutely. You can find our reviews on Google, Yelp, and Angie's List, or check out our reviews page." },
+    ];
+    await this.saveFaq();
+    this.cdr.detectChanges();
+  }
+
+  openAddFaq(): void {
+    this.editingFaqIndex = -2;
+    this.faqForm = { question: '', answer: '', bulletsText: '' };
+    this.cdr.detectChanges();
+  }
+
+  openEditFaq(index: number): void {
+    const item = this.faqItems[index];
+    this.editingFaqIndex = index;
+    this.faqForm = {
+      question: item.question,
+      answer: item.answer,
+      bulletsText: (item.bullets || []).join('\n'),
+    };
+    this.cdr.detectChanges();
+  }
+
+  cancelFaqForm(): void {
+    this.editingFaqIndex = -1;
+    this.cdr.detectChanges();
+  }
+
+  async saveFaqItem(): Promise<void> {
+    const q = this.faqForm.question.trim();
+    const a = this.faqForm.answer.trim();
+    if (!q || !a) return;
+
+    const bullets = this.faqForm.bulletsText
+      .split('\n')
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
+
+    const item: { question: string; answer: string; bullets?: string[] } = { question: q, answer: a };
+    if (bullets.length > 0) item.bullets = bullets;
+
+    if (this.editingFaqIndex >= 0) {
+      this.faqItems[this.editingFaqIndex] = item;
+    } else {
+      this.faqItems.push(item);
+    }
+    this.editingFaqIndex = -1;
+    await this.saveFaq();
+    this.cdr.detectChanges();
+  }
+
+  async deleteFaqItem(index: number): Promise<void> {
+    this.faqItems.splice(index, 1);
+    await this.saveFaq();
+    this.cdr.detectChanges();
+  }
+
+  onFaqDragStart(index: number): void {
+    this.faqDragIndex = index;
+    this.cdr.detectChanges();
+  }
+
+  onFaqRowDragOver(event: DragEvent, rowIndex: number): void {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const midY = rect.top + rect.height / 2;
+    const insertAt = event.clientY < midY ? rowIndex : rowIndex + 1;
+    if (insertAt !== this.faqDragOverIndex) {
+      this.faqDragOverIndex = insertAt;
+      this.cdr.detectChanges();
+    }
+  }
+
+  onFaqDragEnd(): void {
+    this.faqDragIndex = -1;
+    this.faqDragOverIndex = -1;
+    this.cdr.detectChanges();
+  }
+
+  async onFaqDrop(event: DragEvent, targetIndex: number): Promise<void> {
+    event.preventDefault();
+    const fromIndex = this.faqDragIndex;
+    this.faqDragIndex = -1;
+    this.faqDragOverIndex = -1;
+    this.cdr.detectChanges();
+
+    if (fromIndex < 0 || fromIndex === targetIndex || fromIndex === targetIndex - 1) return;
+
+    const [item] = this.faqItems.splice(fromIndex, 1);
+    const insertAt = targetIndex > fromIndex ? targetIndex - 1 : targetIndex;
+    this.faqItems.splice(insertAt, 0, item);
+    this.cdr.detectChanges();
+
+    await this.saveFaq();
+  }
+
+  private async saveFaq(): Promise<void> {
+    await this.uploadService.putJson(this.FAQ_KEY, this.faqItems, GALLERY_BUCKET);
   }
 
   signOut(): void {
