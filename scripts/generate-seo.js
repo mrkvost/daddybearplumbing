@@ -15,7 +15,19 @@ const domain = domainMatch[1];
 const baseUrl = `https://${domain}`;
 const publicDir = path.join(__dirname, '../public');
 
-const routes = ['/', '/gallery', '/reviews', '/contact'];
+const routes = [
+  '/',
+  '/about',
+  '/residential',
+  '/commercial',
+  '/gallery',
+  '/reviews',
+  '/faq',
+  '/contact',
+  '/terms',
+  '/privacy',
+  '/cookies',
+];
 
 // sitemap.xml
 fs.writeFileSync(path.join(publicDir, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>

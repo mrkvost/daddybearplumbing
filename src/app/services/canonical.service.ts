@@ -6,7 +6,7 @@ import { filter, map, mergeMap } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 const BRAND = 'Daddy Bear Plumbing';
-const OG_FALLBACK = '/gallery-images/meta/og-image.jpg';
+const OG_FALLBACK = '/og-placeholder.jpg';
 
 @Injectable({ providedIn: 'root' })
 export class CanonicalService {

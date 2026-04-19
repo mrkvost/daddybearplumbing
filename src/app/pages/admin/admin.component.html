@@ -541,9 +541,12 @@
             </button>
           </div>
         } @else {
-          <div class="ghost-border bg-surface-container-low p-6 mb-6 text-center">
-            <span class="material-symbols-outlined text-4xl text-outline-variant block mb-2">image</span>
-            <p class="text-secondary text-sm">No OG image set. Social shares will show no preview.</p>
+          <div class="mb-6">
+            <p class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold mb-2">Placeholder (no custom image set)</p>
+            <div class="ghost-border bg-surface-container-low p-2">
+              <img src="/og-placeholder.jpg" alt="OG placeholder" class="w-full max-h-64 object-contain" />
+            </div>
+            <p class="text-outline text-xs mt-2">1200 &times; 630 JPG — used as the fallback for social shares. Upload a branded image to replace.</p>
           </div>
         }
 

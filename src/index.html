@@ -7,13 +7,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
 
-    <!-- Open Graph defaults (updated dynamically by CanonicalService) -->
+    <!-- Open Graph defaults — crawlers (Facebook, LinkedIn, X) do NOT execute JS,
+         so these absolute values must be baked into the static HTML.
+         CanonicalService still updates them per-route for the in-browser experience. -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Daddy Bear Plumbing" />
     <meta property="og:title" content="Daddy Bear Plumbing" />
-    <meta property="og:description" content="" />
-    <meta property="og:url" content="" />
-    <meta property="og:image" content="" />
+    <meta property="og:description" content="Professional plumbing services for Chicago's Western Suburbs. Licensed, insured, and locally owned." />
+    <meta property="og:url" content="https://kvaking.com" />
+    <meta property="og:image" content="https://kvaking.com/og-placeholder.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Daddy Bear Plumbing logo" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Daddy Bear Plumbing" />
+    <meta name="twitter:description" content="Professional plumbing services for Chicago's Western Suburbs. Licensed, insured, and locally owned." />
+    <meta name="twitter:image" content="https://kvaking.com/og-placeholder.jpg" />
 
     <!-- Fonts: Public Sans + Inter self-hosted (see src/fonts.css) -->
     <!-- Material Symbols Outlined: loaded from Google Fonts (icon set too large to self-host) -->
