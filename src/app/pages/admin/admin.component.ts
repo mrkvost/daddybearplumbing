@@ -48,6 +48,44 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   activeTab: 'gallery' | 'reviews' | 'site' | 'services' | 'settings' = 'gallery';
 
+  /* Pagination */
+  pageSize = 10;
+  pages: Record<string, number> = {};
+
+  getPage(list: string): number {
+    return this.pages[list] || 1;
+  }
+
+  setPage(list: string, page: number): void {
+    this.pages[list] = page;
+    this.cdr.detectChanges();
+  }
+
+  pageStart(list: string): number {
+    return (this.getPage(list) - 1) * this.pageSize;
+  }
+
+  pageItems(arr: any[], list: string): any[] {
+    const start = this.pageStart(list);
+    return arr.slice(start, start + this.pageSize);
+  }
+
+  totalPages(arr: any[]): number {
+    return Math.ceil(arr.length / this.pageSize);
+  }
+
+  pageRange(arr: any[]): number[] {
+    const total = this.totalPages(arr);
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  /** Returns actual array indices for the current page */
+  pageIndices(arr: any[], list: string): number[] {
+    const start = this.pageStart(list);
+    const end = Math.min(start + this.pageSize, arr.length);
+    return Array.from({ length: end - start }, (_, i) => start + i);
+  }
+
   /* Gallery state */
   images: AdminGalleryImage[] = [];
   uploads: UploadItem[] = [];

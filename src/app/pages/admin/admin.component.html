@@ -116,7 +116,7 @@
         }
         @if (!loadingImages && images.length > 0) {
           <div class="space-y-1">
-            @for (image of images; track image.filename; let i = $index) {
+            @for (i of pageIndices(images, 'gallery'); track i) {
               <!-- Drop indicator above -->
               <div
                 class="transition-all overflow-hidden"
@@ -129,7 +129,7 @@
               <div
                 class="flex items-center gap-4 px-4 py-3 ghost-border bg-surface-container-low cursor-grab active:cursor-grabbing"
                 [class.opacity-30]="dragIndex === i"
-                [class.opacity-50]="image.deleting"
+                [class.opacity-50]="images[i].deleting"
                 draggable="true"
                 (dragstart)="onDragStart(i)"
                 (dragend)="onDragEnd()"
@@ -143,7 +143,6 @@
                     (keydown.escape)="cancelEditPosition()"
                     (blur)="applyPosition('gallery', i, $any($event.target).valueAsNumber)"
                     (click)="$event.stopPropagation()" (mousedown)="$event.stopPropagation()"
-                    #posInput
                   />
                 } @else {
                   <span class="text-xs text-outline w-6 text-center font-body shrink-0 cursor-pointer hover:text-primary hover:font-bold transition-colors"
@@ -155,35 +154,35 @@
                 <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
                 <!-- Thumbnail -->
                 <div class="w-16 h-12 shrink-0 overflow-hidden bg-surface-container-high">
-                  <img [src]="image.url" [alt]="image.tagLabel" class="w-full h-full object-cover" loading="lazy" />
+                  <img [src]="images[i].url" [alt]="images[i].tagLabel" class="w-full h-full object-cover" loading="lazy" />
                 </div>
                 <!-- Info -->
                 <div class="flex-1 min-w-0">
-                  @if (image.editingTag) {
+                  @if (images[i].editingTag) {
                     <input
                       type="text"
-                      [value]="image.tagLabel === 'Uncategorized' ? '' : image.tagLabel"
-                      (keydown.enter)="saveTag(image, $any($event.target).value)"
-                      (keydown.escape)="cancelEditTag(image)"
-                      (blur)="saveTag(image, $any($event.target).value)"
+                      [value]="images[i].tagLabel === 'Uncategorized' ? '' : images[i].tagLabel"
+                      (keydown.enter)="saveTag(images[i], $any($event.target).value)"
+                      (keydown.escape)="cancelEditTag(images[i])"
+                      (blur)="saveTag(images[i], $any($event.target).value)"
                       placeholder="Tag (empty = infer from filename)"
                       class="w-full bg-surface-container-lowest border border-outline-variant/20 px-2 py-1 text-sm font-body text-on-surface focus:border-primary focus:ring-0"
                       autofocus
                     />
                   } @else {
                     <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate cursor-pointer hover:text-primary-fixed transition-colors"
-                       (click)="startEditTag(image)" title="Click to edit tag">
-                      {{ image.tagLabel }}
-                      @if (image.customTag) {
+                       (click)="startEditTag(images[i])" title="Click to edit tag">
+                      {{ images[i].tagLabel }}
+                      @if (images[i].customTag) {
                         <span class="text-[0.6rem] text-outline font-body normal-case tracking-normal">(custom)</span>
                       }
                     </p>
                   }
-                  <p class="text-[0.65rem] text-secondary">{{ image.date | date:'mediumDate' }} &middot; {{ image.filename }}</p>
+                  <p class="text-[0.65rem] text-secondary">{{ images[i].date | date:'mediumDate' }} &middot; {{ images[i].filename }}</p>
                 </div>
                 <!-- Delete -->
-                <button (click)="deleteImage(image)" [disabled]="image.deleting" class="p-1 text-secondary hover:text-error transition-colors shrink-0 disabled:opacity-50" title="Delete">
-                  <span class="material-symbols-outlined text-lg">{{ image.deleting ? 'hourglass_top' : 'delete' }}</span>
+                <button (click)="deleteImage(images[i])" [disabled]="images[i].deleting" class="p-1 text-secondary hover:text-error transition-colors shrink-0 disabled:opacity-50" title="Delete">
+                  <span class="material-symbols-outlined text-lg">{{ images[i].deleting ? 'hourglass_top' : 'delete' }}</span>
                 </button>
               </div>
             }
@@ -197,6 +196,21 @@
               <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
             </div>
           </div>
+          <!-- Gallery pagination -->
+          @if (totalPages(images) > 1) {
+            <div class="flex items-center justify-center gap-2 mt-4">
+              <button (click)="setPage('gallery', getPage('gallery') - 1)" [disabled]="getPage('gallery') <= 1"
+                class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Prev</button>
+              @for (p of pageRange(images); track p) {
+                <button (click)="setPage('gallery', p)"
+                  class="w-8 h-8 text-xs font-bold transition-colors"
+                  [class.bg-primary]="p === getPage('gallery')" [class.text-white]="p === getPage('gallery')"
+                  [class.text-secondary]="p !== getPage('gallery')" [class.hover:text-primary]="p !== getPage('gallery')">{{ p }}</button>
+              }
+              <button (click)="setPage('gallery', getPage('gallery') + 1)" [disabled]="getPage('gallery') >= totalPages(images)"
+                class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Next</button>
+            </div>
+          }
         }
       </div>
     }
@@ -289,7 +303,7 @@
       <!-- Reviews list -->
       @if (!loadingReviews && reviews.length > 0) {
         <div class="space-y-1">
-          @for (review of reviews; track review.id; let i = $index) {
+          @for (i of pageIndices(reviews, 'reviews'); track i) {
             <!-- Drop indicator -->
             <div class="transition-all overflow-hidden"
               [style.height.px]="reviewDragOverIndex === i && reviewDragIndex !== i && reviewDragIndex !== i - 1 ? 60 : 0"
@@ -298,7 +312,7 @@
             </div>
             <div class="flex items-center gap-4 px-4 py-3 ghost-border bg-surface-container-low cursor-grab active:cursor-grabbing"
               [class.opacity-30]="reviewDragIndex === i"
-              [class.opacity-50]="review.deleting"
+              [class.opacity-50]="reviews[i].deleting"
               draggable="true" (dragstart)="onReviewDragStart(i)" (dragend)="onReviewDragEnd()" (dragover)="onReviewRowDragOver($event, i)">
               <!-- Position number -->
               @if (editingPositionList === 'reviews' && editingPositionIndex === i) {
@@ -321,23 +335,23 @@
               <div class="flex gap-0.5 shrink-0">
                 @for (s of [1,2,3,4,5]; track s) {
                   <span class="material-symbols-outlined text-xs"
-                    [style.color]="s <= review.rating ? '#b02f00' : '#c6c6c6'" [style.font-variation-settings]="s <= review.rating ? '\'FILL\' 1' : '\'FILL\' 0'">star</span>
+                    [style.color]="s <= reviews[i].rating ? '#b02f00' : '#c6c6c6'" [style.font-variation-settings]="s <= reviews[i].rating ? '\'FILL\' 1' : '\'FILL\' 0'">star</span>
                 }
               </div>
               <!-- Content -->
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-body text-on-surface leading-relaxed truncate">{{ review.text }}</p>
+                <p class="text-sm font-body text-on-surface leading-relaxed truncate">{{ reviews[i].text }}</p>
                 <p class="text-[0.65rem] text-secondary">
-                  <span class="font-headline font-bold uppercase tracking-tight">{{ review.name }}</span>
-                  @if (review.location) { <span> &middot; {{ review.location }}</span> }
-                  <span> &middot; {{ review.date }}</span>
+                  <span class="font-headline font-bold uppercase tracking-tight">{{ reviews[i].name }}</span>
+                  @if (reviews[i].location) { <span> &middot; {{ reviews[i].location }}</span> }
+                  <span> &middot; {{ reviews[i].date }}</span>
                 </p>
               </div>
               <!-- Actions -->
-              <button (click)="openEditReview(review)" class="p-1 text-secondary hover:text-primary transition-colors shrink-0" title="Edit">
+              <button (click)="openEditReview(reviews[i])" class="p-1 text-secondary hover:text-primary transition-colors shrink-0" title="Edit">
                 <span class="material-symbols-outlined text-lg">edit</span>
               </button>
-              <button (click)="deleteReview(review)" [disabled]="review.deleting" class="p-1 text-secondary hover:text-error transition-colors shrink-0 disabled:opacity-50" title="Delete">
+              <button (click)="deleteReview(reviews[i])" [disabled]="reviews[i].deleting" class="p-1 text-secondary hover:text-error transition-colors shrink-0 disabled:opacity-50" title="Delete">
                 <span class="material-symbols-outlined text-lg">delete</span>
               </button>
             </div>
@@ -349,6 +363,21 @@
             <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
           </div>
         </div>
+        <!-- Reviews pagination -->
+        @if (totalPages(reviews) > 1) {
+          <div class="flex items-center justify-center gap-2 mt-4">
+            <button (click)="setPage('reviews', getPage('reviews') - 1)" [disabled]="getPage('reviews') <= 1"
+              class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Prev</button>
+            @for (p of pageRange(reviews); track p) {
+              <button (click)="setPage('reviews', p)"
+                class="w-8 h-8 text-xs font-bold transition-colors"
+                [class.bg-primary]="p === getPage('reviews')" [class.text-white]="p === getPage('reviews')"
+                [class.text-secondary]="p !== getPage('reviews')" [class.hover:text-primary]="p !== getPage('reviews')">{{ p }}</button>
+            }
+            <button (click)="setPage('reviews', getPage('reviews') + 1)" [disabled]="getPage('reviews') >= totalPages(reviews)"
+              class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Next</button>
+          </div>
+        }
       }
     }
 
@@ -474,7 +503,7 @@
 
         @if (locations.length > 0) {
           <div class="space-y-1 mb-6">
-            @for (loc of locations; track $index; let i = $index) {
+            @for (i of pageIndices(locations, 'locations'); track i) {
               <div class="transition-all overflow-hidden"
                 [style.height.px]="locationDragOverIndex === i && locationDragIndex !== i && locationDragIndex !== i - 1 ? 48 : 0"
                 (dragover)="$event.preventDefault()" (drop)="onLocationDrop($event, i)">
@@ -508,7 +537,7 @@
                     autofocus />
                 } @else {
                   <span class="flex-1 font-headline font-bold text-sm uppercase tracking-tight text-on-surface cursor-pointer hover:text-primary-fixed transition-colors"
-                    (click)="startEditLocation(i)" title="Click to edit">{{ loc }}</span>
+                    (click)="startEditLocation(i)" title="Click to edit">{{ locations[i] }}</span>
                 }
                 <button (click)="deleteLocation(i)" class="p-1 text-secondary hover:text-error transition-colors shrink-0" title="Delete">
                   <span class="material-symbols-outlined text-lg">delete</span>
@@ -521,6 +550,20 @@
               <div class="flex items-center gap-4 px-4 py-2 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
             </div>
           </div>
+          @if (totalPages(locations) > 1) {
+            <div class="flex items-center justify-center gap-2 mt-4">
+              <button (click)="setPage('locations', getPage('locations') - 1)" [disabled]="getPage('locations') <= 1"
+                class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Prev</button>
+              @for (p of pageRange(locations); track p) {
+                <button (click)="setPage('locations', p)"
+                  class="w-8 h-8 text-xs font-bold transition-colors"
+                  [class.bg-primary]="p === getPage('locations')" [class.text-white]="p === getPage('locations')"
+                  [class.text-secondary]="p !== getPage('locations')" [class.hover:text-primary]="p !== getPage('locations')">{{ p }}</button>
+              }
+              <button (click)="setPage('locations', getPage('locations') + 1)" [disabled]="getPage('locations') >= totalPages(locations)"
+                class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Next</button>
+            </div>
+          }
         }
 
         <!-- Add location -->
@@ -616,7 +659,7 @@
 
         @if (residentialCards.length > 0) {
           <div class="space-y-1 mb-16">
-            @for (card of residentialCards; track $index; let i = $index) {
+            @for (i of pageIndices(residentialCards, 'residential'); track i) {
               <div class="transition-all overflow-hidden"
                 [style.height.px]="cardDragList === 'residential' && cardDragOverIndex === i && cardDragIndex !== i && cardDragIndex !== i - 1 ? 60 : 0"
                 (dragover)="$event.preventDefault()" (drop)="onCardDrop($event, 'residential', i)">
@@ -640,10 +683,10 @@
                     title="Click to change position">{{ i + 1 }}</span>
                 }
                 <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
-                <span class="material-symbols-outlined text-xl text-primary-fixed shrink-0">{{ card.icon }}</span>
+                <span class="material-symbols-outlined text-xl text-primary-fixed shrink-0">{{ residentialCards[i].icon }}</span>
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate">{{ card.title }}</p>
-                  <p class="text-[0.65rem] text-secondary truncate">{{ card.description }}</p>
+                  <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate">{{ residentialCards[i].title }}</p>
+                  <p class="text-[0.65rem] text-secondary truncate">{{ residentialCards[i].description }}</p>
                 </div>
                 <button (click)="openEditCard('residential', i)" class="p-1 text-secondary hover:text-primary transition-colors shrink-0" title="Edit">
                   <span class="material-symbols-outlined text-lg">edit</span>
@@ -659,6 +702,20 @@
               <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
             </div>
           </div>
+          @if (totalPages(residentialCards) > 1) {
+            <div class="flex items-center justify-center gap-2 mt-4">
+              <button (click)="setPage('residential', getPage('residential') - 1)" [disabled]="getPage('residential') <= 1"
+                class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Prev</button>
+              @for (p of pageRange(residentialCards); track p) {
+                <button (click)="setPage('residential', p)"
+                  class="w-8 h-8 text-xs font-bold transition-colors"
+                  [class.bg-primary]="p === getPage('residential')" [class.text-white]="p === getPage('residential')"
+                  [class.text-secondary]="p !== getPage('residential')" [class.hover:text-primary]="p !== getPage('residential')">{{ p }}</button>
+              }
+              <button (click)="setPage('residential', getPage('residential') + 1)" [disabled]="getPage('residential') >= totalPages(residentialCards)"
+                class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Next</button>
+            </div>
+          }
         }
 
         <!-- Commercial Industries -->
@@ -684,7 +741,7 @@
 
         @if (commercialIndustries.length > 0) {
           <div class="space-y-1 mb-16">
-            @for (card of commercialIndustries; track $index; let i = $index) {
+            @for (i of pageIndices(commercialIndustries, 'commercialIndustries'); track i) {
               <div class="transition-all overflow-hidden"
                 [style.height.px]="cardDragList === 'commercial-industries' && cardDragOverIndex === i && cardDragIndex !== i && cardDragIndex !== i - 1 ? 60 : 0"
                 (dragover)="$event.preventDefault()" (drop)="onCardDrop($event, 'commercial-industries', i)">
@@ -708,10 +765,10 @@
                     title="Click to change position">{{ i + 1 }}</span>
                 }
                 <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
-                <span class="material-symbols-outlined text-xl text-primary-fixed shrink-0">{{ card.icon }}</span>
+                <span class="material-symbols-outlined text-xl text-primary-fixed shrink-0">{{ commercialIndustries[i].icon }}</span>
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate">{{ card.title }}</p>
-                  <p class="text-[0.65rem] text-secondary truncate">{{ card.description }}</p>
+                  <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate">{{ commercialIndustries[i].title }}</p>
+                  <p class="text-[0.65rem] text-secondary truncate">{{ commercialIndustries[i].description }}</p>
                 </div>
                 <button (click)="openEditCard('commercial-industries', i)" class="p-1 text-secondary hover:text-primary transition-colors shrink-0" title="Edit">
                   <span class="material-symbols-outlined text-lg">edit</span>
@@ -727,6 +784,20 @@
               <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
             </div>
           </div>
+          @if (totalPages(commercialIndustries) > 1) {
+            <div class="flex items-center justify-center gap-2 mt-4">
+              <button (click)="setPage('commercialIndustries', getPage('commercialIndustries') - 1)" [disabled]="getPage('commercialIndustries') <= 1"
+                class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Prev</button>
+              @for (p of pageRange(commercialIndustries); track p) {
+                <button (click)="setPage('commercialIndustries', p)"
+                  class="w-8 h-8 text-xs font-bold transition-colors"
+                  [class.bg-primary]="p === getPage('commercialIndustries')" [class.text-white]="p === getPage('commercialIndustries')"
+                  [class.text-secondary]="p !== getPage('commercialIndustries')" [class.hover:text-primary]="p !== getPage('commercialIndustries')">{{ p }}</button>
+              }
+              <button (click)="setPage('commercialIndustries', getPage('commercialIndustries') + 1)" [disabled]="getPage('commercialIndustries') >= totalPages(commercialIndustries)"
+                class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Next</button>
+            </div>
+          }
         }
 
         <!-- Commercial Services -->
@@ -748,7 +819,7 @@
 
         @if (commercialServices.length > 0) {
           <div class="space-y-1 mb-8">
-            @for (card of commercialServices; track $index; let i = $index) {
+            @for (i of pageIndices(commercialServices, 'commercialServices'); track i) {
               <div class="transition-all overflow-hidden"
                 [style.height.px]="cardDragList === 'commercial-services' && cardDragOverIndex === i && cardDragIndex !== i && cardDragIndex !== i - 1 ? 60 : 0"
                 (dragover)="$event.preventDefault()" (drop)="onCardDrop($event, 'commercial-services', i)">
@@ -772,9 +843,9 @@
                     title="Click to change position">{{ i + 1 }}</span>
                 }
                 <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
-                <span class="material-symbols-outlined text-xl text-primary-fixed shrink-0">{{ card.icon }}</span>
+                <span class="material-symbols-outlined text-xl text-primary-fixed shrink-0">{{ commercialServices[i].icon }}</span>
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate">{{ card.title }}</p>
+                  <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate">{{ commercialServices[i].title }}</p>
                 </div>
                 <button (click)="openEditCard('commercial-services', i)" class="p-1 text-secondary hover:text-primary transition-colors shrink-0" title="Edit">
                   <span class="material-symbols-outlined text-lg">edit</span>
@@ -790,6 +861,20 @@
               <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
             </div>
           </div>
+          @if (totalPages(commercialServices) > 1) {
+            <div class="flex items-center justify-center gap-2 mt-4">
+              <button (click)="setPage('commercialServices', getPage('commercialServices') - 1)" [disabled]="getPage('commercialServices') <= 1"
+                class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Prev</button>
+              @for (p of pageRange(commercialServices); track p) {
+                <button (click)="setPage('commercialServices', p)"
+                  class="w-8 h-8 text-xs font-bold transition-colors"
+                  [class.bg-primary]="p === getPage('commercialServices')" [class.text-white]="p === getPage('commercialServices')"
+                  [class.text-secondary]="p !== getPage('commercialServices')" [class.hover:text-primary]="p !== getPage('commercialServices')">{{ p }}</button>
+              }
+              <button (click)="setPage('commercialServices', getPage('commercialServices') + 1)" [disabled]="getPage('commercialServices') >= totalPages(commercialServices)"
+                class="px-3 py-1 text-xs font-headline font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-30 transition-colors">Next</button>
+            </div>
+          }
         }
 
       </div>
