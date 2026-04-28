@@ -173,3 +173,6 @@ admin user creation, gallery photo convention, project structure.
 - Goals 3 and 5 can be done in any order (both operate on Angular components).
 - `terraform.tfvars` is gitignored — never commit real AWS account details.
 - For a new deployment: copy `terraform.tfvars.example`, delete `import.tf`, run `bootstrap.sh`.
+- cards for residential and commercial should have fixed height. They should be clickable and after click they should show picture and full text.
+- new section "Construction" with subpages Residential and Commercial (similar to services) and similar admin area for that.
+- albums in the gallery

@@ -31,6 +31,8 @@ const DEFAULT_SERVICES: ServiceCard[] = [
   { icon: 'waves', title: 'Hydro Jetting', description: '' },
   { icon: 'foundation', title: 'Sewer Lines', description: '' },
   { icon: 'shield', title: 'Backflow Prevention', description: '' },
+  { icon: 'gas_meter', title: 'Gas Leaks & Detection', description: '' },
+  { icon: 'construction', title: 'Site Digs & Excavation', description: '' },
 ];
 
 @Component({

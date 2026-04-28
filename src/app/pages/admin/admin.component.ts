@@ -955,6 +955,8 @@ export class AdminComponent implements OnInit, OnDestroy {
       { icon: 'waves', title: 'Hydro Jetting', description: '' },
       { icon: 'foundation', title: 'Sewer Lines', description: '' },
       { icon: 'shield', title: 'Backflow Prevention', description: '' },
+      { icon: 'gas_meter', title: 'Gas Leaks & Detection', description: '' },
+      { icon: 'construction', title: 'Site Digs & Excavation', description: '' },
     ];
     this.comLoaded = true;
     await this.saveServiceCards();
