@@ -194,6 +194,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   async applyPosition(list: string, fromIndex: number, newPos: number): Promise<void> {
+    if (this.editingPositionList !== list || this.editingPositionIndex !== fromIndex) return;
     this.cancelEditPosition();
     const arr = this.getListArray(list);
     if (!arr || arr.length === 0) return;
