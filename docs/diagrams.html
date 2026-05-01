@@ -507,7 +507,15 @@
   <h2>Admin — Edit Tag</h2>
   <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Admin clicks tag label on a photo &rarr; inline text input appears</div></div>
   <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">Types new tag (or clears to revert to filename-inferred tag)</div></div>
-  <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">Saves <code>gallery.json</code> with <code>{ "file": "...", "tag": "Custom Tag" }</code></div></div>
+  <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">Saves <code>gallery.json</code> with <code>{ "file": "...", "tag": "Custom Tag", "albumId": "…" }</code> &mdash; tag and albumId are both optional</div></div>
+
+  <h2>Admin &mdash; Albums</h2>
+  <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Albums tab loads <code>/gallery-images/albums.json</code> (CachingDisabled). Each album: <code>{id, slug, title, description?, location?, coverFilename?}</code></div></div>
+  <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">Add/edit album (modal): title auto-derives slug; manual slug edit locks auto-derive; uniqueness ensured by appending <code>-2</code>, <code>-3</code>… on collision</div></div>
+  <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">Cover photo picked from a modal grid of gallery photos &mdash; modal stacked above the album form (z-[60] over z-50)</div></div>
+  <div class="flow-step"><div class="flow-num">4</div><div class="flow-text">Photos joined to albums via <code>albumId</code> on each <code>gallery.json</code> entry &mdash; assigned from the Gallery tab via the bookmark-icon button on each row, which opens an album-picker modal</div></div>
+  <div class="flow-step"><div class="flow-num">5</div><div class="flow-text">Deleting an album scrubs <code>albumId</code> from all matching photos and saves <code>gallery.json</code> alongside <code>albums.json</code></div></div>
+  <div class="flow-step"><div class="flow-num">6</div><div class="flow-text">Public landing <code>/gallery</code> shows an Albums grid above the All Photos grid; <code>/gallery/album/:slug</code> drills into a single album (header with title/location/description, only that album's photos, "Back to Gallery" link)</div></div>
 
   <h2>Admin — Hero / OG Image</h2>
   <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Admin switches to Hero or OG tab &rarr; sees current image (Hero tab: full-size HeroComponent preview)</div></div>
@@ -836,7 +844,7 @@ infrastructure/
   <div class="check check-done">Residential/commercial cards: fixed height, clickable → modal with full text + optional image</div>
   <div class="check check-done">Admin UI for uploading per-card images (staged preview, replace/remove, S3 cleanup; stored at <code>gallery-images/cards/</code>)</div>
   <div class="check check-todo">Construction section (Residential + Commercial subpages, mirroring Services structure)</div>
-  <div class="check check-todo">Gallery albums (group photos into named albums)</div>
+  <div class="check check-done">Gallery albums (group photos into named albums; admin CRUD + cover picker; <code>/gallery/album/:slug</code> drill-in)</div>
 </div>
 
 <script>

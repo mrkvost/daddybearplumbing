@@ -5,7 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { Meta } from '@angular/platform-browser';
 import { AuthService } from '../../services/auth.service';
 import { UploadService } from '../../services/upload.service';
-import { GalleryService, GalleryImage, GalleryEntry } from '../../services/gallery.service';
+import { GalleryService, GalleryImage, GalleryEntry, Album } from '../../services/gallery.service';
 import { Review } from '../../services/reviews.service';
 import { environment } from '../../../environments/environment';
 import { HeroComponent } from '../../components/hero/hero.component';
@@ -46,7 +46,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   private meta = inject(Meta);
   private cdr = inject(ChangeDetectorRef);
 
-  activeTab: 'dashboard' | 'hero' | 'og' | 'about' | 'residential' | 'commercial' | 'gallery' | 'reviews' | 'locations' | 'faq' | 'settings' = 'dashboard';
+  activeTab: 'dashboard' | 'hero' | 'og' | 'about' | 'residential' | 'commercial' | 'gallery' | 'albums' | 'reviews' | 'locations' | 'faq' | 'settings' = 'dashboard';
 
   /* Pagination */
   pageSize = 10;
@@ -93,6 +93,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       case 'reviews': this.loadReviews(); break;
       case 'locations': this.loadLocations(); break;
       case 'faq': this.loadFaq(); break;
+      case 'albums': this.loadAlbums(); break;
       case 'residential':
       case 'commercialIndustries':
       case 'commercialServices':
@@ -123,6 +124,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.loadLocations();
     this.loadServiceCards();
     this.loadFaq();
+    this.loadAlbums();
   }
 
   ngOnDestroy(): void {
@@ -170,8 +172,11 @@ export class AdminComponent implements OnInit, OnDestroy {
   private async saveGalleryManifest(): Promise<void> {
     const entries: GalleryEntry[] = this.images.map(img => {
       const adminImg = img as AdminGalleryImage;
-      if (adminImg.customTag) {
-        return { file: img.filename, tag: adminImg.customTag };
+      if (adminImg.customTag || adminImg.albumId) {
+        const entry: { file: string; tag?: string; albumId?: string } = { file: img.filename };
+        if (adminImg.customTag) entry.tag = adminImg.customTag;
+        if (adminImg.albumId) entry.albumId = adminImg.albumId;
+        return entry;
       }
       return img.filename;
     });
@@ -215,6 +220,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       case 'reviews': return this.reviews;
       case 'locations': return this.locations;
       case 'faq': return this.faqItems;
+      case 'albums': return this.albums;
       case 'residential': return this.residentialCards;
       case 'commercialIndustries': return this.commercialIndustries;
       case 'commercialServices': return this.commercialServices;
@@ -228,6 +234,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       case 'reviews': await this.saveReviews(); break;
       case 'locations': await this.saveLocations(); break;
       case 'faq': await this.saveFaq(); break;
+      case 'albums': await this.saveAlbums(); break;
       case 'residential':
       case 'commercialIndustries':
       case 'commercialServices': await this.saveServiceCards(); break;
@@ -291,41 +298,48 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
   }
 
-  /* ---------- Tag editing ---------- */
+  /* ---------- Photo editing (tag + album) ---------- */
 
-  editingTagImage: AdminGalleryImage | null = null;
-  editingTagValue = '';
+  editingPhotoImage: AdminGalleryImage | null = null;
+  editingPhotoTagValue = '';
+  editingPhotoAlbumId: string | undefined = undefined;
 
-  startEditTag(image: AdminGalleryImage): void {
-    this.editingTagImage = image;
-    this.editingTagValue = image.tagLabel === 'Uncategorized' ? '' : image.tagLabel;
+  startEditPhoto(image: AdminGalleryImage): void {
+    this.editingPhotoImage = image;
+    this.editingPhotoTagValue = image.tagLabel === 'Uncategorized' ? '' : image.tagLabel;
+    this.editingPhotoAlbumId = image.albumId;
     this.cdr.detectChanges();
   }
 
-  async saveTag(): Promise<void> {
-    const image = this.editingTagImage;
+  async savePhoto(): Promise<void> {
+    const image = this.editingPhotoImage;
     if (!image) return;
-    const trimmed = this.editingTagValue.trim();
+
+    const trimmed = this.editingPhotoTagValue.trim();
     if (trimmed) {
       image.customTag = trimmed;
       image.tagLabel = trimmed;
       image.tag = trimmed.toLowerCase().replace(/\s+/g, '-');
     } else {
-      // Clear custom tag — revert to filename-inferred
       image.customTag = undefined;
       const parsed = this.galleryService.parseFilename(image.filename);
       image.tag = parsed.tag;
       image.tagLabel = parsed.tagLabel;
     }
-    this.editingTagImage = null;
-    this.editingTagValue = '';
+
+    image.albumId = this.editingPhotoAlbumId || undefined;
+
+    this.editingPhotoImage = null;
+    this.editingPhotoTagValue = '';
+    this.editingPhotoAlbumId = undefined;
     await this.saveGalleryManifest();
     this.cdr.detectChanges();
   }
 
-  cancelEditTag(): void {
-    this.editingTagImage = null;
-    this.editingTagValue = '';
+  cancelEditPhoto(): void {
+    this.editingPhotoImage = null;
+    this.editingPhotoTagValue = '';
+    this.editingPhotoAlbumId = undefined;
     this.cdr.detectChanges();
   }
 
@@ -1318,6 +1332,208 @@ export class AdminComponent implements OnInit, OnDestroy {
     await this.uploadService.putJson(this.FAQ_KEY, this.faqItems, GALLERY_BUCKET);
   }
 
+  /* ================================================================
+   * ALBUMS
+   * ================================================================ */
+
+  albums: Album[] = [];
+  loadingAlbums = true;
+  editingAlbumIndex = -1; // -1 closed, -2 adding, >=0 editing
+  albumForm: { id: string; slug: string; title: string; description: string; location: string; coverFilename: string } = {
+    id: '', slug: '', title: '', description: '', location: '', coverFilename: '',
+  };
+  /** Slug edit lock — only auto-derive from title until the user manually edits the slug */
+  private albumSlugManuallyEdited = false;
+  showCoverPicker = false;
+
+  albumDragIndex = -1;
+  albumDragOverIndex = -1;
+
+  private readonly ALBUMS_KEY = 'gallery-images/albums.json';
+
+  async loadAlbums(): Promise<void> {
+    this.loadingAlbums = true;
+    this.cdr.detectChanges();
+    try {
+      const res = await fetch(`/gallery-images/albums.json?t=${Date.now()}`);
+      if (res.ok) this.albums = await res.json();
+    } catch { /* empty */ }
+    this.loadingAlbums = false;
+    this.cdr.detectChanges();
+  }
+
+  private slugify(s: string): string {
+    return s.toLowerCase().trim()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+  }
+
+  /** Re-derive slug from the title while the user hasn't manually edited the slug */
+  onAlbumTitleInput(): void {
+    if (!this.albumSlugManuallyEdited) {
+      this.albumForm.slug = this.slugify(this.albumForm.title);
+    }
+  }
+
+  onAlbumSlugInput(): void {
+    this.albumSlugManuallyEdited = true;
+  }
+
+  openAddAlbum(): void {
+    this.editingAlbumIndex = -2;
+    this.albumForm = { id: '', slug: '', title: '', description: '', location: '', coverFilename: '' };
+    this.albumSlugManuallyEdited = false;
+    this.cdr.detectChanges();
+  }
+
+  openEditAlbum(index: number): void {
+    const album = this.albums[index];
+    this.editingAlbumIndex = index;
+    this.albumForm = {
+      id: album.id,
+      slug: album.slug,
+      title: album.title,
+      description: album.description || '',
+      location: album.location || '',
+      coverFilename: album.coverFilename || '',
+    };
+    this.albumSlugManuallyEdited = true;
+    this.cdr.detectChanges();
+  }
+
+  cancelAlbumForm(): void {
+    this.editingAlbumIndex = -1;
+    this.showCoverPicker = false;
+    this.cdr.detectChanges();
+  }
+
+  async saveAlbumItem(): Promise<void> {
+    const title = this.albumForm.title.trim();
+    let slug = this.slugify(this.albumForm.slug || title);
+    if (!title || !slug) return;
+
+    // Ensure slug uniqueness
+    const others = this.albums.filter((_, i) => i !== this.editingAlbumIndex);
+    if (others.some(a => a.slug === slug)) {
+      let n = 2;
+      while (others.some(a => a.slug === `${slug}-${n}`)) n++;
+      slug = `${slug}-${n}`;
+    }
+
+    const album: Album = {
+      id: this.albumForm.id || `a${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
+      slug,
+      title,
+    };
+    if (this.albumForm.description.trim()) album.description = this.albumForm.description.trim();
+    if (this.albumForm.location.trim()) album.location = this.albumForm.location.trim();
+    if (this.albumForm.coverFilename) album.coverFilename = this.albumForm.coverFilename;
+
+    if (this.editingAlbumIndex >= 0) {
+      this.albums[this.editingAlbumIndex] = album;
+    } else {
+      this.albums.push(album);
+    }
+    this.editingAlbumIndex = -1;
+    this.showCoverPicker = false;
+    await this.saveAlbums();
+    this.cdr.detectChanges();
+  }
+
+  async deleteAlbumItem(index: number): Promise<void> {
+    const album = this.albums[index];
+    // Detach photos from this album
+    let touched = false;
+    for (const img of this.images) {
+      if (img.albumId === album.id) {
+        img.albumId = undefined;
+        touched = true;
+      }
+    }
+    this.albums.splice(index, 1);
+    await this.saveAlbums();
+    if (touched) await this.saveGalleryManifest();
+    this.cdr.detectChanges();
+  }
+
+  openCoverPicker(): void {
+    this.showCoverPicker = true;
+    this.cdr.detectChanges();
+  }
+
+  closeCoverPicker(): void {
+    this.showCoverPicker = false;
+    this.cdr.detectChanges();
+  }
+
+  pickCover(filename: string): void {
+    this.albumForm.coverFilename = filename;
+    this.showCoverPicker = false;
+    this.cdr.detectChanges();
+  }
+
+  clearCover(): void {
+    this.albumForm.coverFilename = '';
+    this.cdr.detectChanges();
+  }
+
+  coverUrlFor(filename: string | undefined): string | null {
+    return filename ? `/gallery-images/${filename}` : null;
+  }
+
+  albumPhotoCount(albumId: string): number {
+    return this.images.filter(img => (img as any).albumId === albumId).length;
+  }
+
+  onAlbumDragStart(index: number): void {
+    this.albumDragIndex = index;
+    this.cdr.detectChanges();
+  }
+
+  onAlbumRowDragOver(event: DragEvent, rowIndex: number): void {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const midY = rect.top + rect.height / 2;
+    const insertAt = event.clientY < midY ? rowIndex : rowIndex + 1;
+    if (insertAt !== this.albumDragOverIndex) {
+      this.albumDragOverIndex = insertAt;
+      this.cdr.detectChanges();
+    }
+  }
+
+  onAlbumDragEnd(): void {
+    this.albumDragIndex = -1;
+    this.albumDragOverIndex = -1;
+    this.cdr.detectChanges();
+  }
+
+  async onAlbumDrop(event: DragEvent, targetIndex: number): Promise<void> {
+    event.preventDefault();
+    const fromIndex = this.albumDragIndex;
+    this.albumDragIndex = -1;
+    this.albumDragOverIndex = -1;
+    this.cdr.detectChanges();
+
+    if (fromIndex < 0 || fromIndex === targetIndex || fromIndex === targetIndex - 1) return;
+
+    const [item] = this.albums.splice(fromIndex, 1);
+    const insertAt = targetIndex > fromIndex ? targetIndex - 1 : targetIndex;
+    this.albums.splice(insertAt, 0, item);
+    this.cdr.detectChanges();
+
+    await this.saveAlbums();
+  }
+
+  private async saveAlbums(): Promise<void> {
+    await this.uploadService.putJson(this.ALBUMS_KEY, this.albums, GALLERY_BUCKET);
+  }
+
+  albumTitleFor(albumId: string | undefined): string | null {
+    if (!albumId) return null;
+    return this.albums.find(a => a.id === albumId)?.title || null;
+  }
+
   signOut(): void {
     this.auth.signOut();
     this.router.navigate(['/admin/login']);
@@ -1332,14 +1548,19 @@ export class AdminComponent implements OnInit, OnDestroy {
     // Don't close anything while a card image is uploading
     if (this.cardImageUploading) return;
 
-    if (this.editingList) {
+    // Innermost modals first
+    if (this.showCoverPicker) {
+      this.closeCoverPicker();
+    } else if (this.editingAlbumIndex !== -1) {
+      this.cancelAlbumForm();
+    } else if (this.editingList) {
       this.cancelCardForm();
     } else if (this.showReviewForm) {
       this.cancelReviewForm();
     } else if (this.editingFaqIndex !== -1) {
       this.cancelFaqForm();
-    } else if (this.editingTagImage) {
-      this.cancelEditTag();
+    } else if (this.editingPhotoImage) {
+      this.cancelEditPhoto();
     } else if (this.editingLocationIndex !== -1) {
       this.cancelEditLocation();
     } else if (this.showLocationForm) {

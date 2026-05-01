@@ -89,6 +89,9 @@
   <button (click)="activeTab = 'gallery'"
     [class]="activeTab === 'gallery' ? 'text-primary border-b-2 border-primary' : 'text-secondary hover:text-primary'"
     class="font-body text-sm uppercase tracking-widest transition-colors whitespace-nowrap">Gallery</button>
+  <button (click)="activeTab = 'albums'"
+    [class]="activeTab === 'albums' ? 'text-primary border-b-2 border-primary' : 'text-secondary hover:text-primary'"
+    class="font-body text-sm uppercase tracking-widest transition-colors whitespace-nowrap">Albums</button>
   <button (click)="activeTab = 'reviews'"
     [class]="activeTab === 'reviews' ? 'text-primary border-b-2 border-primary' : 'text-secondary hover:text-primary'"
     class="font-body text-sm uppercase tracking-widest transition-colors whitespace-nowrap">Reviews</button>
@@ -111,6 +114,7 @@
     <option value="residential">Residential</option>
     <option value="commercial">Commercial</option>
     <option value="gallery">Gallery</option>
+    <option value="albums">Albums</option>
     <option value="reviews">Reviews</option>
     <option value="locations">Locations</option>
     <option value="faq">FAQ</option>
@@ -264,14 +268,25 @@
                 <!-- Info -->
                 <div class="flex-1 min-w-0">
                   <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate cursor-pointer hover:text-primary-fixed transition-colors"
-                     (click)="startEditTag(images[i])" title="Click to edit tag">
+                     (click)="startEditPhoto(images[i])" title="Click to edit tag and album">
                     {{ images[i].tagLabel }}
                     @if (images[i].customTag) {
                       <span class="text-[0.6rem] text-outline font-body normal-case tracking-normal">(custom)</span>
                     }
                   </p>
-                  <p class="text-[0.65rem] text-secondary">{{ images[i].date | date:'mediumDate' }} &middot; {{ images[i].filename }}</p>
+                  <p class="text-[0.65rem] text-secondary truncate">
+                    {{ images[i].date | date:'mediumDate' }} &middot; {{ images[i].filename }}
+                    @if (albumTitleFor(images[i].albumId); as title) {
+                      &middot; <span class="text-primary-fixed font-bold">{{ title }}</span>
+                    }
+                  </p>
                 </div>
+                <!-- Edit photo (tag + album) -->
+                <button (click)="startEditPhoto(images[i])"
+                  class="p-1 text-secondary hover:text-primary transition-colors shrink-0"
+                  [title]="albumTitleFor(images[i].albumId) || 'Edit tag and album'">
+                  <span class="material-symbols-outlined text-lg">edit</span>
+                </button>
                 <!-- Delete -->
                 <button (click)="deleteImage(images[i])" [disabled]="images[i].deleting" class="p-1 text-secondary hover:text-error transition-colors shrink-0 disabled:opacity-50" title="Delete">
                   <span class="material-symbols-outlined text-lg">{{ images[i].deleting ? 'hourglass_top' : 'delete' }}</span>
@@ -292,32 +307,73 @@
         }
       </div>
 
-      <!-- Tag edit modal -->
-      @if (editingTagImage) {
+      <!-- Edit photo modal (tag + album) -->
+      @if (editingPhotoImage) {
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90"
-          (click)="cancelEditTag()">
-          <div class="relative ghost-border bg-surface w-full max-w-md p-8"
+          (click)="cancelEditPhoto()">
+          <div class="relative ghost-border bg-surface w-full max-w-md max-h-[90vh] overflow-y-auto p-8"
             (click)="$event.stopPropagation()">
-            <button type="button" (click)="cancelEditTag()"
+            <button type="button" (click)="cancelEditPhoto()"
               class="absolute top-4 right-4 text-secondary hover:text-on-surface p-2 transition-colors z-10"
               aria-label="Close">
               <span class="material-symbols-outlined">close</span>
             </button>
-            <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2 pr-8">Edit Tag</p>
-            <p class="text-xs text-outline mb-6 truncate">{{ editingTagImage.filename }}</p>
+            <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2 pr-8">Edit Photo</p>
+            <div class="flex items-center gap-3 mb-6">
+              <img [src]="editingPhotoImage.url" [alt]="editingPhotoImage.tagLabel"
+                class="w-16 h-12 object-cover ghost-border shrink-0" />
+              <p class="text-xs text-outline truncate flex-1">{{ editingPhotoImage.filename }}</p>
+            </div>
+
             <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Tag</label>
-            <input type="text" [(ngModel)]="editingTagValue"
-              (keydown.enter)="saveTag()"
+            <input type="text" [(ngModel)]="editingPhotoTagValue"
+              (keydown.enter)="savePhoto()"
               placeholder="Tag (empty = infer from filename)"
               class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
               autofocus />
-            <p class="text-outline text-xs mt-1">Leave empty to use the filename-inferred tag.</p>
+            <p class="text-outline text-xs mt-1 mb-6">Leave empty to use the filename-inferred tag.</p>
+
+            <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Album</label>
+            @if (albums.length === 0) {
+              <p class="text-secondary text-xs mb-1">No albums yet. Create one in the Albums tab first.</p>
+            } @else {
+              <div class="space-y-1 mb-1">
+                <button type="button" (click)="editingPhotoAlbumId = undefined"
+                  class="w-full flex items-center gap-3 px-3 py-2 ghost-border bg-surface-container-low hover:bg-surface-container-high transition-colors text-left"
+                  [class.ring-2]="!editingPhotoAlbumId"
+                  [class.ring-primary]="!editingPhotoAlbumId">
+                  <span class="material-symbols-outlined text-base text-secondary shrink-0">block</span>
+                  <span class="text-xs font-headline font-bold uppercase tracking-tight flex-1">No album</span>
+                  @if (!editingPhotoAlbumId) {
+                    <span class="material-symbols-outlined text-sm text-primary">check</span>
+                  }
+                </button>
+                @for (album of albums; track album.id) {
+                  <button type="button" (click)="editingPhotoAlbumId = album.id"
+                    class="w-full flex items-center gap-3 px-3 py-2 ghost-border bg-surface-container-low hover:bg-surface-container-high transition-colors text-left"
+                    [class.ring-2]="editingPhotoAlbumId === album.id"
+                    [class.ring-primary]="editingPhotoAlbumId === album.id">
+                    @if (album.coverFilename) {
+                      <img [src]="coverUrlFor(album.coverFilename)" [alt]="album.title"
+                        class="w-8 h-6 object-cover ghost-border shrink-0" />
+                    } @else {
+                      <span class="material-symbols-outlined text-base text-primary-fixed shrink-0">photo_library</span>
+                    }
+                    <span class="text-xs font-headline font-bold uppercase tracking-tight flex-1 truncate">{{ album.title }}</span>
+                    @if (editingPhotoAlbumId === album.id) {
+                      <span class="material-symbols-outlined text-sm text-primary">check</span>
+                    }
+                  </button>
+                }
+              </div>
+            }
+
             <div class="flex gap-4 mt-6">
-              <button (click)="saveTag()"
+              <button (click)="savePhoto()"
                 class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
                 Save
               </button>
-              <button (click)="cancelEditTag()"
+              <button (click)="cancelEditPhoto()"
                 class="text-secondary hover:text-primary text-xs font-headline font-bold uppercase tracking-widest transition-colors">
                 Cancel
               </button>
@@ -725,6 +781,197 @@
                 Cancel
               </button>
             </div>
+          </div>
+        </div>
+      }
+    }
+
+    <!-- ==================== ALBUMS TAB ==================== -->
+    @if (activeTab === 'albums') {
+      <div>
+        <p class="text-xs text-outline mb-6">Albums group photos for the public gallery (e.g. "Bathroom remodel — La Grange").</p>
+
+        <ng-template #albumsExtraActions>
+          <button (click)="openAddAlbum()"
+            class="bg-primary-fixed text-white px-4 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+            Add Album
+          </button>
+        </ng-template>
+        <ng-container [ngTemplateOutlet]="listHeaderTpl" [ngTemplateOutletContext]="{ list: 'albums', arr: albums, label: 'album', extraActions: albumsExtraActions }" />
+
+        @if (albums.length === 0 && !loadingAlbums) {
+          <div class="ghost-border bg-surface-container-low p-6 mb-6 text-center">
+            <p class="text-secondary text-sm">No albums yet. Click "Add Album" to create one.</p>
+          </div>
+        }
+
+        @if (albums.length > 0) {
+          <div class="space-y-1 mb-6">
+            @for (i of pageIndices(albums, 'albums'); track albums[i].id) {
+              <div class="transition-all overflow-hidden"
+                [style.height.px]="albumDragOverIndex === i && albumDragIndex !== i && albumDragIndex !== i - 1 ? 56 : 0"
+                (dragover)="$event.preventDefault()" (drop)="onAlbumDrop($event, i)">
+                <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
+              </div>
+              <div class="flex items-center gap-4 px-4 py-2.5 ghost-border bg-surface-container-low cursor-grab active:cursor-grabbing"
+                [class.opacity-30]="albumDragIndex === i"
+                draggable="true" (dragstart)="onAlbumDragStart(i)" (dragend)="onAlbumDragEnd()" (dragover)="onAlbumRowDragOver($event, i)">
+                @if (editingPositionList === 'albums' && editingPositionIndex === i) {
+                  <input type="number" min="1" [max]="albums.length" [value]="i + 1"
+                    class="w-8 text-xs text-center font-body bg-surface-container-lowest border border-primary px-0 py-0.5 shrink-0"
+                    (keydown.enter)="applyPosition('albums', i, $any($event.target).valueAsNumber)"
+                    (keydown.escape)="cancelEditPosition()"
+                    (blur)="applyPosition('albums', i, $any($event.target).valueAsNumber)"
+                    (click)="$event.stopPropagation()" (mousedown)="$event.stopPropagation()" />
+                } @else {
+                  <span class="text-xs text-outline w-6 text-center font-body shrink-0 cursor-pointer hover:text-primary hover:font-bold transition-colors"
+                    (click)="startEditPosition('albums', i); $event.stopPropagation()"
+                    (mousedown)="$event.stopPropagation()"
+                    title="Click to change position">{{ i + 1 }}</span>
+                }
+                <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
+                @if (albums[i].coverFilename) {
+                  <img [src]="coverUrlFor(albums[i].coverFilename)" [alt]="albums[i].title"
+                    class="w-12 h-9 object-cover ghost-border shrink-0" />
+                } @else {
+                  <span class="material-symbols-outlined text-xl text-primary-fixed shrink-0">photo_library</span>
+                }
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate">{{ albums[i].title }}</p>
+                  <p class="text-[0.65rem] text-secondary truncate">
+                    /album/{{ albums[i].slug }} &middot; {{ albumPhotoCount(albums[i].id) }} photo{{ albumPhotoCount(albums[i].id) === 1 ? '' : 's' }}
+                    @if (albums[i].location) { &middot; {{ albums[i].location }} }
+                  </p>
+                </div>
+                <button (click)="openEditAlbum(i)" class="p-1 text-secondary hover:text-primary transition-colors shrink-0" title="Edit">
+                  <span class="material-symbols-outlined text-lg">edit</span>
+                </button>
+                <button (click)="deleteAlbumItem(i)" class="p-1 text-secondary hover:text-error transition-colors shrink-0" title="Delete">
+                  <span class="material-symbols-outlined text-lg">delete</span>
+                </button>
+              </div>
+            }
+            <div class="transition-all overflow-hidden"
+              [style.height.px]="albumDragOverIndex === albums.length && albumDragIndex !== albums.length - 1 ? 56 : 0"
+              (dragover)="$event.preventDefault()" (drop)="onAlbumDrop($event, albums.length)">
+              <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
+            </div>
+          </div>
+          <ng-container [ngTemplateOutlet]="paginationBottomTpl" [ngTemplateOutletContext]="{ list: 'albums', arr: albums }" />
+        }
+      </div>
+
+      <!-- Album form modal -->
+      @if (editingAlbumIndex !== -1) {
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90"
+          (click)="cancelAlbumForm()">
+          <div class="relative ghost-border bg-surface w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8"
+            (click)="$event.stopPropagation()">
+            <button type="button" (click)="cancelAlbumForm()"
+              class="absolute top-4 right-4 text-secondary hover:text-on-surface p-2 transition-colors z-10"
+              aria-label="Close">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+            <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-6 pr-8">
+              {{ editingAlbumIndex >= 0 ? 'Edit Album' : 'New Album' }}
+            </p>
+            <div class="grid md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Title</label>
+                <input type="text" [(ngModel)]="albumForm.title" (ngModelChange)="onAlbumTitleInput()"
+                  placeholder="e.g. Bathroom Remodel — La Grange"
+                  class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
+                  autofocus />
+              </div>
+              <div>
+                <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Slug</label>
+                <input type="text" [(ngModel)]="albumForm.slug" (input)="onAlbumSlugInput()"
+                  placeholder="e.g. bathroom-remodel-la-grange"
+                  class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors" />
+                <p class="text-outline text-xs mt-1">URL: /gallery/album/{{ albumForm.slug || '…' }}</p>
+              </div>
+            </div>
+            <div class="mb-6">
+              <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Location (optional)</label>
+              <input type="text" [(ngModel)]="albumForm.location" placeholder="e.g. La Grange, IL"
+                class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors" />
+            </div>
+            <div class="mb-6">
+              <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Description (optional)</label>
+              <textarea [(ngModel)]="albumForm.description" rows="3"
+                placeholder="Short description shown on the album page"
+                class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors resize-y"></textarea>
+            </div>
+            <div class="mb-6">
+              <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Cover photo (optional)</label>
+              @if (albumForm.coverFilename) {
+                <div class="ghost-border bg-surface-container-lowest p-4">
+                  <img [src]="coverUrlFor(albumForm.coverFilename)" alt="Cover preview"
+                    class="w-full max-h-48 object-cover ghost-border mb-3" />
+                  <div class="flex gap-4 items-center">
+                    <button type="button" (click)="openCoverPicker()"
+                      class="text-xs text-primary-fixed font-headline font-bold uppercase tracking-widest hover:underline">
+                      Replace
+                    </button>
+                    <button type="button" (click)="clearCover()"
+                      class="text-xs text-secondary hover:text-error font-headline font-bold uppercase tracking-widest transition-colors">
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              } @else {
+                <button type="button" (click)="openCoverPicker()"
+                  class="ghost-border bg-surface-container-lowest p-6 w-full flex flex-col items-center justify-center cursor-pointer hover:bg-surface-container-low transition-colors">
+                  <span class="material-symbols-outlined text-3xl text-outline mb-2">image</span>
+                  <span class="text-xs text-secondary uppercase tracking-widest font-headline font-bold">Choose cover photo</span>
+                </button>
+              }
+              <p class="text-outline text-xs mt-1">If unset, the first photo in the album is used.</p>
+            </div>
+            <div class="flex gap-4">
+              <button (click)="saveAlbumItem()"
+                class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+                {{ editingAlbumIndex >= 0 ? 'Update' : 'Add' }}
+              </button>
+              <button (click)="cancelAlbumForm()"
+                class="text-secondary hover:text-primary text-xs font-headline font-bold uppercase tracking-widest transition-colors">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Cover photo picker modal -->
+      @if (showCoverPicker) {
+        <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90"
+          (click)="closeCoverPicker()">
+          <div class="relative ghost-border bg-surface w-full max-w-4xl max-h-[90vh] overflow-y-auto p-8"
+            (click)="$event.stopPropagation()">
+            <button type="button" (click)="closeCoverPicker()"
+              class="absolute top-4 right-4 text-secondary hover:text-on-surface p-2 transition-colors z-10"
+              aria-label="Close">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+            <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-6 pr-8">Pick Cover Photo</p>
+            @if (images.length === 0) {
+              <p class="text-secondary text-sm">No photos available. Upload some in the Gallery tab first.</p>
+            } @else {
+              <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
+                @for (img of images; track img.filename) {
+                  <button type="button" (click)="pickCover(img.filename)"
+                    class="relative aspect-[4/3] overflow-hidden ghost-border hover:ring-2 hover:ring-primary transition-all"
+                    [class.ring-2]="albumForm.coverFilename === img.filename"
+                    [class.ring-primary]="albumForm.coverFilename === img.filename">
+                    <img [src]="img.url" [alt]="img.tagLabel"
+                      class="w-full h-full object-cover" loading="lazy" />
+                    @if (albumForm.coverFilename === img.filename) {
+                      <span class="absolute top-1 right-1 bg-primary text-white p-1 material-symbols-outlined text-sm">check</span>
+                    }
+                  </button>
+                }
+              </div>
+            }
           </div>
         </div>
       }

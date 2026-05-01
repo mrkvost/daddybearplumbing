@@ -1,15 +1,49 @@
 <!-- Page header -->
 <section class="relative h-[300px] flex items-end overflow-hidden bg-black">
   <div class="relative z-10 w-full max-w-7xl mx-auto px-6 pb-12">
-    <p class="text-white/50 text-[0.7rem] font-bold tracking-[0.3em] uppercase mb-4">Documentation</p>
-    <h1 class="font-headline font-black text-5xl md:text-7xl text-white leading-[0.9] tracking-tighter uppercase">
-      Project Gallery
-    </h1>
+    @if (currentAlbum) {
+      <a routerLink="/gallery"
+        class="inline-flex items-center gap-2 text-white/50 hover:text-white text-[0.7rem] font-bold tracking-[0.3em] uppercase mb-4 transition-colors">
+        <span class="material-symbols-outlined text-sm">chevron_left</span>
+        Back to Gallery
+      </a>
+      <h1 class="font-headline font-black text-5xl md:text-7xl text-white leading-[0.9] tracking-tighter uppercase">
+        {{ currentAlbum.title }}
+      </h1>
+      @if (currentAlbum.location) {
+        <p class="text-white/60 text-sm mt-3 font-body">{{ currentAlbum.location }}</p>
+      }
+    } @else {
+      <p class="text-white/50 text-[0.7rem] font-bold tracking-[0.3em] uppercase mb-4">Documentation</p>
+      <h1 class="font-headline font-black text-5xl md:text-7xl text-white leading-[0.9] tracking-tighter uppercase">
+        Project Gallery
+      </h1>
+    }
   </div>
 </section>
 
-<!-- Tag filter bar -->
-@if (!loading && !error) {
+<!-- Album not found -->
+@if (albumNotFound) {
+  <div class="max-w-7xl mx-auto px-6 py-24 text-center">
+    <span class="material-symbols-outlined text-6xl text-outline-variant block mb-4">folder_off</span>
+    <p class="text-on-surface font-headline font-bold text-lg uppercase mb-2">Album not found</p>
+    <p class="text-secondary text-sm mb-6">The album you're looking for doesn't exist.</p>
+    <a routerLink="/gallery"
+      class="text-primary-fixed font-headline font-bold text-sm uppercase tracking-widest hover:underline">
+      View all albums
+    </a>
+  </div>
+}
+
+<!-- Album description (drill-in only) -->
+@if (currentAlbum?.description) {
+  <section class="max-w-3xl mx-auto px-6 pt-12">
+    <p class="text-secondary text-sm leading-relaxed">{{ currentAlbum?.description }}</p>
+  </section>
+}
+
+<!-- Tag filter bar (landing only) -->
+@if (!loading && !error && !currentAlbum && !albumNotFound) {
   <div class="bg-surface-container-lowest border-b border-outline-variant/20">
     <div class="max-w-7xl mx-auto px-6 py-4 flex gap-3 overflow-x-auto">
       @for (tag of tags; track tag) {
@@ -44,9 +78,52 @@
   </div>
 }
 
+<!-- Albums grid (landing only) -->
+@if (!loading && !error && !currentAlbum && albumCards.length > 0) {
+  <section class="max-w-7xl mx-auto px-6 pt-16">
+    <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-6">Albums</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (album of albumCards; track album.id) {
+        <a [routerLink]="['/gallery/album', album.slug]"
+          class="group ghost-border bg-surface-container-low overflow-hidden hover:bg-surface-container-high transition-colors">
+          <div class="relative aspect-[4/3] overflow-hidden bg-surface-container-high">
+            @if (album.coverUrl) {
+              <img
+                [src]="album.coverUrl"
+                [alt]="album.title + ' cover'"
+                loading="lazy"
+                class="w-full h-full object-cover grayscale-filter group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
+              />
+            } @else {
+              <div class="w-full h-full flex items-center justify-center">
+                <span class="material-symbols-outlined text-5xl text-outline-variant">photo_library</span>
+              </div>
+            }
+            <div class="absolute top-0 right-0 bg-black/70 text-white text-[0.65rem] font-headline font-bold uppercase tracking-widest px-3 py-1.5">
+              {{ album.photoCount }} {{ album.photoCount === 1 ? 'photo' : 'photos' }}
+            </div>
+          </div>
+          <div class="p-5">
+            <h3 class="font-headline font-bold text-sm uppercase tracking-tight text-on-surface mb-1">{{ album.title }}</h3>
+            @if (album.location) {
+              <p class="text-secondary text-xs flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">location_on</span>
+                {{ album.location }}
+              </p>
+            }
+          </div>
+        </a>
+      }
+    </div>
+  </section>
+}
+
 <!-- Image grid -->
-@if (!loading && !error) {
+@if (!loading && !error && !albumNotFound) {
   <section class="max-w-7xl mx-auto px-6 py-16">
+    @if (!currentAlbum && albumCards.length > 0) {
+      <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-6">All Photos</p>
+    }
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0 ghost-border">
       @for (image of visibleImages; track image.filename) {
         <div
@@ -90,10 +167,17 @@
     @if (filteredImages.length === 0) {
       <div class="text-center py-16">
         <span class="material-symbols-outlined text-6xl text-outline-variant mb-4 block">filter_alt_off</span>
-        <p class="text-on-surface font-headline font-bold uppercase mb-4">No photos with this tag</p>
-        <button (click)="setTag('All')" class="text-primary-fixed font-headline font-bold text-sm uppercase tracking-widest hover:underline">
-          View all photos
-        </button>
+        @if (currentAlbum) {
+          <p class="text-on-surface font-headline font-bold uppercase mb-4">No photos in this album yet</p>
+          <a routerLink="/gallery" class="text-primary-fixed font-headline font-bold text-sm uppercase tracking-widest hover:underline">
+            View all albums
+          </a>
+        } @else {
+          <p class="text-on-surface font-headline font-bold uppercase mb-4">No photos with this tag</p>
+          <button (click)="setTag('All')" class="text-primary-fixed font-headline font-bold text-sm uppercase tracking-widest hover:underline">
+            View all photos
+          </button>
+        }
       </div>
     }
   </section>

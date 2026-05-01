@@ -7,10 +7,20 @@ export interface GalleryImage {
   date: Date;
   tag: string;
   tagLabel: string;
+  albumId?: string;
 }
 
-/** Entry in gallery.json — either a string (legacy) or an object with optional tag */
-export type GalleryEntry = string | { file: string; tag?: string };
+/** Entry in gallery.json — either a string (legacy) or an object with optional tag and albumId */
+export type GalleryEntry = string | { file: string; tag?: string; albumId?: string };
+
+export interface Album {
+  id: string;
+  slug: string;
+  title: string;
+  description?: string;
+  location?: string;
+  coverFilename?: string;
+}
 
 const IMAGE_EXTENSIONS = /\.(jpg|jpeg|png|webp)$/i;
 
@@ -27,11 +37,24 @@ export class GalleryService {
       .filter(img => IMAGE_EXTENSIONS.test(img.filename));
   }
 
+  async listAlbums(): Promise<Album[]> {
+    try {
+      const response = await fetch(`/gallery-images/albums.json?t=${Date.now()}`);
+      if (!response.ok) return [];
+      return await response.json();
+    } catch {
+      return [];
+    }
+  }
+
   /** Parse a gallery.json entry — supports both string and object formats */
   parseEntry(entry: GalleryEntry): GalleryImage {
     const filename = typeof entry === 'string' ? entry : entry.file;
     const customTag = typeof entry === 'string' ? undefined : entry.tag;
-    return this.parseFilename(filename, customTag);
+    const albumId = typeof entry === 'string' ? undefined : entry.albumId;
+    const img = this.parseFilename(filename, customTag);
+    if (albumId) img.albumId = albumId;
+    return img;
   }
 
   parseFilename(filename: string, customTag?: string): GalleryImage {

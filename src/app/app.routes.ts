@@ -21,6 +21,15 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'gallery/album/:slug',
+    loadComponent: () =>
+      import('./pages/gallery/gallery.component').then((m) => m.GalleryComponent),
+    data: {
+      title: 'Album',
+      description: 'A collection of project photos from Daddy Bear Plumbing.',
+    },
+  },
+  {
     path: 'reviews',
     loadComponent: () =>
       import('./pages/reviews/reviews.component').then((m) => m.ReviewsComponent),
