@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, HostListener, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
 
@@ -6,6 +6,7 @@ export interface ServiceCard {
   icon: string;
   title: string;
   description: string;
+  image?: string;
 }
 
 export interface CommercialData {
@@ -48,6 +49,7 @@ export class CommercialComponent implements OnInit {
   phoneDisplay = environment.phoneDisplay;
   industries: ServiceCard[] = DEFAULT_INDUSTRIES;
   services: ServiceCard[] = DEFAULT_SERVICES;
+  selectedCard: ServiceCard | null = null;
 
   async ngOnInit(): Promise<void> {
     try {
@@ -59,5 +61,18 @@ export class CommercialComponent implements OnInit {
         this.cdr.detectChanges();
       }
     } catch { /* use defaults */ }
+  }
+
+  openCard(card: ServiceCard): void {
+    this.selectedCard = card;
+  }
+
+  closeCard(): void {
+    this.selectedCard = null;
+  }
+
+  @HostListener('document:keydown.escape')
+  onEsc(): void {
+    if (this.selectedCard) this.closeCard();
   }
 }

@@ -20,11 +20,13 @@
 
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
     @for (card of cards; track card.title) {
-      <div class="ghost-border bg-surface-container-low p-8 flex flex-col">
+      <button type="button" (click)="openCard(card)"
+        class="ghost-border bg-surface-container-low p-8 flex flex-col text-left h-64 hover:bg-surface-container-high transition-colors group">
         <span class="material-symbols-outlined text-4xl text-primary-fixed mb-6">{{ card.icon }}</span>
         <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">{{ card.title }}</h3>
-        <p class="text-secondary text-sm leading-relaxed flex-1">{{ card.description }}</p>
-      </div>
+        <p class="text-secondary text-sm leading-relaxed flex-1 line-clamp-3">{{ card.description }}</p>
+        <p class="text-[0.6rem] uppercase tracking-widest text-primary-fixed font-bold mt-3 group-hover:underline">Read more →</p>
+      </button>
     }
   </div>
 
@@ -42,3 +44,25 @@
   </div>
 
 </section>
+
+<!-- Card detail modal -->
+@if (selectedCard) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90"
+    (click)="closeCard()">
+    <div class="relative ghost-border bg-surface max-w-2xl w-full max-h-[85vh] overflow-y-auto p-10"
+      (click)="$event.stopPropagation()">
+      <button (click)="closeCard()"
+        class="absolute top-4 right-4 text-secondary hover:text-on-surface p-2 transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+      @if (selectedCard.image) {
+        <img [src]="selectedCard.image" [alt]="selectedCard.title"
+          class="w-full max-h-72 object-cover ghost-border mb-8" />
+      } @else {
+        <span class="material-symbols-outlined text-6xl text-primary-fixed block mb-6">{{ selectedCard.icon }}</span>
+      }
+      <h3 class="font-headline font-black text-2xl tracking-tighter uppercase mb-4">{{ selectedCard.title }}</h3>
+      <p class="text-secondary text-sm leading-relaxed whitespace-pre-line">{{ selectedCard.description }}</p>
+    </div>
+  </div>
+}

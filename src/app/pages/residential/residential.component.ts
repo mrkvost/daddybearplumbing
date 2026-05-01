@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, HostListener, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
 
@@ -6,6 +6,7 @@ export interface ServiceCard {
   icon: string;
   title: string;
   description: string;
+  image?: string;
 }
 
 const DEFAULT_CARDS: ServiceCard[] = [
@@ -35,6 +36,7 @@ export class ResidentialComponent implements OnInit {
   phone = environment.phone;
   phoneDisplay = environment.phoneDisplay;
   cards: ServiceCard[] = DEFAULT_CARDS;
+  selectedCard: ServiceCard | null = null;
 
   async ngOnInit(): Promise<void> {
     try {
@@ -47,5 +49,18 @@ export class ResidentialComponent implements OnInit {
         }
       }
     } catch { /* use defaults */ }
+  }
+
+  openCard(card: ServiceCard): void {
+    this.selectedCard = card;
+  }
+
+  closeCard(): void {
+    this.selectedCard = null;
+  }
+
+  @HostListener('document:keydown.escape')
+  onEsc(): void {
+    if (this.selectedCard) this.closeCard();
   }
 }

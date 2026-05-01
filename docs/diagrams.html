@@ -321,10 +321,10 @@
       <div class="comp-node page"><div class="comp-name">AboutComponent</div><div class="comp-sel">/about</div><div class="comp-desc">Company history,<br>why choose us, promise</div></div>
     </div>
     <div class="flex-col">
-      <div class="comp-node page"><div class="comp-name">ResidentialComponent</div><div class="comp-sel">/residential</div><div class="comp-desc">Service cards from S3<br>(fallback defaults)</div></div>
+      <div class="comp-node page"><div class="comp-name">ResidentialComponent</div><div class="comp-sel">/residential</div><div class="comp-desc">Service cards from S3 (fallback defaults)<br>Fixed-height (h-64), description clamped to 3 lines<br>Click → modal with full text + optional image</div></div>
     </div>
     <div class="flex-col">
-      <div class="comp-node page"><div class="comp-name">CommercialComponent</div><div class="comp-sel">/commercial</div><div class="comp-desc">Industry + service cards<br>from S3 (fallback defaults)</div></div>
+      <div class="comp-node page"><div class="comp-name">CommercialComponent</div><div class="comp-sel">/commercial</div><div class="comp-desc">Industry + service cards (fallback defaults)<br>Industry cards: fixed h-64, click → modal<br>Service cards: compact icon+title only</div></div>
     </div>
     <div class="flex-col">
       <div class="comp-node page"><div class="comp-name">FaqComponent</div><div class="comp-sel">/faq</div><div class="comp-desc">Q&amp;A list + optional bullets<br>Loads from S3 (fallback defaults)</div></div>
@@ -832,6 +832,10 @@ infrastructure/
   <div class="check check-todo">Admin-triggered AWS rebuild (static hero + locations at build time)</div>
   <div class="check check-done">Session persistence (sessionStorage + auto-refresh via refresh token)</div>
   <div class="check check-done">Home page hero image (admin-uploadable with preview, fallback default)</div>
+  <div class="check check-done">Residential/commercial cards: fixed height, clickable → modal with full text + optional image</div>
+  <div class="check check-todo">Admin UI for uploading per-card images (data model already supports `image?: string`)</div>
+  <div class="check check-todo">Construction section (Residential + Commercial subpages, mirroring Services structure)</div>
+  <div class="check check-todo">Gallery albums (group photos into named albums)</div>
 </div>
 
 <script>
