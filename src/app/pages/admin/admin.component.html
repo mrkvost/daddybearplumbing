@@ -86,6 +86,9 @@
   <button (click)="activeTab = 'commercial'"
     [class]="activeTab === 'commercial' ? 'text-primary border-b-2 border-primary' : 'text-secondary hover:text-primary'"
     class="font-body text-sm uppercase tracking-widest transition-colors whitespace-nowrap">Commercial</button>
+  <button (click)="activeTab = 'construction'"
+    [class]="activeTab === 'construction' ? 'text-primary border-b-2 border-primary' : 'text-secondary hover:text-primary'"
+    class="font-body text-sm uppercase tracking-widest transition-colors whitespace-nowrap">Construction</button>
   <button (click)="activeTab = 'gallery'"
     [class]="activeTab === 'gallery' ? 'text-primary border-b-2 border-primary' : 'text-secondary hover:text-primary'"
     class="font-body text-sm uppercase tracking-widest transition-colors whitespace-nowrap">Gallery</button>
@@ -113,6 +116,7 @@
     <option value="about">About</option>
     <option value="residential">Residential</option>
     <option value="commercial">Commercial</option>
+    <option value="construction">Construction</option>
     <option value="gallery">Gallery</option>
     <option value="albums">Albums</option>
     <option value="reviews">Reviews</option>
@@ -1098,8 +1102,8 @@
       </div>
     }
 
-    <!-- ==================== RESIDENTIAL / COMMERCIAL TABS ==================== -->
-    @if (activeTab === 'residential' || activeTab === 'commercial') {
+    <!-- ==================== RESIDENTIAL / COMMERCIAL / CONSTRUCTION TABS ==================== -->
+    @if (activeTab === 'residential' || activeTab === 'commercial' || activeTab === 'construction') {
       <!-- Card form template (shared, rendered below the relevant section header) -->
       <ng-template #cardFormTpl>
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90"
@@ -1133,8 +1137,21 @@
             <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Description</label>
             <textarea [(ngModel)]="cardForm.description" rows="3" placeholder="Short description of this service..."
               class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors resize-y"></textarea>
-            <p class="text-outline text-xs mt-1">Leave empty for compact cards (commercial services).</p>
+            <p class="text-outline text-xs mt-1">Leave empty for compact cards (commercial services and construction).</p>
           </div>
+
+          <!-- Section (construction only) -->
+          @if (editingList === 'construction-residential' || editingList === 'construction-commercial') {
+            <div class="mb-6">
+              <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Section</label>
+              <select [(ngModel)]="cardForm.section"
+                class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors">
+                <option value="exterior">Exterior</option>
+                <option value="interior">Interior</option>
+              </select>
+              <p class="text-outline text-xs mt-1">Every construction card belongs to either the Exterior or Interior section.</p>
+            </div>
+          }
 
           <!-- Image (optional) — not shown on compact commercial-services cards -->
           @if (editingList !== 'commercial-services') {
@@ -1447,6 +1464,176 @@
             </div>
           </div>
           <ng-container [ngTemplateOutlet]="paginationBottomTpl" [ngTemplateOutletContext]="{ list: 'commercialServices', arr: commercialServices }" />
+        }
+        }
+
+        <!-- Construction Residential -->
+        @if (activeTab === 'construction') {
+        <p class="text-xs text-outline mb-6">Cards shown on /construction/residential and /construction/commercial.</p>
+
+        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2">Residential Construction</p>
+        <p class="text-xs text-outline mb-6">Cards shown on /construction/residential.</p>
+
+        <ng-template #constructionResidentialExtraActions>
+          <button (click)="editingList === 'construction-residential' ? cancelCardForm() : openAddCard('construction-residential')"
+            class="bg-primary-fixed text-white px-4 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+            {{ editingList === 'construction-residential' ? 'Close' : 'Add Card' }}
+          </button>
+        </ng-template>
+        <ng-container [ngTemplateOutlet]="listHeaderTpl" [ngTemplateOutletContext]="{ list: 'constructionResidential', arr: constructionResidentialCards, label: 'card', extraActions: constructionResidentialExtraActions }" />
+
+        @if (editingList === 'construction-residential') {
+          <ng-container [ngTemplateOutlet]="cardFormTpl" />
+        }
+
+        @if (constructionResidentialCards.length === 0 && !loadingConstruction) {
+          <div class="ghost-border bg-surface-container-low p-6 mb-8 text-center">
+            <p class="text-secondary text-sm mb-4">No cards saved yet. The page shows built-in defaults.</p>
+            <button (click)="initConstructionDefaults('residential')"
+              class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+              Load Defaults to Edit
+            </button>
+          </div>
+        }
+
+        @if (constructionResidentialCards.length > 0) {
+          <div class="space-y-1 mb-16">
+            @for (i of pageIndices(constructionResidentialCards, 'constructionResidential'); track i) {
+              <div class="transition-all overflow-hidden"
+                [style.height.px]="cardDragList === 'construction-residential' && cardDragOverIndex === i && cardDragIndex !== i && cardDragIndex !== i - 1 ? 60 : 0"
+                (dragover)="$event.preventDefault()" (drop)="onCardDrop($event, 'construction-residential', i)">
+                <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
+              </div>
+              <div class="flex items-center gap-4 px-4 py-3 ghost-border bg-surface-container-low cursor-grab active:cursor-grabbing"
+                [class.opacity-30]="cardDragList === 'construction-residential' && cardDragIndex === i"
+                draggable="true" (dragstart)="onCardDragStart('construction-residential', i)" (dragend)="onCardDragEnd()" (dragover)="onCardRowDragOver($event, i)">
+                @if (editingPositionList === 'constructionResidential' && editingPositionIndex === i) {
+                  <input type="number" min="1" [max]="constructionResidentialCards.length" [value]="i + 1"
+                    class="w-8 text-xs text-center font-body bg-surface-container-lowest border border-primary px-0 py-0.5 shrink-0"
+                    (keydown.enter)="applyPosition('constructionResidential', i, $any($event.target).valueAsNumber)"
+                    (keydown.escape)="cancelEditPosition()"
+                    (blur)="applyPosition('constructionResidential', i, $any($event.target).valueAsNumber)"
+                    (click)="$event.stopPropagation()" (mousedown)="$event.stopPropagation()" />
+                } @else {
+                  <span class="text-xs text-outline w-6 text-center font-body shrink-0 cursor-pointer hover:text-primary hover:font-bold transition-colors"
+                    (click)="startEditPosition('constructionResidential', i); $event.stopPropagation()"
+                    (mousedown)="$event.stopPropagation()"
+                    title="Click to change position">{{ i + 1 }}</span>
+                }
+                <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
+                @if (constructionResidentialCards[i].image) {
+                  <img [src]="constructionResidentialCards[i].image" [alt]="constructionResidentialCards[i].title"
+                    class="w-9 h-9 object-cover ghost-border shrink-0" />
+                } @else {
+                  <span class="material-symbols-outlined text-xl text-primary-fixed shrink-0">{{ constructionResidentialCards[i].icon }}</span>
+                }
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate">{{ constructionResidentialCards[i].title }}</p>
+                  <p class="text-[0.65rem] text-secondary truncate">
+                    @if (constructionResidentialCards[i].section) {
+                      <span class="text-primary-fixed font-bold uppercase tracking-widest">{{ constructionResidentialCards[i].section }}</span> &middot;
+                    }
+                    {{ constructionResidentialCards[i].description }}
+                  </p>
+                </div>
+                <button (click)="openEditCard('construction-residential', i)" class="p-1 text-secondary hover:text-primary transition-colors shrink-0" title="Edit">
+                  <span class="material-symbols-outlined text-lg">edit</span>
+                </button>
+                <button (click)="deleteCard('construction-residential', i)" class="p-1 text-secondary hover:text-error transition-colors shrink-0" title="Delete">
+                  <span class="material-symbols-outlined text-lg">delete</span>
+                </button>
+              </div>
+            }
+            <div class="transition-all overflow-hidden"
+              [style.height.px]="cardDragList === 'construction-residential' && cardDragOverIndex === constructionResidentialCards.length && cardDragIndex !== constructionResidentialCards.length - 1 ? 60 : 0"
+              (dragover)="$event.preventDefault()" (drop)="onCardDrop($event, 'construction-residential', constructionResidentialCards.length)">
+              <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
+            </div>
+          </div>
+          <ng-container [ngTemplateOutlet]="paginationBottomTpl" [ngTemplateOutletContext]="{ list: 'constructionResidential', arr: constructionResidentialCards }" />
+        }
+
+        <!-- Construction Commercial -->
+        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2 mt-12">Commercial Construction</p>
+        <p class="text-xs text-outline mb-6">Cards shown on /construction/commercial.</p>
+
+        <ng-template #constructionCommercialExtraActions>
+          <button (click)="editingList === 'construction-commercial' ? cancelCardForm() : openAddCard('construction-commercial')"
+            class="bg-primary-fixed text-white px-4 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+            {{ editingList === 'construction-commercial' ? 'Close' : 'Add Card' }}
+          </button>
+        </ng-template>
+        <ng-container [ngTemplateOutlet]="listHeaderTpl" [ngTemplateOutletContext]="{ list: 'constructionCommercial', arr: constructionCommercialCards, label: 'card', extraActions: constructionCommercialExtraActions }" />
+
+        @if (editingList === 'construction-commercial') {
+          <ng-container [ngTemplateOutlet]="cardFormTpl" />
+        }
+
+        @if (constructionCommercialCards.length === 0 && !loadingConstruction) {
+          <div class="ghost-border bg-surface-container-low p-6 mb-8 text-center">
+            <p class="text-secondary text-sm mb-4">No cards saved yet. The page shows built-in defaults.</p>
+            <button (click)="initConstructionDefaults('commercial')"
+              class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+              Load Defaults to Edit
+            </button>
+          </div>
+        }
+
+        @if (constructionCommercialCards.length > 0) {
+          <div class="space-y-1 mb-8">
+            @for (i of pageIndices(constructionCommercialCards, 'constructionCommercial'); track i) {
+              <div class="transition-all overflow-hidden"
+                [style.height.px]="cardDragList === 'construction-commercial' && cardDragOverIndex === i && cardDragIndex !== i && cardDragIndex !== i - 1 ? 60 : 0"
+                (dragover)="$event.preventDefault()" (drop)="onCardDrop($event, 'construction-commercial', i)">
+                <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
+              </div>
+              <div class="flex items-center gap-4 px-4 py-3 ghost-border bg-surface-container-low cursor-grab active:cursor-grabbing"
+                [class.opacity-30]="cardDragList === 'construction-commercial' && cardDragIndex === i"
+                draggable="true" (dragstart)="onCardDragStart('construction-commercial', i)" (dragend)="onCardDragEnd()" (dragover)="onCardRowDragOver($event, i)">
+                @if (editingPositionList === 'constructionCommercial' && editingPositionIndex === i) {
+                  <input type="number" min="1" [max]="constructionCommercialCards.length" [value]="i + 1"
+                    class="w-8 text-xs text-center font-body bg-surface-container-lowest border border-primary px-0 py-0.5 shrink-0"
+                    (keydown.enter)="applyPosition('constructionCommercial', i, $any($event.target).valueAsNumber)"
+                    (keydown.escape)="cancelEditPosition()"
+                    (blur)="applyPosition('constructionCommercial', i, $any($event.target).valueAsNumber)"
+                    (click)="$event.stopPropagation()" (mousedown)="$event.stopPropagation()" />
+                } @else {
+                  <span class="text-xs text-outline w-6 text-center font-body shrink-0 cursor-pointer hover:text-primary hover:font-bold transition-colors"
+                    (click)="startEditPosition('constructionCommercial', i); $event.stopPropagation()"
+                    (mousedown)="$event.stopPropagation()"
+                    title="Click to change position">{{ i + 1 }}</span>
+                }
+                <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
+                @if (constructionCommercialCards[i].image) {
+                  <img [src]="constructionCommercialCards[i].image" [alt]="constructionCommercialCards[i].title"
+                    class="w-9 h-9 object-cover ghost-border shrink-0" />
+                } @else {
+                  <span class="material-symbols-outlined text-xl text-primary-fixed shrink-0">{{ constructionCommercialCards[i].icon }}</span>
+                }
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate">{{ constructionCommercialCards[i].title }}</p>
+                  <p class="text-[0.65rem] text-secondary truncate">
+                    @if (constructionCommercialCards[i].section) {
+                      <span class="text-primary-fixed font-bold uppercase tracking-widest">{{ constructionCommercialCards[i].section }}</span> &middot;
+                    }
+                    {{ constructionCommercialCards[i].description }}
+                  </p>
+                </div>
+                <button (click)="openEditCard('construction-commercial', i)" class="p-1 text-secondary hover:text-primary transition-colors shrink-0" title="Edit">
+                  <span class="material-symbols-outlined text-lg">edit</span>
+                </button>
+                <button (click)="deleteCard('construction-commercial', i)" class="p-1 text-secondary hover:text-error transition-colors shrink-0" title="Delete">
+                  <span class="material-symbols-outlined text-lg">delete</span>
+                </button>
+              </div>
+            }
+            <div class="transition-all overflow-hidden"
+              [style.height.px]="cardDragList === 'construction-commercial' && cardDragOverIndex === constructionCommercialCards.length && cardDragIndex !== constructionCommercialCards.length - 1 ? 60 : 0"
+              (dragover)="$event.preventDefault()" (drop)="onCardDrop($event, 'construction-commercial', constructionCommercialCards.length)">
+              <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
+            </div>
+          </div>
+          <ng-container [ngTemplateOutlet]="paginationBottomTpl" [ngTemplateOutletContext]="{ list: 'constructionCommercial', arr: constructionCommercialCards }" />
         }
         }
 

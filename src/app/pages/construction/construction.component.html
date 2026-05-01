@@ -1,0 +1,62 @@
+<!-- Page header -->
+<section class="relative h-[300px] flex items-end overflow-hidden bg-black">
+  <div class="relative z-10 w-full max-w-7xl mx-auto px-6 pb-12">
+    <p class="text-white/50 text-[0.7rem] font-bold tracking-[0.3em] uppercase mb-4">{{ eyebrow }}</p>
+    <h1 class="font-headline font-black text-5xl md:text-7xl text-white leading-[0.9] tracking-tighter uppercase">
+      {{ heading }}
+    </h1>
+  </div>
+</section>
+
+<section class="max-w-6xl mx-auto px-6 py-16">
+
+  <div class="mb-16 max-w-3xl">
+    @for (p of introParagraphs; track $index) {
+      <p class="text-secondary text-sm leading-relaxed mb-4">{{ p }}</p>
+    }
+  </div>
+
+  <!-- Exterior -->
+  @if (exteriorCards.length > 0) {
+    <div class="mb-16">
+      <h2 class="font-headline font-black text-2xl tracking-tighter uppercase mb-6">Exterior</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (card of exteriorCards; track card.title) {
+          <div class="ghost-border bg-surface-container-low p-6 flex flex-col items-center text-center">
+            <span class="material-symbols-outlined text-3xl text-primary-fixed mb-4">{{ card.icon }}</span>
+            <h3 class="font-headline font-bold text-xs uppercase tracking-tight">{{ card.title }}</h3>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Interior -->
+  @if (interiorCards.length > 0) {
+    <div class="mb-16">
+      <h2 class="font-headline font-black text-2xl tracking-tighter uppercase mb-6">Interior</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (card of interiorCards; track card.title) {
+          <div class="ghost-border bg-surface-container-low p-6 flex flex-col items-center text-center">
+            <span class="material-symbols-outlined text-3xl text-primary-fixed mb-4">{{ card.icon }}</span>
+            <h3 class="font-headline font-bold text-xs uppercase tracking-tight">{{ card.title }}</h3>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- CTA -->
+  <div class="ghost-border bg-surface-container-low p-8 text-center">
+    <h2 class="font-headline font-black text-xl tracking-tighter uppercase mb-3">Planning a Project?</h2>
+    <p class="text-secondary text-sm mb-6">We provide free estimates and partner with general contractors and homeowners across the Western Suburbs.</p>
+    <a
+      [href]="'tel:' + phone"
+      class="inline-flex items-center gap-2 bg-primary-fixed text-white px-8 py-3 font-headline font-bold text-sm uppercase tracking-widest hover:opacity-90 transition-all"
+    >
+      <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">call</span>
+      Call {{ phoneDisplay }}
+    </a>
+  </div>
+
+</section>

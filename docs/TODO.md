@@ -175,7 +175,10 @@ admin user creation, gallery photo convention, project structure.
 - For a new deployment: copy `terraform.tfvars.example`, delete `import.tf`, run `bootstrap.sh`.
 - [x] Residential & commercial cards: fixed height (`h-64`), description clamped to 3 lines, click → modal showing the full text and an image (or large icon if no image)
 - [x] Admin support for uploading per-card images — image upload UI in the card form (Residential + Commercial Industries), stored at `gallery-images/cards/`; old images are cleaned up on replace/remove/delete
-- new section "Construction" with subpages Residential and Commercial (similar to services) and similar admin area for that.
+- [x] New "Construction" section with subpages `/construction/residential` and `/construction/commercial` (mirrors
+      Services pattern: cards + modal). Shared component driven by route data. Admin "Construction" tab with both
+      lists; cards stored in `gallery-images/construction.json`. Construction dropdown added to navbar (desktop + mobile)
+      and routes added to sitemap.
 - [x] Albums in the gallery — `albums.json` data model + `/gallery/album/:slug` route + admin Albums tab (CRUD,
       cover-photo picker, drag-drop reorder, pagination) + per-photo album assignment in the gallery admin tab
 - [ ] Shrink `public/idph_logo.jpg` — file is 1773×490 (~64 KB) but rendered at `max-w-[150px]` in the footer,

@@ -325,6 +325,7 @@
     </div>
     <div class="flex-col">
       <div class="comp-node page"><div class="comp-name">CommercialComponent</div><div class="comp-sel">/commercial</div><div class="comp-desc">Industry + service cards (fallback defaults)<br>Industry cards: fixed h-64, click → modal<br>Service cards: compact icon+title only</div></div>
+      <div class="comp-node page"><div class="comp-name">ConstructionComponent</div><div class="comp-sel">/construction/residential, /construction/commercial</div><div class="comp-desc">Shared component driven by route <code>data.mode</code><br>Loads <code>construction.json</code>, falls back to defaults<br>Same fixed-height card + modal pattern</div></div>
     </div>
     <div class="flex-col">
       <div class="comp-node page"><div class="comp-name">FaqComponent</div><div class="comp-sel">/faq</div><div class="comp-desc">Q&amp;A list + optional bullets<br>Loads from S3 (fallback defaults)</div></div>
@@ -424,6 +425,8 @@
       <tr><td><code>/about</code></td><td>AboutComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
       <tr><td><code>/residential</code></td><td>ResidentialComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
       <tr><td><code>/commercial</code></td><td>CommercialComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
+      <tr><td><code>/construction/residential</code></td><td>ConstructionComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
+      <tr><td><code>/construction/commercial</code></td><td>ConstructionComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
       <tr><td><code>/faq</code></td><td>FaqComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
       <tr><td><code>/terms</code></td><td>TermsComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
       <tr><td><code>/privacy</code></td><td>PrivacyComponent</td><td><span class="tag tag-lazy">Lazy</span></td><td>&mdash;</td><td><span class="badge badge-done">Complete</span></td></tr>
@@ -843,7 +846,7 @@ infrastructure/
   <div class="check check-done">Home page hero image (admin-uploadable with preview, fallback default)</div>
   <div class="check check-done">Residential/commercial cards: fixed height, clickable → modal with full text + optional image</div>
   <div class="check check-done">Admin UI for uploading per-card images (staged preview, replace/remove, S3 cleanup; stored at <code>gallery-images/cards/</code>)</div>
-  <div class="check check-todo">Construction section (Residential + Commercial subpages, mirroring Services structure)</div>
+  <div class="check check-done">Construction section (Residential + Commercial subpages mirroring Services; admin tab; <code>construction.json</code>)</div>
   <div class="check check-done">Gallery albums (group photos into named albums; admin CRUD + cover picker; <code>/gallery/album/:slug</code> drill-in)</div>
 </div>
 

@@ -20,6 +20,8 @@ const routes = [
   '/about',
   '/residential',
   '/commercial',
+  '/construction/residential',
+  '/construction/commercial',
   '/gallery',
   '/reviews',
   '/faq',

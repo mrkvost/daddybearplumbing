@@ -131,11 +131,12 @@ The `/admin` route is protected by Cognito authentication.
 - Only manually created users can log in (no self-signup)
 - First login requires setting a new password
 - Session survives page refresh (tokens in sessionStorage, auto-refreshed; cleared on tab close)
-- Tabs: **Dashboard**, **Hero**, **OG**, **About**, **Residential**, **Commercial**, **Gallery**, **Albums**, **Reviews**, **Locations**, **FAQ**, **Settings**
+- Tabs: **Dashboard**, **Hero**, **OG**, **About**, **Residential**, **Commercial**, **Construction**, **Gallery**, **Albums**, **Reviews**, **Locations**, **FAQ**, **Settings**
 - **Hero image**: select file → full grayscale preview (matches homepage look) → confirm upload. Hash-based filenames for cache busting. Falls back to default `hero.jpg` if no custom image set.
 - **OG image**: same flow, used for social media link previews (1200×630 recommended)
 - Both tracked via `meta.json` in the gallery bucket
 - **Service cards**: edit cards shown on `/residential` and `/commercial` pages. Drag-and-drop reorder, add/edit/delete. Optional per-card image (Residential + Commercial Industries) shown in the card detail modal — uploaded files are stored under `gallery-images/cards/<hash>.<ext>` and old ones are cleaned up on replace/remove/delete. "Load Defaults" to populate from hardcoded cards for first-time editing. Card metadata stored as `services-residential.json` and `services-commercial.json` in the gallery bucket.
+- **Construction cards**: same pattern as service cards but for `/construction/residential` and `/construction/commercial`. Stored as a single `construction.json` with `{residential: [...], commercial: [...]}`.
 - **Locations**: edit suburb list shown on home + contact. Stored as `locations.json`.
 - **FAQ**: edit question + answer + optional bullet list shown on `/faq`. Stored as `faq.json`.
 - **Albums**: group photos into named collections (e.g. "Bathroom Remodel — La Grange"). Each album has title, slug, optional description/location, and a cover photo picked from gallery. Customer-facing landing at `/gallery` shows the albums grid above the photo grid; deep link `/gallery/album/<slug>` drills into one album. Photos are assigned to an album from the Gallery admin tab (book-mark icon next to each row). Stored as `albums.json`; per-photo `albumId` lives on entries in `gallery.json`.

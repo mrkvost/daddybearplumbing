@@ -46,7 +46,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   private meta = inject(Meta);
   private cdr = inject(ChangeDetectorRef);
 
-  activeTab: 'dashboard' | 'hero' | 'og' | 'about' | 'residential' | 'commercial' | 'gallery' | 'albums' | 'reviews' | 'locations' | 'faq' | 'settings' = 'dashboard';
+  activeTab: 'dashboard' | 'hero' | 'og' | 'about' | 'residential' | 'commercial' | 'construction' | 'gallery' | 'albums' | 'reviews' | 'locations' | 'faq' | 'settings' = 'dashboard';
 
   /* Pagination */
   pageSize = 10;
@@ -98,6 +98,9 @@ export class AdminComponent implements OnInit, OnDestroy {
       case 'commercialIndustries':
       case 'commercialServices':
         this.loadServiceCards(); break;
+      case 'constructionResidential':
+      case 'constructionCommercial':
+        this.loadConstruction(); break;
     }
   }
 
@@ -125,6 +128,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.loadServiceCards();
     this.loadFaq();
     this.loadAlbums();
+    this.loadConstruction();
   }
 
   ngOnDestroy(): void {
@@ -224,6 +228,8 @@ export class AdminComponent implements OnInit, OnDestroy {
       case 'residential': return this.residentialCards;
       case 'commercialIndustries': return this.commercialIndustries;
       case 'commercialServices': return this.commercialServices;
+      case 'constructionResidential': return this.constructionResidentialCards;
+      case 'constructionCommercial': return this.constructionCommercialCards;
       default: return null;
     }
   }
@@ -238,6 +244,8 @@ export class AdminComponent implements OnInit, OnDestroy {
       case 'residential':
       case 'commercialIndustries':
       case 'commercialServices': await this.saveServiceCards(); break;
+      case 'constructionResidential':
+      case 'constructionCommercial': await this.saveConstruction(); break;
     }
   }
 
@@ -907,9 +915,9 @@ export class AdminComponent implements OnInit, OnDestroy {
   loadingServices = true;
 
   // Editing state
-  editingList: 'residential' | 'commercial-industries' | 'commercial-services' | null = null;
+  editingList: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial' | null = null;
   editingIndex = -1; // -1 = adding new
-  cardForm: { icon: string; title: string; description: string; image: string } = { icon: '', title: '', description: '', image: '' };
+  cardForm: { icon: string; title: string; description: string; image: string; section: '' | 'exterior' | 'interior' } = { icon: '', title: '', description: '', image: '', section: '' };
 
   // Card image upload state
   cardImageStagedFile: File | null = null;
@@ -994,31 +1002,36 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  private getList(key: string): { icon: string; title: string; description: string; image?: string }[] {
+  private getList(key: string): { icon: string; title: string; description: string; image?: string; section?: 'exterior' | 'interior' }[] {
     if (key === 'residential') return this.residentialCards;
     if (key === 'commercial-industries') return this.commercialIndustries;
+    if (key === 'construction-residential') return this.constructionResidentialCards;
+    if (key === 'construction-commercial') return this.constructionCommercialCards;
     return this.commercialServices;
   }
 
-  openAddCard(list: 'residential' | 'commercial-industries' | 'commercial-services'): void {
+  openAddCard(list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial'): void {
     this.editingList = list;
     this.editingIndex = -1;
-    this.cardForm = { icon: '', title: '', description: '', image: '' };
+    const isConstruction = list === 'construction-residential' || list === 'construction-commercial';
+    this.cardForm = { icon: '', title: '', description: '', image: '', section: isConstruction ? 'exterior' : '' };
     this.cardImageOriginal = null;
     this.clearCardImageStaging();
     this.cardImageError = '';
     this.cdr.detectChanges();
   }
 
-  openEditCard(list: 'residential' | 'commercial-industries' | 'commercial-services', index: number): void {
+  openEditCard(list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial', index: number): void {
     this.editingList = list;
     this.editingIndex = index;
     const card = this.getList(list)[index];
+    const isConstruction = list === 'construction-residential' || list === 'construction-commercial';
     this.cardForm = {
       icon: card.icon,
       title: card.title,
       description: card.description,
       image: card.image || '',
+      section: card.section || (isConstruction ? 'exterior' : ''),
     };
     this.cardImageOriginal = card.image || null;
     this.clearCardImageStaging();
@@ -1099,12 +1112,15 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
 
     const list = this.getList(this.editingList);
-    const card: { icon: string; title: string; description: string; image?: string } = {
+    const card: { icon: string; title: string; description: string; image?: string; section?: 'exterior' | 'interior' } = {
       icon: this.cardForm.icon.trim(),
       title: this.cardForm.title.trim(),
       description: this.cardForm.description.trim(),
     };
     if (imageUrl) card.image = imageUrl;
+    if (this.cardForm.section === 'exterior' || this.cardForm.section === 'interior') {
+      card.section = this.cardForm.section;
+    }
 
     if (this.editingIndex >= 0) {
       list[this.editingIndex] = card;
@@ -1112,31 +1128,32 @@ export class AdminComponent implements OnInit, OnDestroy {
       list.push(card);
     }
 
+    const savedList = this.editingList;
     this.editingList = null;
     this.editingIndex = -1;
     this.cardImageOriginal = null;
     this.clearCardImageStaging();
-    await this.saveServiceCards();
+    await this.saveCardsForList(savedList);
     this.cdr.detectChanges();
   }
 
-  async deleteCard(list: 'residential' | 'commercial-industries' | 'commercial-services', index: number): Promise<void> {
+  async deleteCard(list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial', index: number): Promise<void> {
     const card = this.getList(list)[index];
     if (this.isManagedCardImage(card.image)) {
       const key = card.image!.replace(/^\//, '');
       await this.uploadService.delete(key, GALLERY_BUCKET).catch(() => {});
     }
     this.getList(list).splice(index, 1);
-    await this.saveServiceCards();
+    await this.saveCardsForList(list);
     this.cdr.detectChanges();
   }
 
   /* Drag and drop for service cards */
   cardDragIndex = -1;
   cardDragOverIndex = -1;
-  cardDragList: 'residential' | 'commercial-industries' | 'commercial-services' | null = null;
+  cardDragList: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial' | null = null;
 
-  onCardDragStart(list: 'residential' | 'commercial-industries' | 'commercial-services', index: number): void {
+  onCardDragStart(list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial', index: number): void {
     this.cardDragList = list;
     this.cardDragIndex = index;
     this.cdr.detectChanges();
@@ -1159,7 +1176,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  async onCardDrop(event: DragEvent, list: 'residential' | 'commercial-industries' | 'commercial-services', targetIndex: number): Promise<void> {
+  async onCardDrop(event: DragEvent, list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial', targetIndex: number): Promise<void> {
     event.preventDefault();
     const fromIndex = this.cardDragIndex;
     const fromList = this.cardDragList;
@@ -1176,12 +1193,71 @@ export class AdminComponent implements OnInit, OnDestroy {
     arr.splice(insertAt, 0, item);
     this.cdr.detectChanges();
 
-    await this.saveServiceCards();
+    await this.saveCardsForList(list);
   }
 
   private async saveServiceCards(): Promise<void> {
     await this.uploadService.putJson(this.RES_KEY, this.residentialCards, GALLERY_BUCKET);
     await this.uploadService.putJson(this.COM_KEY, { industries: this.commercialIndustries, services: this.commercialServices }, GALLERY_BUCKET);
+  }
+
+  /** Save the right JSON file for the given card list */
+  private async saveCardsForList(list: string): Promise<void> {
+    if (list === 'construction-residential' || list === 'construction-commercial') {
+      await this.saveConstruction();
+    } else {
+      await this.saveServiceCards();
+    }
+  }
+
+  /* ================================================================
+   * CONSTRUCTION (Residential + Commercial)
+   * ================================================================ */
+
+  constructionResidentialCards: { icon: string; title: string; description: string; image?: string; section?: 'exterior' | 'interior' }[] = [];
+  constructionCommercialCards: { icon: string; title: string; description: string; image?: string; section?: 'exterior' | 'interior' }[] = [];
+  loadingConstruction = true;
+
+  private readonly CONSTRUCTION_KEY = 'gallery-images/construction.json';
+
+  async loadConstruction(): Promise<void> {
+    this.loadingConstruction = true;
+    this.cdr.detectChanges();
+    try {
+      const res = await fetch(`/gallery-images/construction.json?t=${Date.now()}`);
+      if (res.ok) {
+        const data = await res.json();
+        this.constructionResidentialCards = data.residential || [];
+        this.constructionCommercialCards = data.commercial || [];
+      }
+    } catch { /* empty */ }
+    this.loadingConstruction = false;
+    this.cdr.detectChanges();
+  }
+
+  async initConstructionDefaults(mode: 'residential' | 'commercial'): Promise<void> {
+    const defaults: { icon: string; title: string; description: string; section: 'exterior' | 'interior' }[] = [
+      { icon: 'water_drop', title: 'Main water line', description: '', section: 'exterior' },
+      { icon: 'foundation', title: 'Sewer line', description: '', section: 'exterior' },
+      { icon: 'flood', title: 'Storm drainage line', description: '', section: 'exterior' },
+      { icon: 'plumbing', title: 'Water, Drains and Vents', description: '', section: 'interior' },
+      { icon: 'gas_meter', title: 'Gas piping', description: '', section: 'interior' },
+      { icon: 'bathtub', title: 'Final plumbing installation', description: '', section: 'interior' },
+    ];
+    if (mode === 'residential') {
+      this.constructionResidentialCards = defaults.map(c => ({ ...c }));
+    } else {
+      this.constructionCommercialCards = defaults.map(c => ({ ...c }));
+    }
+    await this.saveConstruction();
+    this.cdr.detectChanges();
+  }
+
+  private async saveConstruction(): Promise<void> {
+    await this.uploadService.putJson(this.CONSTRUCTION_KEY, {
+      residential: this.constructionResidentialCards,
+      commercial: this.constructionCommercialCards,
+    }, GALLERY_BUCKET);
   }
 
   /* ================================================================
