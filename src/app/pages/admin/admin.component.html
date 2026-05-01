@@ -153,8 +153,16 @@
 
       <!-- Upload -->
       @if (showUploadForm) {
-      <div class="mb-16">
-        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-6">Upload New Photos</p>
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90"
+        (click)="uploading ? null : (showUploadForm = false)">
+      <div class="relative ghost-border bg-surface w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8"
+        (click)="$event.stopPropagation()">
+        <button type="button" (click)="showUploadForm = false" [disabled]="uploading"
+          class="absolute top-4 right-4 text-secondary hover:text-on-surface p-2 transition-colors disabled:opacity-30 z-10"
+          aria-label="Close">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-6 pr-8">Upload New Photos</p>
         <div class="grid md:grid-cols-[1fr_2fr] gap-6 mb-6">
           <div>
             <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Tag</label>
@@ -193,6 +201,7 @@
             {{ uploading ? 'Uploading...' : 'Upload ' + uploads.length + ' file' + (uploads.length !== 1 ? 's' : '') }}
           </button>
         }
+      </div>
       </div>
       }
 
@@ -254,26 +263,13 @@
                 </div>
                 <!-- Info -->
                 <div class="flex-1 min-w-0">
-                  @if (images[i].editingTag) {
-                    <input
-                      type="text"
-                      [value]="images[i].tagLabel === 'Uncategorized' ? '' : images[i].tagLabel"
-                      (keydown.enter)="saveTag(images[i], $any($event.target).value)"
-                      (keydown.escape)="cancelEditTag(images[i])"
-                      (blur)="saveTag(images[i], $any($event.target).value)"
-                      placeholder="Tag (empty = infer from filename)"
-                      class="w-full bg-surface-container-lowest border border-outline-variant/20 px-2 py-1 text-sm font-body text-on-surface focus:border-primary focus:ring-0"
-                      autofocus
-                    />
-                  } @else {
-                    <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate cursor-pointer hover:text-primary-fixed transition-colors"
-                       (click)="startEditTag(images[i])" title="Click to edit tag">
-                      {{ images[i].tagLabel }}
-                      @if (images[i].customTag) {
-                        <span class="text-[0.6rem] text-outline font-body normal-case tracking-normal">(custom)</span>
-                      }
-                    </p>
-                  }
+                  <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate cursor-pointer hover:text-primary-fixed transition-colors"
+                     (click)="startEditTag(images[i])" title="Click to edit tag">
+                    {{ images[i].tagLabel }}
+                    @if (images[i].customTag) {
+                      <span class="text-[0.6rem] text-outline font-body normal-case tracking-normal">(custom)</span>
+                    }
+                  </p>
                   <p class="text-[0.65rem] text-secondary">{{ images[i].date | date:'mediumDate' }} &middot; {{ images[i].filename }}</p>
                 </div>
                 <!-- Delete -->
@@ -295,6 +291,40 @@
           <ng-container [ngTemplateOutlet]="paginationBottomTpl" [ngTemplateOutletContext]="{ list: 'gallery', arr: images }" />
         }
       </div>
+
+      <!-- Tag edit modal -->
+      @if (editingTagImage) {
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90"
+          (click)="cancelEditTag()">
+          <div class="relative ghost-border bg-surface w-full max-w-md p-8"
+            (click)="$event.stopPropagation()">
+            <button type="button" (click)="cancelEditTag()"
+              class="absolute top-4 right-4 text-secondary hover:text-on-surface p-2 transition-colors z-10"
+              aria-label="Close">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+            <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2 pr-8">Edit Tag</p>
+            <p class="text-xs text-outline mb-6 truncate">{{ editingTagImage.filename }}</p>
+            <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Tag</label>
+            <input type="text" [(ngModel)]="editingTagValue"
+              (keydown.enter)="saveTag()"
+              placeholder="Tag (empty = infer from filename)"
+              class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
+              autofocus />
+            <p class="text-outline text-xs mt-1">Leave empty to use the filename-inferred tag.</p>
+            <div class="flex gap-4 mt-6">
+              <button (click)="saveTag()"
+                class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+                Save
+              </button>
+              <button (click)="cancelEditTag()"
+                class="text-secondary hover:text-primary text-xs font-headline font-bold uppercase tracking-widest transition-colors">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      }
     }
 
     <!-- ==================== REVIEWS TAB ==================== -->
@@ -309,8 +339,16 @@
 
       <!-- Review form (add/edit) -->
       @if (showReviewForm) {
-        <div class="ghost-border bg-surface-container-low p-6 mb-8">
-          <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-6">
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90"
+          (click)="cancelReviewForm()">
+        <div class="relative ghost-border bg-surface w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8"
+          (click)="$event.stopPropagation()">
+          <button type="button" (click)="cancelReviewForm()"
+            class="absolute top-4 right-4 text-secondary hover:text-on-surface p-2 transition-colors z-10"
+            aria-label="Close">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+          <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-6 pr-8">
             {{ editingReview ? 'Edit Review' : 'New Review' }}
           </p>
           <div class="grid md:grid-cols-2 gap-6 mb-6">
@@ -355,6 +393,7 @@
               Cancel
             </button>
           </div>
+        </div>
         </div>
       }
 
@@ -575,14 +614,32 @@
         <ng-container [ngTemplateOutlet]="listHeaderTpl" [ngTemplateOutletContext]="{ list: 'locations', arr: locations, label: 'location', extraActions: locationsExtraActions }" />
 
         @if (showLocationForm) {
-          <div class="flex gap-3 mb-8">
-            <input type="text" [(ngModel)]="newLocation" placeholder="e.g. Riverside, IL"
-              (keydown.enter)="addLocation()"
-              class="flex-1 bg-surface-container-lowest border border-outline-variant/20 px-4 py-2.5 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors" />
-            <button (click)="addLocation()"
-              class="bg-primary-fixed text-white px-4 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all shrink-0">
-              Add
-            </button>
+          <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90"
+            (click)="showLocationForm = false">
+            <div class="relative ghost-border bg-surface w-full max-w-md p-8"
+              (click)="$event.stopPropagation()">
+              <button type="button" (click)="showLocationForm = false"
+                class="absolute top-4 right-4 text-secondary hover:text-on-surface p-2 transition-colors z-10"
+                aria-label="Close">
+                <span class="material-symbols-outlined">close</span>
+              </button>
+              <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-6 pr-8">New Location</p>
+              <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Location</label>
+              <input type="text" [(ngModel)]="newLocation" placeholder="e.g. Riverside, IL"
+                (keydown.enter)="addLocation()"
+                class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
+                autofocus />
+              <div class="flex gap-4 mt-6">
+                <button (click)="addLocation()"
+                  class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+                  Add
+                </button>
+                <button (click)="showLocationForm = false"
+                  class="text-secondary hover:text-primary text-xs font-headline font-bold uppercase tracking-widest transition-colors">
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         }
 
@@ -623,17 +680,8 @@
                 }
                 <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
                 <span class="material-symbols-outlined text-sm text-secondary shrink-0">location_on</span>
-                @if (editingLocationIndex === i) {
-                  <input type="text" [value]="editingLocationValue"
-                    (keydown.enter)="saveEditLocation(i, $any($event.target).value)"
-                    (keydown.escape)="cancelEditLocation()"
-                    (blur)="saveEditLocation(i, $any($event.target).value)"
-                    class="flex-1 bg-surface-container-lowest border border-outline-variant/20 px-2 py-1 text-sm font-body text-on-surface focus:border-primary focus:ring-0"
-                    autofocus />
-                } @else {
-                  <span class="flex-1 font-headline font-bold text-sm uppercase tracking-tight text-on-surface cursor-pointer hover:text-primary-fixed transition-colors"
-                    (click)="startEditLocation(i)" title="Click to edit">{{ locations[i] }}</span>
-                }
+                <span class="flex-1 font-headline font-bold text-sm uppercase tracking-tight text-on-surface cursor-pointer hover:text-primary-fixed transition-colors"
+                  (click)="startEditLocation(i)" title="Click to edit">{{ locations[i] }}</span>
                 <button (click)="deleteLocation(i)" class="p-1 text-secondary hover:text-error transition-colors shrink-0" title="Delete">
                   <span class="material-symbols-outlined text-lg">delete</span>
                 </button>
@@ -649,6 +697,37 @@
         }
 
       </div>
+
+      <!-- Location edit modal -->
+      @if (editingLocationIndex !== -1) {
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90"
+          (click)="cancelEditLocation()">
+          <div class="relative ghost-border bg-surface w-full max-w-md p-8"
+            (click)="$event.stopPropagation()">
+            <button type="button" (click)="cancelEditLocation()"
+              class="absolute top-4 right-4 text-secondary hover:text-on-surface p-2 transition-colors z-10"
+              aria-label="Close">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+            <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-6 pr-8">Edit Location</p>
+            <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Location</label>
+            <input type="text" [(ngModel)]="editingLocationValue"
+              (keydown.enter)="saveEditLocation()"
+              class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
+              autofocus />
+            <div class="flex gap-4 mt-6">
+              <button (click)="saveEditLocation()"
+                class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+                Save
+              </button>
+              <button (click)="cancelEditLocation()"
+                class="text-secondary hover:text-primary text-xs font-headline font-bold uppercase tracking-widest transition-colors">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      }
     }
 
     <!-- ==================== FAQ TAB ==================== -->
@@ -665,8 +744,16 @@
         <ng-container [ngTemplateOutlet]="listHeaderTpl" [ngTemplateOutletContext]="{ list: 'faq', arr: faqItems, label: 'question', extraActions: faqExtraActions }" />
 
         @if (editingFaqIndex !== -1) {
-          <div class="ghost-border bg-surface-container-low p-6 mb-8">
-            <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-6">
+          <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90"
+            (click)="cancelFaqForm()">
+          <div class="relative ghost-border bg-surface w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8"
+            (click)="$event.stopPropagation()">
+            <button type="button" (click)="cancelFaqForm()"
+              class="absolute top-4 right-4 text-secondary hover:text-on-surface p-2 transition-colors z-10"
+              aria-label="Close">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+            <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-6 pr-8">
               {{ editingFaqIndex >= 0 ? 'Edit Question' : 'New Question' }}
             </p>
             <div class="mb-6">
@@ -695,6 +782,7 @@
                 Cancel
               </button>
             </div>
+          </div>
           </div>
         }
 
@@ -767,10 +855,18 @@
     @if (activeTab === 'residential' || activeTab === 'commercial') {
       <!-- Card form template (shared, rendered below the relevant section header) -->
       <ng-template #cardFormTpl>
-        <div class="ghost-border bg-surface-container-low p-6 mb-8">
-          <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-6">
-            {{ editingIndex >= 0 ? 'Edit Card' : 'New Card' }}
-          </p>
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90"
+          (click)="cancelCardForm()">
+          <div class="relative ghost-border bg-surface w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8"
+            (click)="$event.stopPropagation()">
+            <button type="button" (click)="cancelCardForm()" [disabled]="cardImageUploading"
+              class="absolute top-4 right-4 text-secondary hover:text-on-surface p-2 transition-colors disabled:opacity-30 z-10"
+              aria-label="Close">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+            <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-6 pr-8">
+              {{ editingIndex >= 0 ? 'Edit Card' : 'New Card' }}
+            </p>
           <div class="grid md:grid-cols-2 gap-6 mb-6">
             <div>
               <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Icon Name</label>
@@ -841,17 +937,24 @@
             </div>
           }
 
-          <!-- Preview -->
-          @if (cardForm.icon || cardForm.title) {
-            <div class="ghost-border bg-surface-container-lowest p-6 mb-6 max-w-[220px]">
-              @if (cardForm.icon) {
-                <span class="material-symbols-outlined text-3xl text-primary-fixed block mb-3">{{ cardForm.icon }}</span>
-              }
-              <p class="font-headline font-bold text-xs uppercase tracking-tight">{{ cardForm.title || 'Title' }}</p>
-              @if (cardForm.description) {
-                <p class="text-secondary text-xs leading-relaxed mt-2">{{ cardForm.description }}</p>
-              }
-            </div>
+          <!-- Preview — mirrors the public-facing card layout -->
+          @if (cardForm.icon || cardForm.title || cardForm.description) {
+            <p class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold mb-2 text-center">Preview</p>
+            @if (editingList === 'commercial-services') {
+              <!-- Compact tile (no description, no modal on the public page) -->
+              <div class="ghost-border bg-surface-container-lowest p-6 mb-6 mx-auto w-[180px] flex flex-col items-center text-center">
+                <span class="material-symbols-outlined text-3xl text-primary-fixed mb-4">{{ cardForm.icon || 'category' }}</span>
+                <h3 class="font-headline font-bold text-xs uppercase tracking-tight">{{ cardForm.title || 'Title' }}</h3>
+              </div>
+            } @else {
+              <!-- Clickable card with truncated description + Read more -->
+              <div class="ghost-border bg-surface-container-lowest p-8 mb-6 mx-auto w-[280px] h-64 flex flex-col">
+                <span class="material-symbols-outlined text-4xl text-primary-fixed mb-6">{{ cardForm.icon || 'category' }}</span>
+                <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">{{ cardForm.title || 'Title' }}</h3>
+                <p class="text-secondary text-sm leading-relaxed flex-1 line-clamp-3">{{ cardForm.description || 'Card description preview…' }}</p>
+                <p class="text-[0.6rem] uppercase tracking-widest text-primary-fixed font-bold mt-3">Read more →</p>
+              </div>
+            }
           }
           <div class="flex gap-4">
             <button (click)="saveCard()" [disabled]="cardImageUploading"
@@ -862,6 +965,7 @@
               class="text-secondary hover:text-primary text-xs font-headline font-bold uppercase tracking-widest transition-colors disabled:opacity-50">
               Cancel
             </button>
+          </div>
           </div>
         </div>
       </ng-template>

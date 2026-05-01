@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, HostListener, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -13,7 +13,6 @@ import { DEFAULT_LOCATIONS } from '../../defaults/locations';
 
 interface AdminGalleryImage extends GalleryImage {
   deleting?: boolean;
-  editingTag?: boolean;
   customTag?: string; // tag set by admin (stored in gallery.json)
 }
 
@@ -294,14 +293,19 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   /* ---------- Tag editing ---------- */
 
+  editingTagImage: AdminGalleryImage | null = null;
+  editingTagValue = '';
+
   startEditTag(image: AdminGalleryImage): void {
-    image.editingTag = true;
+    this.editingTagImage = image;
+    this.editingTagValue = image.tagLabel === 'Uncategorized' ? '' : image.tagLabel;
     this.cdr.detectChanges();
   }
 
-  async saveTag(image: AdminGalleryImage, newTag: string): Promise<void> {
-    image.editingTag = false;
-    const trimmed = newTag.trim();
+  async saveTag(): Promise<void> {
+    const image = this.editingTagImage;
+    if (!image) return;
+    const trimmed = this.editingTagValue.trim();
     if (trimmed) {
       image.customTag = trimmed;
       image.tagLabel = trimmed;
@@ -313,12 +317,15 @@ export class AdminComponent implements OnInit, OnDestroy {
       image.tag = parsed.tag;
       image.tagLabel = parsed.tagLabel;
     }
+    this.editingTagImage = null;
+    this.editingTagValue = '';
     await this.saveGalleryManifest();
     this.cdr.detectChanges();
   }
 
-  cancelEditTag(image: AdminGalleryImage): void {
-    image.editingTag = false;
+  cancelEditTag(): void {
+    this.editingTagImage = null;
+    this.editingTagValue = '';
     this.cdr.detectChanges();
   }
 
@@ -811,9 +818,11 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  async saveEditLocation(index: number, value: string): Promise<void> {
+  async saveEditLocation(): Promise<void> {
+    if (this.editingLocationIndex < 0) return;
+    const index = this.editingLocationIndex;
+    const trimmed = this.editingLocationValue.trim();
     this.editingLocationIndex = -1;
-    const trimmed = value.trim();
     if (trimmed && trimmed !== this.locations[index]) {
       this.locations[index] = trimmed;
       await this.saveLocations();
@@ -1312,5 +1321,35 @@ export class AdminComponent implements OnInit, OnDestroy {
   signOut(): void {
     this.auth.signOut();
     this.router.navigate(['/admin/login']);
+  }
+
+  /* ================================================================
+   * GLOBAL MODAL CLOSE
+   * ================================================================ */
+
+  @HostListener('document:keydown.escape')
+  onAdminEscape(): void {
+    // Don't close anything while a card image is uploading
+    if (this.cardImageUploading) return;
+
+    if (this.editingList) {
+      this.cancelCardForm();
+    } else if (this.showReviewForm) {
+      this.cancelReviewForm();
+    } else if (this.editingFaqIndex !== -1) {
+      this.cancelFaqForm();
+    } else if (this.editingTagImage) {
+      this.cancelEditTag();
+    } else if (this.editingLocationIndex !== -1) {
+      this.cancelEditLocation();
+    } else if (this.showLocationForm) {
+      this.showLocationForm = false;
+      this.cdr.detectChanges();
+    } else if (this.showUploadForm) {
+      this.showUploadForm = false;
+      this.cdr.detectChanges();
+    } else if (this.editingPositionList !== null) {
+      this.cancelEditPosition();
+    }
   }
 }
