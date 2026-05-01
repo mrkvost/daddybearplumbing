@@ -16,14 +16,14 @@
       <!-- Right: Address + Locations -->
       <div class="bg-surface-container-lowest p-12 ghost-border space-y-12">
         <div>
-          <h4 class="font-headline font-bold text-xs uppercase tracking-[0.2em] text-secondary mb-4">Business Address</h4>
+          <h3 class="font-headline font-bold text-xs uppercase tracking-[0.2em] text-secondary mb-4">Business Address</h3>
           <a [href]="mapsUrl" target="_blank" rel="noopener" class="font-body text-xl font-medium hover:text-primary-fixed transition-colors block">
             {{ address.line1 }}<br>
             {{ address.city }}, {{ address.state }} {{ address.zip }}
           </a>
         </div>
         <div>
-          <h4 class="font-headline font-bold text-xs uppercase tracking-[0.2em] text-secondary mb-4">Service Radius</h4>
+          <h3 class="font-headline font-bold text-xs uppercase tracking-[0.2em] text-secondary mb-4">Service Radius</h3>
           <ul class="grid grid-cols-2 gap-y-2">
             @for (loc of locations.slice(0, 7); track loc) {
               <li class="flex items-center gap-2 text-sm font-bold uppercase tracking-tight">

@@ -71,7 +71,10 @@ with some external steps that cannot be automated.
 - [x] Add Open Graph tags (`og:title`, `og:description`, `og:image`, `og:url`) for link sharing
       — managed by CanonicalService; OG image uploadable from Admin → SEO tab
 - [x] Add OG placeholder image (`public/og-placeholder.jpg`, 1200×630, rasterized from `meta/og-placeholder.svg`)
-- [ ] Ensure heading hierarchy is correct: one `<h1>` per page, logical `<h2>`/`<h3>` order
+- [x] Ensure heading hierarchy is correct: one `<h1>` per page, logical `<h2>`/`<h3>` order
+      — audited; pages already had a single `<h1>` and clean h2/h3 nesting. Fixed the only
+      level-skips: footer columns and ServiceArea card headings were `<h4>` jumping past `<h3>`,
+      now `<h3>` to match their position right after page-level `<h2>` content.
 - [ ] Add descriptive `alt` text to all images
 - [x] Create `robots.txt` in Angular's `public/` folder (disallows /admin)
 - [x] Create `sitemap.xml` listing all public routes; robots.txt points to it
