@@ -138,16 +138,6 @@
       </div>
     }
 
-    <!-- ==================== ABOUT TAB ==================== -->
-    @if (activeTab === 'about') {
-      <div>
-        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-4">About Page</p>
-        <h2 class="font-headline font-black text-3xl tracking-tighter uppercase mb-4">Edit About Us</h2>
-        <p class="text-secondary text-sm">Editor coming soon.</p>
-      </div>
-    }
-
-
     <!-- ==================== GALLERY TAB ==================== -->
     @if (activeTab === 'gallery') {
       <!-- Header line -->
@@ -1102,8 +1092,8 @@
       </div>
     }
 
-    <!-- ==================== RESIDENTIAL / COMMERCIAL / CONSTRUCTION TABS ==================== -->
-    @if (activeTab === 'residential' || activeTab === 'commercial' || activeTab === 'construction') {
+    <!-- ==================== RESIDENTIAL / COMMERCIAL / CONSTRUCTION / ABOUT TABS ==================== -->
+    @if (activeTab === 'residential' || activeTab === 'commercial' || activeTab === 'construction' || activeTab === 'about') {
       <!-- Card form template (shared, rendered below the relevant section header) -->
       <ng-template #cardFormTpl>
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90"
@@ -1153,8 +1143,8 @@
             </div>
           }
 
-          <!-- Image (optional) — not shown on compact commercial-services cards -->
-          @if (editingList !== 'commercial-services') {
+          <!-- Image (optional) — not shown on compact commercial-services or about-why cards -->
+          @if (editingList !== 'commercial-services' && editingList !== 'about-why') {
             <div class="mb-6">
               <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Image (optional)</label>
 
@@ -1634,6 +1624,126 @@
             </div>
           </div>
           <ng-container [ngTemplateOutlet]="paginationBottomTpl" [ngTemplateOutletContext]="{ list: 'constructionCommercial', arr: constructionCommercialCards }" />
+        }
+        }
+
+        <!-- About -->
+        @if (activeTab === 'about') {
+        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2">About Page</p>
+        <p class="text-xs text-outline mb-8">Edit the History intro, Why Choose Us cards, and Our Promise epilogue shown on /about. Newlines treated as paragraph breaks.</p>
+
+        @if (loadingAbout) {
+          <div class="text-center py-16">
+            <span class="material-symbols-outlined text-4xl text-outline-variant animate-pulse block mb-3">article</span>
+            <p class="text-secondary text-sm uppercase tracking-widest">Loading...</p>
+          </div>
+        } @else {
+
+        <!-- Our History -->
+        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2">Our History</p>
+        <p class="text-xs text-outline mb-3">Top intro paragraphs. Separate paragraphs with a blank line.</p>
+        <textarea [(ngModel)]="aboutHistoryText" (ngModelChange)="aboutHistoryDirty = true" rows="8"
+          placeholder="Paragraph 1&#10;&#10;Paragraph 2"
+          class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors resize-y mb-3"></textarea>
+        <div class="flex items-center gap-3 mb-12">
+          <button (click)="saveAboutHistory()" [disabled]="!aboutHistoryDirty || aboutSaving"
+            class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+            {{ aboutSaving ? 'Saving...' : 'Save History' }}
+          </button>
+          @if (aboutHistoryDirty) {
+            <span class="text-xs text-outline">Unsaved changes</span>
+          }
+        </div>
+
+        <!-- Why Choose Us -->
+        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2">Why Choose Us</p>
+        <p class="text-xs text-outline mb-6">Cards shown between History and Promise. Each has an icon, title, and description.</p>
+
+        <ng-template #aboutWhyExtraActions>
+          <button (click)="editingList === 'about-why' ? cancelCardForm() : openAddCard('about-why')"
+            class="bg-primary-fixed text-white px-4 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+            {{ editingList === 'about-why' ? 'Close' : 'Add Card' }}
+          </button>
+        </ng-template>
+        <ng-container [ngTemplateOutlet]="listHeaderTpl" [ngTemplateOutletContext]="{ list: 'aboutWhy', arr: aboutWhyChooseUs, label: 'card', extraActions: aboutWhyExtraActions }" />
+
+        @if (editingList === 'about-why') {
+          <ng-container [ngTemplateOutlet]="cardFormTpl" />
+        }
+
+        @if (aboutWhyChooseUs.length === 0) {
+          <div class="ghost-border bg-surface-container-low p-6 mb-8 text-center">
+            <p class="text-secondary text-sm mb-4">No cards saved yet. The page shows built-in defaults.</p>
+            <button (click)="initAboutWhyDefaults()"
+              class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+              Load Defaults to Edit
+            </button>
+          </div>
+        }
+
+        @if (aboutWhyChooseUs.length > 0) {
+          <div class="space-y-1 mb-12">
+            @for (i of pageIndices(aboutWhyChooseUs, 'aboutWhy'); track i) {
+              <div class="transition-all overflow-hidden"
+                [style.height.px]="cardDragList === 'about-why' && cardDragOverIndex === i && cardDragIndex !== i && cardDragIndex !== i - 1 ? 60 : 0"
+                (dragover)="$event.preventDefault()" (drop)="onCardDrop($event, 'about-why', i)">
+                <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
+              </div>
+              <div class="flex items-center gap-4 px-4 py-3 ghost-border bg-surface-container-low cursor-grab active:cursor-grabbing"
+                [class.opacity-30]="cardDragList === 'about-why' && cardDragIndex === i"
+                draggable="true" (dragstart)="onCardDragStart('about-why', i)" (dragend)="onCardDragEnd()" (dragover)="onCardRowDragOver($event, i)">
+                @if (editingPositionList === 'aboutWhy' && editingPositionIndex === i) {
+                  <input type="number" min="1" [max]="aboutWhyChooseUs.length" [value]="i + 1"
+                    class="w-8 text-xs text-center font-body bg-surface-container-lowest border border-primary px-0 py-0.5 shrink-0"
+                    (keydown.enter)="applyPosition('aboutWhy', i, $any($event.target).valueAsNumber)"
+                    (keydown.escape)="cancelEditPosition()"
+                    (blur)="applyPosition('aboutWhy', i, $any($event.target).valueAsNumber)"
+                    (click)="$event.stopPropagation()" (mousedown)="$event.stopPropagation()" />
+                } @else {
+                  <span class="text-xs text-outline w-6 text-center font-body shrink-0 cursor-pointer hover:text-primary hover:font-bold transition-colors"
+                    (click)="startEditPosition('aboutWhy', i); $event.stopPropagation()"
+                    (mousedown)="$event.stopPropagation()"
+                    title="Click to change position">{{ i + 1 }}</span>
+                }
+                <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
+                <span class="material-symbols-outlined text-xl text-primary-fixed shrink-0">{{ aboutWhyChooseUs[i].icon }}</span>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate">{{ aboutWhyChooseUs[i].title }}</p>
+                  <p class="text-[0.65rem] text-secondary truncate">{{ aboutWhyChooseUs[i].description }}</p>
+                </div>
+                <button (click)="openEditCard('about-why', i)" class="p-1 text-secondary hover:text-primary transition-colors shrink-0" title="Edit">
+                  <span class="material-symbols-outlined text-lg">edit</span>
+                </button>
+                <button (click)="deleteCard('about-why', i)" class="p-1 text-secondary hover:text-error transition-colors shrink-0" title="Delete">
+                  <span class="material-symbols-outlined text-lg">delete</span>
+                </button>
+              </div>
+            }
+            <div class="transition-all overflow-hidden"
+              [style.height.px]="cardDragList === 'about-why' && cardDragOverIndex === aboutWhyChooseUs.length && cardDragIndex !== aboutWhyChooseUs.length - 1 ? 60 : 0"
+              (dragover)="$event.preventDefault()" (drop)="onCardDrop($event, 'about-why', aboutWhyChooseUs.length)">
+              <div class="flex items-center gap-4 px-4 py-3 bg-blue-500/10 border border-dashed border-blue-400 h-full pointer-events-none"></div>
+            </div>
+          </div>
+          <ng-container [ngTemplateOutlet]="paginationBottomTpl" [ngTemplateOutletContext]="{ list: 'aboutWhy', arr: aboutWhyChooseUs }" />
+        }
+
+        <!-- Our Promise -->
+        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2 mt-12">Our Promise</p>
+        <p class="text-xs text-outline mb-3">Closing paragraphs (epilogue). Separate paragraphs with a blank line.</p>
+        <textarea [(ngModel)]="aboutPromiseText" (ngModelChange)="aboutPromiseDirty = true" rows="8"
+          placeholder="Paragraph 1&#10;&#10;Paragraph 2"
+          class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors resize-y mb-3"></textarea>
+        <div class="flex items-center gap-3 mb-8">
+          <button (click)="saveAboutPromise()" [disabled]="!aboutPromiseDirty || aboutSaving"
+            class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+            {{ aboutSaving ? 'Saving...' : 'Save Promise' }}
+          </button>
+          @if (aboutPromiseDirty) {
+            <span class="text-xs text-outline">Unsaved changes</span>
+          }
+        </div>
+
         }
         }
 

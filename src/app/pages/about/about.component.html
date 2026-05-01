@@ -11,87 +11,42 @@
 <section class="max-w-4xl mx-auto px-6 py-16">
 
   <!-- Our History -->
-  <h2 class="font-headline font-black text-2xl tracking-tighter uppercase mb-6">Our History</h2>
-  <div class="space-y-4 text-secondary text-sm leading-relaxed mb-16">
-    <p>
-      Daddy Bear Plumbing has established itself as one of the most dependable plumbing service providers
-      in Chicago and Suburbs, earning a reputation for delivering high-quality plumbing services
-      to the local community. As a family-owned and operated business, we take great pride in providing
-      prompt and reliable service to our customers.
-    </p>
-    <p>
-      Founded on the belief that honest work speaks for itself, our company was built by hands that
-      understand the trade inside and out. That passion for the plumbing industry drives everything
-      we do — from the smallest faucet repair to a full re-pipe. We are dedicated to providing the
-      same high level of quality work and exceptional customer service that has made Daddy Bear Plumbing
-      a trusted name in the community.
-    </p>
-  </div>
+  @if (history.length > 0) {
+    <h2 class="font-headline font-black text-2xl tracking-tighter uppercase mb-6">Our History</h2>
+    <div class="space-y-4 text-secondary text-sm leading-relaxed mb-16">
+      @for (p of history; track $index) {
+        <p>{{ p }}</p>
+      }
+    </div>
+  }
 
   <!-- Why Choose Us -->
-  <h2 class="font-headline font-black text-2xl tracking-tighter uppercase mb-8">Why Choose Us</h2>
-  <div class="space-y-8 mb-16">
-
-    <div class="ghost-border bg-surface-container-low p-6">
-      <div class="flex items-start gap-4">
-        <span class="material-symbols-outlined text-2xl text-primary-fixed shrink-0 mt-0.5">request_quote</span>
-        <div>
-          <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-2">We Respect Your Time</h3>
-          <p class="text-secondary text-sm leading-relaxed">
-            We offer free estimates as part of our service. To schedule
-            an appointment, we require a $150 deposit, which is fully applied
-            toward the final cost of the work performed. This deposit helps us
-            ensure commitment on both sides, reduce last-minute cancellations,
-            and provide reliable, timely service to all our customers.
-          </p>
+  @if (whyChooseUs.length > 0) {
+    <h2 class="font-headline font-black text-2xl tracking-tighter uppercase mb-8">Why Choose Us</h2>
+    <div class="space-y-8 mb-16">
+      @for (card of whyChooseUs; track card.title) {
+        <div class="ghost-border bg-surface-container-low p-6">
+          <div class="flex items-start gap-4">
+            <span class="material-symbols-outlined text-2xl text-primary-fixed shrink-0 mt-0.5">{{ card.icon }}</span>
+            <div>
+              <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-2">{{ card.title }}</h3>
+              <p class="text-secondary text-sm leading-relaxed">{{ card.description }}</p>
+            </div>
+          </div>
         </div>
-      </div>
+      }
     </div>
-
-    <div class="ghost-border bg-surface-container-low p-6">
-      <div class="flex items-start gap-4">
-        <span class="material-symbols-outlined text-2xl text-primary-fixed shrink-0 mt-0.5">verified_user</span>
-        <div>
-          <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-2">Licensed, Insured, Bonded</h3>
-          <p class="text-secondary text-sm leading-relaxed">
-            Our company is fully licensed and insured to provide top-notch plumbing services. You can trust
-            our team to complete every job to the highest standards of quality, and in the unlikely event
-            of an accident or damage, our insurance covers any costs.
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <div class="ghost-border bg-surface-container-low p-6">
-      <div class="flex items-start gap-4">
-        <span class="material-symbols-outlined text-2xl text-primary-fixed shrink-0 mt-0.5">workspace_premium</span>
-        <div>
-          <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-2">All Work Guaranteed</h3>
-          <p class="text-secondary text-sm leading-relaxed">
-            Choosing Daddy Bear Plumbing means peace of mind knowing that all work we perform is guaranteed.
-            We stand by our work and take pride in providing high-quality services. With us, you can be
-            confident that the job will be done right the first time.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
+  }
 
   <!-- Our Promise -->
-  <h2 class="font-headline font-black text-2xl tracking-tighter uppercase mb-6">Our Promise</h2>
-  <div class="space-y-4 text-secondary text-sm leading-relaxed mb-16">
-    <p>
-      Our team understands the importance of transparency and honesty when it comes to plumbing services.
-      That's why we always provide our customers with transparent pricing with no hidden fees. We take pride
-      in delivering efficient and customized plumbing solutions to meet our clients' specific needs.
-    </p>
-    <p>
-      When you need a reliable plumber, look no further than Daddy Bear Plumbing. We strive to provide
-      our customers with the highest quality service, and our team is always ready to take on any plumbing
-      issue. Our service areas include La Grange, Villa Park, Brookfield, Westchester, Riverside,
-      Berwyn, Cicero, Lyons, North Riverside, and more communities across Chicago and Suburbs.
-    </p>
-  </div>
+  @if (promise.length > 0) {
+    <h2 class="font-headline font-black text-2xl tracking-tighter uppercase mb-6">Our Promise</h2>
+    <div class="space-y-4 text-secondary text-sm leading-relaxed mb-16">
+      @for (p of promise; track $index) {
+        <p>{{ p }}</p>
+      }
+    </div>
+  }
 
   <!-- CTA -->
   <div class="ghost-border bg-surface-container-low p-8 text-center">

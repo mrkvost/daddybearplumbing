@@ -101,6 +101,8 @@ export class AdminComponent implements OnInit, OnDestroy {
       case 'constructionResidential':
       case 'constructionCommercial':
         this.loadConstruction(); break;
+      case 'aboutWhy':
+        this.loadAbout(); break;
     }
   }
 
@@ -129,6 +131,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.loadFaq();
     this.loadAlbums();
     this.loadConstruction();
+    this.loadAbout();
   }
 
   ngOnDestroy(): void {
@@ -230,6 +233,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       case 'commercialServices': return this.commercialServices;
       case 'constructionResidential': return this.constructionResidentialCards;
       case 'constructionCommercial': return this.constructionCommercialCards;
+      case 'aboutWhy': return this.aboutWhyChooseUs;
       default: return null;
     }
   }
@@ -246,6 +250,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       case 'commercialServices': await this.saveServiceCards(); break;
       case 'constructionResidential':
       case 'constructionCommercial': await this.saveConstruction(); break;
+      case 'aboutWhy': await this.saveAbout(); break;
     }
   }
 
@@ -915,7 +920,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   loadingServices = true;
 
   // Editing state
-  editingList: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial' | null = null;
+  editingList: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial' | 'about-why' | null = null;
   editingIndex = -1; // -1 = adding new
   cardForm: { icon: string; title: string; description: string; image: string; section: '' | 'exterior' | 'interior' } = { icon: '', title: '', description: '', image: '', section: '' };
 
@@ -1007,10 +1012,11 @@ export class AdminComponent implements OnInit, OnDestroy {
     if (key === 'commercial-industries') return this.commercialIndustries;
     if (key === 'construction-residential') return this.constructionResidentialCards;
     if (key === 'construction-commercial') return this.constructionCommercialCards;
+    if (key === 'about-why') return this.aboutWhyChooseUs;
     return this.commercialServices;
   }
 
-  openAddCard(list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial'): void {
+  openAddCard(list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial' | 'about-why'): void {
     this.editingList = list;
     this.editingIndex = -1;
     const isConstruction = list === 'construction-residential' || list === 'construction-commercial';
@@ -1021,7 +1027,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  openEditCard(list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial', index: number): void {
+  openEditCard(list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial' | 'about-why', index: number): void {
     this.editingList = list;
     this.editingIndex = index;
     const card = this.getList(list)[index];
@@ -1137,7 +1143,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  async deleteCard(list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial', index: number): Promise<void> {
+  async deleteCard(list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial' | 'about-why', index: number): Promise<void> {
     const card = this.getList(list)[index];
     if (this.isManagedCardImage(card.image)) {
       const key = card.image!.replace(/^\//, '');
@@ -1151,9 +1157,9 @@ export class AdminComponent implements OnInit, OnDestroy {
   /* Drag and drop for service cards */
   cardDragIndex = -1;
   cardDragOverIndex = -1;
-  cardDragList: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial' | null = null;
+  cardDragList: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial' | 'about-why' | null = null;
 
-  onCardDragStart(list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial', index: number): void {
+  onCardDragStart(list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial' | 'about-why', index: number): void {
     this.cardDragList = list;
     this.cardDragIndex = index;
     this.cdr.detectChanges();
@@ -1176,7 +1182,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  async onCardDrop(event: DragEvent, list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial', targetIndex: number): Promise<void> {
+  async onCardDrop(event: DragEvent, list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial' | 'about-why', targetIndex: number): Promise<void> {
     event.preventDefault();
     const fromIndex = this.cardDragIndex;
     const fromList = this.cardDragList;
@@ -1205,6 +1211,8 @@ export class AdminComponent implements OnInit, OnDestroy {
   private async saveCardsForList(list: string): Promise<void> {
     if (list === 'construction-residential' || list === 'construction-commercial') {
       await this.saveConstruction();
+    } else if (list === 'about-why') {
+      await this.saveAbout();
     } else {
       await this.saveServiceCards();
     }
@@ -1258,6 +1266,86 @@ export class AdminComponent implements OnInit, OnDestroy {
       residential: this.constructionResidentialCards,
       commercial: this.constructionCommercialCards,
     }, GALLERY_BUCKET);
+  }
+
+  /* ================================================================
+   * ABOUT (history paragraphs + Why Choose Us cards + promise paragraphs)
+   * ================================================================ */
+
+  aboutHistory: string[] = [];
+  aboutWhyChooseUs: { icon: string; title: string; description: string }[] = [];
+  aboutPromise: string[] = [];
+  aboutHistoryText = '';
+  aboutPromiseText = '';
+  aboutHistoryDirty = false;
+  aboutPromiseDirty = false;
+  aboutSaving = false;
+  loadingAbout = true;
+
+  private readonly ABOUT_KEY = 'gallery-images/about.json';
+
+  async loadAbout(): Promise<void> {
+    this.loadingAbout = true;
+    this.cdr.detectChanges();
+    try {
+      const res = await fetch(`/gallery-images/about.json?t=${Date.now()}`);
+      if (res.ok) {
+        const data = await res.json();
+        this.aboutHistory = data.history || [];
+        this.aboutWhyChooseUs = data.whyChooseUs || [];
+        this.aboutPromise = data.promise || [];
+      }
+    } catch { /* empty */ }
+    this.aboutHistoryText = this.aboutHistory.join('\n\n');
+    this.aboutPromiseText = this.aboutPromise.join('\n\n');
+    this.aboutHistoryDirty = false;
+    this.aboutPromiseDirty = false;
+    this.loadingAbout = false;
+    this.cdr.detectChanges();
+  }
+
+  private parseParagraphs(text: string): string[] {
+    return text.split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
+  }
+
+  async saveAboutHistory(): Promise<void> {
+    this.aboutHistory = this.parseParagraphs(this.aboutHistoryText);
+    this.aboutHistoryText = this.aboutHistory.join('\n\n');
+    this.aboutSaving = true;
+    this.cdr.detectChanges();
+    await this.saveAbout();
+    this.aboutHistoryDirty = false;
+    this.aboutSaving = false;
+    this.cdr.detectChanges();
+  }
+
+  async saveAboutPromise(): Promise<void> {
+    this.aboutPromise = this.parseParagraphs(this.aboutPromiseText);
+    this.aboutPromiseText = this.aboutPromise.join('\n\n');
+    this.aboutSaving = true;
+    this.cdr.detectChanges();
+    await this.saveAbout();
+    this.aboutPromiseDirty = false;
+    this.aboutSaving = false;
+    this.cdr.detectChanges();
+  }
+
+  private async saveAbout(): Promise<void> {
+    await this.uploadService.putJson(this.ABOUT_KEY, {
+      history: this.aboutHistory,
+      whyChooseUs: this.aboutWhyChooseUs,
+      promise: this.aboutPromise,
+    }, GALLERY_BUCKET);
+  }
+
+  async initAboutWhyDefaults(): Promise<void> {
+    this.aboutWhyChooseUs = [
+      { icon: 'request_quote', title: 'We Respect Your Time', description: 'We offer free estimates as part of our service. To schedule an appointment, we require a $150 deposit, which is fully applied toward the final cost of the work performed. This deposit helps us ensure commitment on both sides, reduce last-minute cancellations, and provide reliable, timely service to all our customers.' },
+      { icon: 'verified_user', title: 'Licensed, Insured, Bonded', description: 'Our company is fully licensed and insured to provide top-notch plumbing services. You can trust our team to complete every job to the highest standards of quality, and in the unlikely event of an accident or damage, our insurance covers any costs.' },
+      { icon: 'workspace_premium', title: 'All Work Guaranteed', description: 'Choosing Daddy Bear Plumbing means peace of mind knowing that all work we perform is guaranteed. We stand by our work and take pride in providing high-quality services. With us, you can be confident that the job will be done right the first time.' },
+    ];
+    await this.saveAbout();
+    this.cdr.detectChanges();
   }
 
   /* ================================================================
