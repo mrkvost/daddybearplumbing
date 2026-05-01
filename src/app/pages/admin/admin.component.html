@@ -792,6 +792,55 @@
               class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors resize-y"></textarea>
             <p class="text-outline text-xs mt-1">Leave empty for compact cards (commercial services).</p>
           </div>
+
+          <!-- Image (optional) — not shown on compact commercial-services cards -->
+          @if (editingList !== 'commercial-services') {
+            <div class="mb-6">
+              <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Image (optional)</label>
+
+              @if (cardImageStagedPreview) {
+                <div class="ghost-border bg-surface-container-lowest p-4 mb-2">
+                  <img [src]="cardImageStagedPreview" alt="Staged image"
+                    class="w-full max-h-48 object-cover ghost-border mb-3" />
+                  <div class="flex gap-3 items-center">
+                    <p class="text-xs text-secondary flex-1 truncate">{{ cardImageStagedFile?.name }}</p>
+                    <button type="button" (click)="cancelCardImageStaged()"
+                      class="text-xs text-secondary hover:text-error font-headline font-bold uppercase tracking-widest transition-colors">
+                      Discard
+                    </button>
+                  </div>
+                  <p class="text-outline text-xs mt-2">Image will be uploaded when you click {{ editingIndex >= 0 ? 'Update' : 'Add' }}.</p>
+                </div>
+              } @else if (cardForm.image) {
+                <div class="ghost-border bg-surface-container-lowest p-4 mb-2">
+                  <img [src]="cardForm.image" alt="Card image"
+                    class="w-full max-h-48 object-cover ghost-border mb-3" />
+                  <div class="flex gap-4 items-center">
+                    <label class="text-xs text-primary-fixed font-headline font-bold uppercase tracking-widest cursor-pointer hover:underline">
+                      Replace
+                      <input type="file" accept="image/*" class="hidden" (change)="onCardImageSelected($event)" />
+                    </label>
+                    <button type="button" (click)="removeCardImage()"
+                      class="text-xs text-secondary hover:text-error font-headline font-bold uppercase tracking-widest transition-colors">
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              } @else {
+                <label class="ghost-border bg-surface-container-lowest p-6 mb-2 flex flex-col items-center justify-center cursor-pointer hover:bg-surface-container-low transition-colors">
+                  <span class="material-symbols-outlined text-3xl text-outline mb-2">image</span>
+                  <span class="text-xs text-secondary uppercase tracking-widest font-headline font-bold">Choose image</span>
+                  <input type="file" accept="image/*" class="hidden" (change)="onCardImageSelected($event)" />
+                </label>
+              }
+
+              @if (cardImageError) {
+                <p class="text-xs text-error mt-2">{{ cardImageError }}</p>
+              }
+              <p class="text-outline text-xs mt-1">Shown in the card detail modal. If absent, the icon is shown instead.</p>
+            </div>
+          }
+
           <!-- Preview -->
           @if (cardForm.icon || cardForm.title) {
             <div class="ghost-border bg-surface-container-lowest p-6 mb-6 max-w-[220px]">
@@ -805,12 +854,12 @@
             </div>
           }
           <div class="flex gap-4">
-            <button (click)="saveCard()"
-              class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
-              {{ editingIndex >= 0 ? 'Update' : 'Add' }}
+            <button (click)="saveCard()" [disabled]="cardImageUploading"
+              class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+              {{ cardImageUploading ? 'Uploading…' : (editingIndex >= 0 ? 'Update' : 'Add') }}
             </button>
-            <button (click)="cancelCardForm()"
-              class="text-secondary hover:text-primary text-xs font-headline font-bold uppercase tracking-widest transition-colors">
+            <button (click)="cancelCardForm()" [disabled]="cardImageUploading"
+              class="text-secondary hover:text-primary text-xs font-headline font-bold uppercase tracking-widest transition-colors disabled:opacity-50">
               Cancel
             </button>
           </div>
@@ -871,7 +920,12 @@
                     title="Click to change position">{{ i + 1 }}</span>
                 }
                 <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
-                <span class="material-symbols-outlined text-xl text-primary-fixed shrink-0">{{ residentialCards[i].icon }}</span>
+                @if (residentialCards[i].image) {
+                  <img [src]="residentialCards[i].image" [alt]="residentialCards[i].title"
+                    class="w-9 h-9 object-cover ghost-border shrink-0" />
+                } @else {
+                  <span class="material-symbols-outlined text-xl text-primary-fixed shrink-0">{{ residentialCards[i].icon }}</span>
+                }
                 <div class="flex-1 min-w-0">
                   <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate">{{ residentialCards[i].title }}</p>
                   <p class="text-[0.65rem] text-secondary truncate">{{ residentialCards[i].description }}</p>
@@ -948,7 +1002,12 @@
                     title="Click to change position">{{ i + 1 }}</span>
                 }
                 <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
-                <span class="material-symbols-outlined text-xl text-primary-fixed shrink-0">{{ commercialIndustries[i].icon }}</span>
+                @if (commercialIndustries[i].image) {
+                  <img [src]="commercialIndustries[i].image" [alt]="commercialIndustries[i].title"
+                    class="w-9 h-9 object-cover ghost-border shrink-0" />
+                } @else {
+                  <span class="material-symbols-outlined text-xl text-primary-fixed shrink-0">{{ commercialIndustries[i].icon }}</span>
+                }
                 <div class="flex-1 min-w-0">
                   <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate">{{ commercialIndustries[i].title }}</p>
                   <p class="text-[0.65rem] text-secondary truncate">{{ commercialIndustries[i].description }}</p>

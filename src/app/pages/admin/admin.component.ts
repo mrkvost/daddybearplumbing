@@ -878,18 +878,26 @@ export class AdminComponent implements OnInit, OnDestroy {
    * SERVICE CARDS (Residential + Commercial)
    * ================================================================ */
 
-  residentialCards: { icon: string; title: string; description: string }[] = [];
-  commercialIndustries: { icon: string; title: string; description: string }[] = [];
-  commercialServices: { icon: string; title: string; description: string }[] = [];
+  residentialCards: { icon: string; title: string; description: string; image?: string }[] = [];
+  commercialIndustries: { icon: string; title: string; description: string; image?: string }[] = [];
+  commercialServices: { icon: string; title: string; description: string; image?: string }[] = [];
   loadingServices = true;
 
   // Editing state
   editingList: 'residential' | 'commercial-industries' | 'commercial-services' | null = null;
   editingIndex = -1; // -1 = adding new
-  cardForm = { icon: '', title: '', description: '' };
+  cardForm: { icon: string; title: string; description: string; image: string } = { icon: '', title: '', description: '', image: '' };
+
+  // Card image upload state
+  cardImageStagedFile: File | null = null;
+  cardImageStagedPreview: string | null = null;
+  cardImageUploading = false;
+  cardImageError = '';
+  private cardImageOriginal: string | null = null;
 
   private readonly RES_KEY = 'gallery-images/services-residential.json';
   private readonly COM_KEY = 'gallery-images/services-commercial.json';
+  private readonly CARD_IMG_PREFIX = 'gallery-images/cards/';
 
   private resLoaded = false;
   private comLoaded = false;
@@ -963,7 +971,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  private getList(key: string): { icon: string; title: string; description: string }[] {
+  private getList(key: string): { icon: string; title: string; description: string; image?: string }[] {
     if (key === 'residential') return this.residentialCards;
     if (key === 'commercial-industries') return this.commercialIndustries;
     return this.commercialServices;
@@ -972,7 +980,10 @@ export class AdminComponent implements OnInit, OnDestroy {
   openAddCard(list: 'residential' | 'commercial-industries' | 'commercial-services'): void {
     this.editingList = list;
     this.editingIndex = -1;
-    this.cardForm = { icon: '', title: '', description: '' };
+    this.cardForm = { icon: '', title: '', description: '', image: '' };
+    this.cardImageOriginal = null;
+    this.clearCardImageStaging();
+    this.cardImageError = '';
     this.cdr.detectChanges();
   }
 
@@ -980,32 +991,118 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.editingList = list;
     this.editingIndex = index;
     const card = this.getList(list)[index];
-    this.cardForm = { ...card };
+    this.cardForm = {
+      icon: card.icon,
+      title: card.title,
+      description: card.description,
+      image: card.image || '',
+    };
+    this.cardImageOriginal = card.image || null;
+    this.clearCardImageStaging();
+    this.cardImageError = '';
     this.cdr.detectChanges();
   }
 
   cancelCardForm(): void {
     this.editingList = null;
     this.editingIndex = -1;
+    this.cardImageOriginal = null;
+    this.clearCardImageStaging();
+    this.cardImageError = '';
     this.cdr.detectChanges();
+  }
+
+  onCardImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    this.cardImageError = '';
+    if (this.cardImageStagedPreview) URL.revokeObjectURL(this.cardImageStagedPreview);
+    this.cardImageStagedFile = input.files[0];
+    this.cardImageStagedPreview = URL.createObjectURL(this.cardImageStagedFile);
+    input.value = '';
+    this.cdr.detectChanges();
+  }
+
+  cancelCardImageStaged(): void {
+    this.clearCardImageStaging();
+    this.cdr.detectChanges();
+  }
+
+  removeCardImage(): void {
+    this.cardForm.image = '';
+    this.clearCardImageStaging();
+    this.cdr.detectChanges();
+  }
+
+  private clearCardImageStaging(): void {
+    if (this.cardImageStagedPreview) URL.revokeObjectURL(this.cardImageStagedPreview);
+    this.cardImageStagedFile = null;
+    this.cardImageStagedPreview = null;
+  }
+
+  private isManagedCardImage(url: string | null | undefined): boolean {
+    return !!url && url.startsWith(`/${this.CARD_IMG_PREFIX}`);
   }
 
   async saveCard(): Promise<void> {
     if (!this.editingList || !this.cardForm.title.trim()) return;
+
+    let imageUrl = this.cardForm.image;
+
+    // Upload staged image if present
+    if (this.cardImageStagedFile) {
+      this.cardImageUploading = true;
+      this.cardImageError = '';
+      this.cdr.detectChanges();
+      try {
+        const ext = this.cardImageStagedFile.name.split('.').pop()?.toLowerCase() || 'jpg';
+        const filename = `card-${this.randomHash()}-${Date.now().toString(36)}.${ext}`;
+        const s3key = `${this.CARD_IMG_PREFIX}${filename}`;
+        await this.uploadService.upload(this.cardImageStagedFile, s3key, GALLERY_BUCKET);
+        imageUrl = `/${s3key}`;
+      } catch (e: any) {
+        this.cardImageError = e.message || 'Image upload failed';
+        this.cardImageUploading = false;
+        this.cdr.detectChanges();
+        return;
+      }
+      this.cardImageUploading = false;
+    }
+
+    // Cleanup the original image when it has been replaced or removed
+    if (this.cardImageOriginal && this.cardImageOriginal !== imageUrl && this.isManagedCardImage(this.cardImageOriginal)) {
+      const key = this.cardImageOriginal.replace(/^\//, '');
+      await this.uploadService.delete(key, GALLERY_BUCKET).catch(() => {});
+    }
+
     const list = this.getList(this.editingList);
-    const card = { icon: this.cardForm.icon.trim(), title: this.cardForm.title.trim(), description: this.cardForm.description.trim() };
+    const card: { icon: string; title: string; description: string; image?: string } = {
+      icon: this.cardForm.icon.trim(),
+      title: this.cardForm.title.trim(),
+      description: this.cardForm.description.trim(),
+    };
+    if (imageUrl) card.image = imageUrl;
+
     if (this.editingIndex >= 0) {
       list[this.editingIndex] = card;
     } else {
       list.push(card);
     }
+
     this.editingList = null;
     this.editingIndex = -1;
+    this.cardImageOriginal = null;
+    this.clearCardImageStaging();
     await this.saveServiceCards();
     this.cdr.detectChanges();
   }
 
   async deleteCard(list: 'residential' | 'commercial-industries' | 'commercial-services', index: number): Promise<void> {
+    const card = this.getList(list)[index];
+    if (this.isManagedCardImage(card.image)) {
+      const key = card.image!.replace(/^\//, '');
+      await this.uploadService.delete(key, GALLERY_BUCKET).catch(() => {});
+    }
     this.getList(list).splice(index, 1);
     await this.saveServiceCards();
     this.cdr.detectChanges();

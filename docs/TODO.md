@@ -174,6 +174,6 @@ admin user creation, gallery photo convention, project structure.
 - `terraform.tfvars` is gitignored — never commit real AWS account details.
 - For a new deployment: copy `terraform.tfvars.example`, delete `import.tf`, run `bootstrap.sh`.
 - [x] Residential & commercial cards: fixed height (`h-64`), description clamped to 3 lines, click → modal showing the full text and an image (or large icon if no image)
-- [ ] Admin support for uploading per-card images (the data model has `image?: string`, but no admin UI yet)
+- [x] Admin support for uploading per-card images — image upload UI in the card form (Residential + Commercial Industries), stored at `gallery-images/cards/`; old images are cleaned up on replace/remove/delete
 - new section "Construction" with subpages Residential and Commercial (similar to services) and similar admin area for that.
 - albums in the gallery

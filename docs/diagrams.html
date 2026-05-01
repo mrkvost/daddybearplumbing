@@ -519,7 +519,8 @@
   <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Admin switches to Residential or Commercial tab &rarr; card lists (Commercial has Industries + Services)</div></div>
   <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">If no cards saved yet &rarr; "Load Defaults to Edit" populates lists from hardcoded defaults and saves to S3</div></div>
   <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">Add/edit cards: icon name (Material Symbols), title, description &mdash; with live preview<br><small>Drag-and-drop reorder (same pattern as gallery photos: numbered rows, drag handle, blue drop indicators)</small></div></div>
-  <div class="flow-step"><div class="flow-num">4</div><div class="flow-text">Saves to <code>services-residential.json</code> and <code>services-commercial.json</code> in gallery bucket<br><small>Residential/Commercial pages load from JSON on init; fall back to hardcoded defaults if no JSON exists</small></div></div>
+  <div class="flow-step"><div class="flow-num">4</div><div class="flow-text">Optional per-card image (Residential + Commercial Industries) &mdash; staged with local preview, uploaded on save as <code>card-&lt;hash&gt;-&lt;ts&gt;.ext</code> under <code>gallery-images/cards/</code><br><small>Replacing or removing an image (and deleting a card with one) cleans up the old S3 object. Compact Commercial Services tiles do not show images, so the upload section is hidden when editing them.</small></div></div>
+  <div class="flow-step"><div class="flow-num">5</div><div class="flow-text">Saves to <code>services-residential.json</code> and <code>services-commercial.json</code> in gallery bucket<br><small>Each card stores <code>{icon, title, description, image?}</code>. Residential/Commercial pages load from JSON on init; fall back to hardcoded defaults if no JSON exists. Modal shows the image when present, the icon otherwise.</small></div></div>
 
   <h2>Admin — Manage Reviews</h2>
   <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Admin switches to Reviews tab &rarr; loads <code>/reviews-data/reviews.json</code></div></div>
@@ -833,7 +834,7 @@ infrastructure/
   <div class="check check-done">Session persistence (sessionStorage + auto-refresh via refresh token)</div>
   <div class="check check-done">Home page hero image (admin-uploadable with preview, fallback default)</div>
   <div class="check check-done">Residential/commercial cards: fixed height, clickable → modal with full text + optional image</div>
-  <div class="check check-todo">Admin UI for uploading per-card images (data model already supports `image?: string`)</div>
+  <div class="check check-done">Admin UI for uploading per-card images (staged preview, replace/remove, S3 cleanup; stored at <code>gallery-images/cards/</code>)</div>
   <div class="check check-todo">Construction section (Residential + Commercial subpages, mirroring Services structure)</div>
   <div class="check check-todo">Gallery albums (group photos into named albums)</div>
 </div>

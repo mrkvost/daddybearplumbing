@@ -135,7 +135,7 @@ The `/admin` route is protected by Cognito authentication.
 - **Hero image**: select file → full grayscale preview (matches homepage look) → confirm upload. Hash-based filenames for cache busting. Falls back to default `hero.jpg` if no custom image set.
 - **OG image**: same flow, used for social media link previews (1200×630 recommended)
 - Both tracked via `meta.json` in the gallery bucket
-- **Service cards**: edit cards shown on `/residential` and `/commercial` pages. Drag-and-drop reorder, add/edit/delete. "Load Defaults" to populate from hardcoded cards for first-time editing. Stored as `services-residential.json` and `services-commercial.json` in the gallery bucket.
+- **Service cards**: edit cards shown on `/residential` and `/commercial` pages. Drag-and-drop reorder, add/edit/delete. Optional per-card image (Residential + Commercial Industries) shown in the card detail modal — uploaded files are stored under `gallery-images/cards/<hash>.<ext>` and old ones are cleaned up on replace/remove/delete. "Load Defaults" to populate from hardcoded cards for first-time editing. Card metadata stored as `services-residential.json` and `services-commercial.json` in the gallery bucket.
 - **Locations**: edit suburb list shown on home + contact. Stored as `locations.json`.
 - **FAQ**: edit question + answer + optional bullet list shown on `/faq`. Stored as `faq.json`.
 - All list tabs share: editable position numbers (click to edit, clamps to valid range), drag-and-drop reorder, pagination (10/page, top + bottom).
