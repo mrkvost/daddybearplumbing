@@ -181,8 +181,8 @@ admin user creation, gallery photo convention, project structure.
       and routes added to sitemap.
 - [x] Albums in the gallery — `albums.json` data model + `/gallery/album/:slug` route + admin Albums tab (CRUD,
       cover-photo picker, drag-drop reorder, pagination) + per-photo album assignment in the gallery admin tab
-- [ ] Shrink `public/idph_logo.jpg` — file is 1773×490 (~64 KB) but rendered at `max-w-[150px]` in the footer,
-      so most of the bytes are wasted. Resize source to ~300×83 (2× of display width) and re-export as JPG/WebP.
+- [x] Shrink `public/idph_logo.jpg` — resized 1773×490 (65 KB) → 300×83 (8.6 KB) and added explicit
+      `width`/`height` attributes in the footer to reserve the box.
 - [ ] Fix Cumulative Layout Shift on initial paint:
     *   `/fonts/public-sans-latin.woff2` swap — preload the file in `<head>` and switch the `@font-face` to
         `font-display: optional` (or tune `size-adjust` / `ascent-override`) so the fallback metrics match
