@@ -5,13 +5,6 @@ Work through them one at a time. Each goal has acceptance criteria that define "
 
 ---
 
-## GOAL 0 — Links Page
-
-- [ ] Create useful links/resources page
-  e.g.: https://www.chicago.gov/city/en/sites/guide-to-building-permits/home/instructions/EPP/PLUMB.html
-
----
-
 ## GOAL 1 — Angular Application ✅ COMPLETE
 
 **What was built:**
@@ -153,8 +146,6 @@ admin user creation, gallery photo convention, project structure.
 - [x] Content pages: About Us, Residential Services, Commercial Services, FAQ, Terms, Privacy, Cookies
 - [x] Admin service cards editor (drag-and-drop reorder, add/edit/delete, load defaults)
 - [x] Enhanced footer (5-column layout: brand, services, navigate, information, accreditation with license numbers)
-- [ ] Tips/Links page
-    *   https://www.chicago.gov/city/en/sites/guide-to-building-permits/home/instructions/EPP/PLUMB.html
 - [ ] Admin-triggered rebuild: button in admin to trigger AWS build pipeline (CodeBuild or Lambda)
       so that hero image + locations are statically embedded in the HTML at build time
       (improves SEO — crawlers see real content instead of JS-fetched data)
