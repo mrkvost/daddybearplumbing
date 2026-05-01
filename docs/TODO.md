@@ -86,8 +86,8 @@ with some external steps that cannot be automated.
 - [ ] Evaluate Angular pre-rendering (`ng build` with `prerender` option) so crawlers receive
       real HTML instead of a blank JS shell — enable if straightforward, document if deferred
 - [x] Self-host Public Sans + Inter fonts (eliminates Google Fonts round-trip for text fonts)
-- [ ] Verify Core Web Vitals: lazy-load the Google Maps iframe (`loading="lazy"`),
-      minimize render-blocking resources
+- [x] Verify Core Web Vitals: Google Maps iframe + gallery thumbnails are `loading="lazy"`;
+      hero image is `fetchpriority="high"` + `decoding="async"` to prioritise the LCP element
 
 **Sub-tasks (external — checklist only, no code):**
 - [ ] Claim and complete **Google Business Profile** (address, phone, hours, photos, service areas)
@@ -177,3 +177,12 @@ admin user creation, gallery photo convention, project structure.
 - [x] Admin support for uploading per-card images — image upload UI in the card form (Residential + Commercial Industries), stored at `gallery-images/cards/`; old images are cleaned up on replace/remove/delete
 - new section "Construction" with subpages Residential and Commercial (similar to services) and similar admin area for that.
 - albums in the gallery
+- [ ] Shrink `public/idph_logo.jpg` — file is 1773×490 (~64 KB) but rendered at `max-w-[150px]` in the footer,
+      so most of the bytes are wasted. Resize source to ~300×83 (2× of display width) and re-export as JPG/WebP.
+- [ ] Fix Cumulative Layout Shift on initial paint:
+    *   `/fonts/public-sans-latin.woff2` swap — preload the file in `<head>` and switch the `@font-face` to
+        `font-display: optional` (or tune `size-adjust` / `ascent-override`) so the fallback metrics match
+    *   Navbar call button reflows when the brand font loads — give it a fixed `min-width` (or render
+        in the headline font from the start) so the layout doesn't jump
+    *   IDPH logo in the footer should declare explicit `width`/`height` attributes so the browser
+        reserves the box before the JPG decodes
