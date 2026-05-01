@@ -25,7 +25,11 @@
     <meta name="twitter:description" content="Professional plumbing services for Chicago's Western Suburbs. Licensed, insured, and locally owned." />
     <meta name="twitter:image" content="https://kvaking.com/og-placeholder.jpg" />
 
-    <!-- Fonts: Public Sans + Inter self-hosted (see src/fonts.css) -->
+    <!-- Fonts: Public Sans + Inter self-hosted (see src/fonts.css)
+         Public Sans (latin) is the headline font that drives initial paint.
+         Preload it + use font-display: optional so the fallback never swaps,
+         eliminating CLS on the brand title and call button. -->
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/public-sans-latin.woff2" crossorigin />
     <!-- Material Symbols Outlined: loaded from Google Fonts (icon set too large to self-host) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

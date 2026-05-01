@@ -183,9 +183,7 @@ admin user creation, gallery photo convention, project structure.
       cover-photo picker, drag-drop reorder, pagination) + per-photo album assignment in the gallery admin tab
 - [x] Shrink `public/idph_logo.jpg` — resized 1773×490 (65 KB) → 300×83 (8.6 KB) and added explicit
       `width`/`height` attributes in the footer to reserve the box.
-- [ ] Fix Cumulative Layout Shift on initial paint:
-    *   `/fonts/public-sans-latin.woff2` swap — preload the file in `<head>` and switch the `@font-face` to
-        `font-display: optional` (or tune `size-adjust` / `ascent-override`) so the fallback metrics match
-    *   Navbar call button reflows when the brand font loads — give it a fixed `min-width` (or render
-        in the headline font from the start) so the layout doesn't jump
-    *   ~~IDPH logo width/height attributes~~ — done (see Shrink IDPH logo above)
+- [x] Fix Cumulative Layout Shift on initial paint — preloaded `/fonts/public-sans-latin.woff2`
+      in `<head>` and switched both Public Sans `@font-face` blocks to `font-display: optional`,
+      so the fallback never swaps to Public Sans mid-render. This eliminates the headline reflow
+      that affected the brand title and the call button. IDPH logo `width`/`height` covered above.
