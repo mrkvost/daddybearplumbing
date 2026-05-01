@@ -342,7 +342,7 @@
 
     <!-- Admin -->
     <div class="flex-col">
-      <div class="comp-node admin"><div class="comp-name">AdminComponent</div><div class="comp-sel">/admin</div><div class="comp-desc">Own navbar (centered title + settings + sign out)<br>10 tabs: Dashboard, Hero, OG, About,<br>Residential, Commercial, Gallery, Reviews, Locations, FAQ<br>Unified pagination (10/page, top + bottom)<br>Editable position numbers + drag-reorder</div></div>
+      <div class="comp-node admin"><div class="comp-name">AdminComponent</div><div class="comp-sel">/admin</div><div class="comp-desc">Own navbar (centered title + settings + sign out)<br>12 tabs: Dashboard, Hero, OG, About,<br>Residential, Commercial, Construction, Gallery,<br>Albums, Reviews, Locations, FAQ<br>Unified pagination (10/page, top + bottom)<br>Editable position numbers + drag-reorder</div></div>
       <div class="connector"></div>
       <div class="comp-node admin" style="padding: 8px 14px;"><div class="comp-name" style="font-size:12px;">LoginComponent</div><div class="comp-sel">/admin/login</div></div>
     </div>
@@ -820,7 +820,7 @@ infrastructure/
   <div class="check check-todo">Pre-rendering evaluation</div>
   <div class="check check-done">Self-hosted text fonts (Public Sans + Inter)</div>
   <div class="check check-done">Scroll-to-top on navigation</div>
-  <div class="check check-todo">Lazy-load Google Maps iframe</div>
+  <div class="check check-done">Core Web Vitals: lazy-load Google Maps iframe + gallery thumbs; hero <code>fetchpriority="high"</code></div>
   <div class="check check-todo">Google Business Profile</div>
   <div class="check check-todo">Google Search Console + Bing Webmaster Tools</div>
 
@@ -848,6 +848,8 @@ infrastructure/
   <div class="check check-done">Admin UI for uploading per-card images (staged preview, replace/remove, S3 cleanup; stored at <code>gallery-images/cards/</code>)</div>
   <div class="check check-done">Construction section (Residential + Commercial subpages mirroring Services; admin tab; <code>construction.json</code>)</div>
   <div class="check check-done">Gallery albums (group photos into named albums; admin CRUD + cover picker; <code>/gallery/album/:slug</code> drill-in)</div>
+  <div class="check check-done">Shrink IDPH logo (1773×490 65 KB → 300×83 8.6 KB) + explicit <code>width</code>/<code>height</code> in footer</div>
+  <div class="check check-todo">Fix CLS on initial paint: preload <code>public-sans-latin.woff2</code> + <code>font-display: optional</code>; navbar call button <code>min-width</code></div>
 </div>
 
 <script>

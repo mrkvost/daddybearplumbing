@@ -188,5 +188,4 @@ admin user creation, gallery photo convention, project structure.
         `font-display: optional` (or tune `size-adjust` / `ascent-override`) so the fallback metrics match
     *   Navbar call button reflows when the brand font loads — give it a fixed `min-width` (or render
         in the headline font from the start) so the layout doesn't jump
-    *   IDPH logo in the footer should declare explicit `width`/`height` attributes so the browser
-        reserves the box before the JPG decodes
+    *   ~~IDPH logo width/height attributes~~ — done (see Shrink IDPH logo above)
