@@ -1,6 +1,6 @@
 # Daddy Bear Plumbing
 
-Website for a plumbing company serving Chicago's Western Suburbs.
+Website for a plumbing company serving Chicago and Suburbs.
 Built with Angular 21, Tailwind CSS v3, deployed to AWS via Terraform.
 
 ---
