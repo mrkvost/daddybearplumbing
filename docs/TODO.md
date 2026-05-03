@@ -75,7 +75,9 @@ with some external steps that cannot be automated.
       — audited; pages already had a single `<h1>` and clean h2/h3 nesting. Fixed the only
       level-skips: footer columns and ServiceArea card headings were `<h4>` jumping past `<h3>`,
       now `<h3>` to match their position right after page-level `<h2>` content.
-- [ ] Add descriptive `alt` text to all images
+- [x] Add descriptive `alt` text to all images — audited; every public `<img>` has descriptive alt
+      (Hero, footer logo + IDPH, gallery thumbnails/lightbox/album covers). All admin images also
+      have alt for a11y. See Future Work for an optional polish item on the service-card modal alts.
 - [x] Create `robots.txt` in Angular's `public/` folder (disallows /admin)
 - [x] Create `sitemap.xml` listing all public routes; robots.txt points to it
 - [x] Add `<link rel="canonical">` per page (CanonicalService, auto on navigation, skips /admin)
@@ -153,6 +155,10 @@ admin user creation, gallery photo convention, project structure.
       so that hero image + locations are statically embedded in the HTML at build time
       (improves SEO — crawlers see real content instead of JS-fetched data)
 - [ ] Online chat integration - more complex
+- [ ] Polish service-card modal `alt` text — residential + commercial card modals currently use
+      just `selectedCard.title` (e.g., "Drain Cleaning"). Append a service qualifier
+      ("Drain Cleaning service" or "Drain Cleaning — residential plumbing") for marginal keyword
+      density on the photo. Functional today; minor SEO polish only.
 - [x] Pagination for admin gallery and reviews lists (+ editable position numbers)
 - [x] Admin FAQ editor (question + answer + optional bullet list, reorder, pagination)
 - [x] Session persistence (tokens in sessionStorage + auto-refresh)
