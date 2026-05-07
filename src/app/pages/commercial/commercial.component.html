@@ -22,11 +22,22 @@
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
     @for (card of industries; track card.title) {
       <button type="button" (click)="openCard(card)"
-        class="ghost-border bg-surface-container-low p-8 flex flex-col text-left h-64 hover:bg-surface-container-high transition-colors group">
-        <span class="material-symbols-outlined text-4xl text-primary-fixed mb-6">{{ card.icon }}</span>
-        <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">{{ card.title }}</h3>
-        <p class="text-secondary text-sm leading-relaxed flex-1 line-clamp-3">{{ card.description }}</p>
-        <p class="text-[0.6rem] uppercase tracking-widest text-primary-fixed font-bold mt-3 group-hover:underline">Read more →</p>
+        class="ghost-border bg-surface-container-low flex flex-col text-left h-96 hover:bg-surface-container-high transition-colors group overflow-hidden">
+        <div class="h-40 bg-surface-container-high overflow-hidden flex-shrink-0">
+          @if (card.image) {
+            <img [src]="card.image" [alt]="card.title" loading="lazy"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          } @else {
+            <div class="w-full h-full flex items-center justify-center">
+              <span class="material-symbols-outlined text-6xl text-primary-fixed">{{ card.icon }}</span>
+            </div>
+          }
+        </div>
+        <div class="p-6 flex flex-col flex-1">
+          <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">{{ card.title }}</h3>
+          <p class="text-secondary text-sm leading-relaxed flex-1 line-clamp-3">{{ card.description }}</p>
+          <p class="text-[0.6rem] uppercase tracking-widest text-primary-fixed font-bold mt-3 group-hover:underline">Read more →</p>
+        </div>
       </button>
     }
   </div>

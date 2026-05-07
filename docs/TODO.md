@@ -194,5 +194,7 @@ admin user creation, gallery photo convention, project structure.
 
 - [ ] About Us picture editable in admin area, same as hero (admin upload → S3 → static page reads it,
       fallback to default if absent)
-- [ ] Services cards: include smaller versions of the pictures right on the card (replace icons with
-      thumbnail previews); on open, show a larger version of the picture in the modal
+- [x] Services cards: include smaller versions of the pictures right on the card. Top h-40 block
+      shows the image (object-cover, hover scale) when present, falls back to a centered 6xl icon
+      otherwise. Cards grew h-64 → h-96. Applied to /residential, /commercial industries, and both
+      /construction/* pages. Modal still shows the full-size image + description as before.
