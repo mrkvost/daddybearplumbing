@@ -82,7 +82,9 @@ with some external steps that cannot be automated.
 - [x] Create `sitemap.xml` listing all public routes; robots.txt points to it
 - [x] Add `<link rel="canonical">` per page (CanonicalService, auto on navigation, skips /admin)
 - [ ] Evaluate Angular pre-rendering (`ng build` with `prerender` option) so crawlers receive
-      real HTML instead of a blank JS shell — enable if straightforward, document if deferred
+      real HTML instead of a blank JS shell — enable if straightforward, document if deferred.
+      Research notes + comparison of approaches (CSR / static footer / app shell / SSG / SSR /
+      dynamic rendering) saved in `docs/SEO_RENDERING_RESEARCH.md`.
 - [x] Self-host Public Sans + Inter fonts (eliminates Google Fonts round-trip for text fonts)
 - [x] Verify Core Web Vitals: Google Maps iframe + gallery thumbnails are `loading="lazy"`;
       hero image is `fetchpriority="high"` + `decoding="async"` to prioritise the LCP element
@@ -175,10 +177,12 @@ admin user creation, gallery photo convention, project structure.
 - For a new deployment: copy `terraform.tfvars.example`, delete `import.tf`, run `bootstrap.sh`.
 - [x] Residential & commercial cards: fixed height (`h-64`), description clamped to 3 lines, click → modal showing the full text and an image (or large icon if no image)
 - [x] Admin support for uploading per-card images — image upload UI in the card form (Residential + Commercial Industries), stored at `gallery-images/cards/`; old images are cleaned up on replace/remove/delete
-- [x] New "Construction" section with subpages `/construction/residential` and `/construction/commercial` (mirrors
-      Services pattern: cards + modal). Shared component driven by route data. Admin "Construction" tab with both
-      lists; cards stored in `gallery-images/construction.json`. Construction dropdown added to navbar (desktop + mobile)
-      and routes added to sitemap.
+- [x] New "Construction" section with subpages `/construction/interior` and `/construction/exterior`
+      (mirrors Services pattern: cards + modal). Each subpage has its own intro paragraphs + 3 cards
+      with substantive descriptions sourced from `construction.txt`. Shared component driven by route
+      data. Admin "Construction" tab with both lists; cards stored in `gallery-images/construction.json`
+      as `{ interior, exterior }`. Construction dropdown in navbar (Interior first, Exterior second)
+      and routes in sitemap.
 - [x] Albums in the gallery — `albums.json` data model + `/gallery/album/:slug` route + admin Albums tab (CRUD,
       cover-photo picker, drag-drop reorder, pagination) + per-photo album assignment in the gallery admin tab
 - [x] Shrink `public/idph_logo.jpg` — resized 1773×490 (65 KB) → 300×83 (8.6 KB) and added explicit
@@ -187,3 +191,8 @@ admin user creation, gallery photo convention, project structure.
       in `<head>` and switched both Public Sans `@font-face` blocks to `font-display: optional`,
       so the fallback never swaps to Public Sans mid-render. This eliminates the headline reflow
       that affected the brand title and the call button. IDPH logo `width`/`height` covered above.
+
+- [ ] About Us picture editable in admin area, same as hero (admin upload → S3 → static page reads it,
+      fallback to default if absent)
+- [ ] Services cards: include smaller versions of the pictures right on the card (replace icons with
+      thumbnail previews); on open, show a larger version of the picture in the modal
