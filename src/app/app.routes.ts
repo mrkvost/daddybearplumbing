@@ -75,23 +75,23 @@ export const routes: Routes = [
     },
   },
   {
-    path: 'construction/residential',
+    path: 'construction/interior',
     loadComponent: () =>
       import('./pages/construction/construction.component').then((m) => m.ConstructionComponent),
     data: {
-      mode: 'residential',
-      title: 'Residential Construction',
-      description: 'New construction plumbing for homes — full builds, bathroom and kitchen remodels, basement finishing, and whole-house repipes across Chicago\'s Western Suburbs.',
+      mode: 'interior',
+      title: 'Interior Construction',
+      description: 'Interior new-construction plumbing — water, drains and vents, gas piping, and final fixture installation for homes and commercial properties across Chicago and Suburbs.',
     },
   },
   {
-    path: 'construction/commercial',
+    path: 'construction/exterior',
     loadComponent: () =>
       import('./pages/construction/construction.component').then((m) => m.ConstructionComponent),
     data: {
-      mode: 'commercial',
-      title: 'Commercial Construction',
-      description: 'Commercial construction plumbing — restaurant build-outs, multi-unit rough-ins, tenant fit-outs, and ADA-compliant fixture installation across Chicago\'s Western Suburbs.',
+      mode: 'exterior',
+      title: 'Exterior Construction',
+      description: 'Exterior new-construction plumbing — main water lines, sewer lines, and storm drainage with full excavation and code-compliant municipal tie-ins.',
     },
   },
   {

@@ -98,8 +98,8 @@ export class AdminComponent implements OnInit, OnDestroy {
       case 'commercialIndustries':
       case 'commercialServices':
         this.loadServiceCards(); break;
-      case 'constructionResidential':
-      case 'constructionCommercial':
+      case 'constructionInterior':
+      case 'constructionExterior':
         this.loadConstruction(); break;
       case 'aboutWhy':
         this.loadAbout(); break;
@@ -231,8 +231,8 @@ export class AdminComponent implements OnInit, OnDestroy {
       case 'residential': return this.residentialCards;
       case 'commercialIndustries': return this.commercialIndustries;
       case 'commercialServices': return this.commercialServices;
-      case 'constructionResidential': return this.constructionResidentialCards;
-      case 'constructionCommercial': return this.constructionCommercialCards;
+      case 'constructionInterior': return this.constructionInteriorCards;
+      case 'constructionExterior': return this.constructionExteriorCards;
       case 'aboutWhy': return this.aboutWhyChooseUs;
       default: return null;
     }
@@ -248,8 +248,8 @@ export class AdminComponent implements OnInit, OnDestroy {
       case 'residential':
       case 'commercialIndustries':
       case 'commercialServices': await this.saveServiceCards(); break;
-      case 'constructionResidential':
-      case 'constructionCommercial': await this.saveConstruction(); break;
+      case 'constructionInterior':
+      case 'constructionExterior': await this.saveConstruction(); break;
       case 'aboutWhy': await this.saveAbout(); break;
     }
   }
@@ -920,7 +920,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   loadingServices = true;
 
   // Editing state
-  editingList: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial' | 'about-why' | null = null;
+  editingList: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-interior' | 'construction-exterior' | 'about-why' | null = null;
   editingIndex = -1; // -1 = adding new
   cardForm: { icon: string; title: string; description: string; image: string; section: '' | 'exterior' | 'interior' } = { icon: '', title: '', description: '', image: '', section: '' };
 
@@ -1010,34 +1010,32 @@ export class AdminComponent implements OnInit, OnDestroy {
   private getList(key: string): { icon: string; title: string; description: string; image?: string; section?: 'exterior' | 'interior' }[] {
     if (key === 'residential') return this.residentialCards;
     if (key === 'commercial-industries') return this.commercialIndustries;
-    if (key === 'construction-residential') return this.constructionResidentialCards;
-    if (key === 'construction-commercial') return this.constructionCommercialCards;
+    if (key === 'construction-interior') return this.constructionInteriorCards;
+    if (key === 'construction-exterior') return this.constructionExteriorCards;
     if (key === 'about-why') return this.aboutWhyChooseUs;
     return this.commercialServices;
   }
 
-  openAddCard(list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial' | 'about-why'): void {
+  openAddCard(list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-interior' | 'construction-exterior' | 'about-why'): void {
     this.editingList = list;
     this.editingIndex = -1;
-    const isConstruction = list === 'construction-residential' || list === 'construction-commercial';
-    this.cardForm = { icon: '', title: '', description: '', image: '', section: isConstruction ? 'exterior' : '' };
+    this.cardForm = { icon: '', title: '', description: '', image: '', section: '' };
     this.cardImageOriginal = null;
     this.clearCardImageStaging();
     this.cardImageError = '';
     this.cdr.detectChanges();
   }
 
-  openEditCard(list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial' | 'about-why', index: number): void {
+  openEditCard(list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-interior' | 'construction-exterior' | 'about-why', index: number): void {
     this.editingList = list;
     this.editingIndex = index;
     const card = this.getList(list)[index];
-    const isConstruction = list === 'construction-residential' || list === 'construction-commercial';
     this.cardForm = {
       icon: card.icon,
       title: card.title,
       description: card.description,
       image: card.image || '',
-      section: card.section || (isConstruction ? 'exterior' : ''),
+      section: card.section || '',
     };
     this.cardImageOriginal = card.image || null;
     this.clearCardImageStaging();
@@ -1143,7 +1141,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  async deleteCard(list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial' | 'about-why', index: number): Promise<void> {
+  async deleteCard(list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-interior' | 'construction-exterior' | 'about-why', index: number): Promise<void> {
     const card = this.getList(list)[index];
     if (this.isManagedCardImage(card.image)) {
       const key = card.image!.replace(/^\//, '');
@@ -1157,9 +1155,9 @@ export class AdminComponent implements OnInit, OnDestroy {
   /* Drag and drop for service cards */
   cardDragIndex = -1;
   cardDragOverIndex = -1;
-  cardDragList: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial' | 'about-why' | null = null;
+  cardDragList: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-interior' | 'construction-exterior' | 'about-why' | null = null;
 
-  onCardDragStart(list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial' | 'about-why', index: number): void {
+  onCardDragStart(list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-interior' | 'construction-exterior' | 'about-why', index: number): void {
     this.cardDragList = list;
     this.cardDragIndex = index;
     this.cdr.detectChanges();
@@ -1182,7 +1180,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  async onCardDrop(event: DragEvent, list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-residential' | 'construction-commercial' | 'about-why', targetIndex: number): Promise<void> {
+  async onCardDrop(event: DragEvent, list: 'residential' | 'commercial-industries' | 'commercial-services' | 'construction-interior' | 'construction-exterior' | 'about-why', targetIndex: number): Promise<void> {
     event.preventDefault();
     const fromIndex = this.cardDragIndex;
     const fromList = this.cardDragList;
@@ -1209,7 +1207,7 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   /** Save the right JSON file for the given card list */
   private async saveCardsForList(list: string): Promise<void> {
-    if (list === 'construction-residential' || list === 'construction-commercial') {
+    if (list === 'construction-interior' || list === 'construction-exterior') {
       await this.saveConstruction();
     } else if (list === 'about-why') {
       await this.saveAbout();
@@ -1219,11 +1217,11 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   /* ================================================================
-   * CONSTRUCTION (Residential + Commercial)
+   * CONSTRUCTION (Interior + Exterior)
    * ================================================================ */
 
-  constructionResidentialCards: { icon: string; title: string; description: string; image?: string; section?: 'exterior' | 'interior' }[] = [];
-  constructionCommercialCards: { icon: string; title: string; description: string; image?: string; section?: 'exterior' | 'interior' }[] = [];
+  constructionInteriorCards: { icon: string; title: string; description: string; image?: string }[] = [];
+  constructionExteriorCards: { icon: string; title: string; description: string; image?: string }[] = [];
   loadingConstruction = true;
 
   private readonly CONSTRUCTION_KEY = 'gallery-images/construction.json';
@@ -1235,27 +1233,29 @@ export class AdminComponent implements OnInit, OnDestroy {
       const res = await fetch(`/gallery-images/construction.json?t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
-        this.constructionResidentialCards = data.residential || [];
-        this.constructionCommercialCards = data.commercial || [];
+        this.constructionInteriorCards = data.interior || [];
+        this.constructionExteriorCards = data.exterior || [];
       }
     } catch { /* empty */ }
     this.loadingConstruction = false;
     this.cdr.detectChanges();
   }
 
-  async initConstructionDefaults(mode: 'residential' | 'commercial'): Promise<void> {
-    const defaults: { icon: string; title: string; description: string; section: 'exterior' | 'interior' }[] = [
-      { icon: 'water_drop', title: 'Main water line', description: '', section: 'exterior' },
-      { icon: 'foundation', title: 'Sewer line', description: '', section: 'exterior' },
-      { icon: 'flood', title: 'Storm drainage line', description: '', section: 'exterior' },
-      { icon: 'plumbing', title: 'Water, Drains and Vents', description: '', section: 'interior' },
-      { icon: 'gas_meter', title: 'Gas piping', description: '', section: 'interior' },
-      { icon: 'bathtub', title: 'Final plumbing installation', description: '', section: 'interior' },
+  async initConstructionDefaults(mode: 'interior' | 'exterior'): Promise<void> {
+    const interior = [
+      { icon: 'plumbing', title: 'Water, Drains & Vents', description: 'We install complete water supply, drain, and vent systems from the ground up, following approved plans and full Illinois plumbing code. This includes precise routing, proper pipe sizing, and correct pitch on drainage lines to ensure smooth flow and prevent future issues. Venting is carefully designed to maintain system balance and eliminate odors. All systems are pressure-tested and inspected to ensure safe, reliable, and long-lasting performance.' },
+      { icon: 'gas_meter', title: 'Gas Piping', description: 'Our team performs safe and code-compliant gas line installations for all required appliances and systems. We carefully plan pipe routing, ensure proper sizing based on demand, and use approved materials and connection methods. Every gas system is thoroughly pressure-tested and checked for leaks to guarantee safety. We prioritize precision and strict safety standards at every step of the installation.' },
+      { icon: 'bathtub', title: 'Final Plumbing Installation', description: 'During the final phase, we install and connect all fixtures and equipment, including toilets, sinks, showers, bathtubs, and appliances. Each component is securely mounted, properly sealed, and aligned for both performance and appearance. We complete full system testing to confirm proper operation, water flow, drainage, and overall functionality. The result is a clean, finished system that is fully operational, efficient, and ready for everyday use.' },
     ];
-    if (mode === 'residential') {
-      this.constructionResidentialCards = defaults.map(c => ({ ...c }));
+    const exterior = [
+      { icon: 'water_drop', title: 'Main Water Line', description: 'We install and connect the main water service line from the municipal supply to the property, ensuring proper sizing, pressure, and long-term reliability. Our work includes trenching, pipe installation (copper, HDPE, or approved materials), shut-off valves, and secure tie-ins to the main. We also handle upgrades and replacements of existing water services to improve flow and meet current code requirements.' },
+      { icon: 'foundation', title: 'Sewer Line', description: 'We provide full installation and repair of sewer lines, connecting the building to the municipal sewer system. This includes proper grading for flow, installation of cleanouts, and ensuring all piping meets code standards. For both residential and commercial properties, we address new installations, replacements, and repairs, delivering systems designed for durability and efficient waste removal.' },
+      { icon: 'flood', title: 'Storm Drainage Line', description: 'We install stormwater drainage systems to safely direct rainwater away from the property and prevent flooding or water damage. This includes yard drains, downspout connections, catch basins, and underground piping systems. Proper layout and grading are key to ensuring effective water management and long-term protection of the structure.' },
+    ];
+    if (mode === 'interior') {
+      this.constructionInteriorCards = interior;
     } else {
-      this.constructionCommercialCards = defaults.map(c => ({ ...c }));
+      this.constructionExteriorCards = exterior;
     }
     await this.saveConstruction();
     this.cdr.detectChanges();
@@ -1263,8 +1263,8 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   private async saveConstruction(): Promise<void> {
     await this.uploadService.putJson(this.CONSTRUCTION_KEY, {
-      residential: this.constructionResidentialCards,
-      commercial: this.constructionCommercialCards,
+      interior: this.constructionInteriorCards,
+      exterior: this.constructionExteriorCards,
     }, GALLERY_BUCKET);
   }
 

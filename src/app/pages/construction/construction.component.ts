@@ -7,38 +7,63 @@ import { environment } from '../../../environments/environment';
 export interface ConstructionCard {
   icon: string;
   title: string;
-  description?: string;
+  description: string;
   image?: string;
-  /** Required — every card belongs to either the exterior or interior section. */
-  section: 'exterior' | 'interior';
 }
 
-export type ConstructionMode = 'residential' | 'commercial';
+export type ConstructionMode = 'interior' | 'exterior';
 
 export interface ConstructionData {
-  residential: ConstructionCard[];
-  commercial: ConstructionCard[];
+  interior: ConstructionCard[];
+  exterior: ConstructionCard[];
 }
 
-const DEFAULT_CARDS: ConstructionCard[] = [
-  { icon: 'water_drop', title: 'Main water line', section: 'exterior' },
-  { icon: 'foundation', title: 'Sewer line', section: 'exterior' },
-  { icon: 'flood', title: 'Storm drainage line', section: 'exterior' },
-  { icon: 'plumbing', title: 'Water, Drains and Vents', section: 'interior' },
-  { icon: 'gas_meter', title: 'Gas piping', section: 'interior' },
-  { icon: 'bathtub', title: 'Final plumbing installation', section: 'interior' },
+const DEFAULT_INTERIOR_CARDS: ConstructionCard[] = [
+  {
+    icon: 'plumbing',
+    title: 'Water, Drains & Vents',
+    description: 'We install complete water supply, drain, and vent systems from the ground up, following approved plans and full Illinois plumbing code. This includes precise routing, proper pipe sizing, and correct pitch on drainage lines to ensure smooth flow and prevent future issues. Venting is carefully designed to maintain system balance and eliminate odors. All systems are pressure-tested and inspected to ensure safe, reliable, and long-lasting performance.',
+  },
+  {
+    icon: 'gas_meter',
+    title: 'Gas Piping',
+    description: 'Our team performs safe and code-compliant gas line installations for all required appliances and systems. We carefully plan pipe routing, ensure proper sizing based on demand, and use approved materials and connection methods. Every gas system is thoroughly pressure-tested and checked for leaks to guarantee safety. We prioritize precision and strict safety standards at every step of the installation.',
+  },
+  {
+    icon: 'bathtub',
+    title: 'Final Plumbing Installation',
+    description: 'During the final phase, we install and connect all fixtures and equipment, including toilets, sinks, showers, bathtubs, and appliances. Each component is securely mounted, properly sealed, and aligned for both performance and appearance. We complete full system testing to confirm proper operation, water flow, drainage, and overall functionality. The result is a clean, finished system that is fully operational, efficient, and ready for everyday use.',
+  },
 ];
 
-const RESIDENTIAL_INTRO: string[] = [
-  'We provide complete new construction plumbing services for both interior and exterior systems, delivering honest, high-quality work from start to finish and in full compliance with Illinois plumbing code.',
-  'We connect the exterior of the property to the main systems, including water service lines, sewer lines, stormwater drainage lines, and underground piping. Our work also includes excavation, trenching, and installation of gas lines, all done safely and according to code. From tying into the main water supply to completing the full drainage and gas systems, we build plumbing infrastructure that is solid, efficient, and built to last.',
-  'In the interior of the house, we install the entire plumbing system from the ground up—starting with rough-in water lines, drain, vent piping, and gas piping and continuing through to final installation of fixtures such as toilets, vanities, bathtubs, showers, kitchen sinks, and appliances. Every detail is completed with precision to ensure long-term performance and reliability.',
+const DEFAULT_EXTERIOR_CARDS: ConstructionCard[] = [
+  {
+    icon: 'water_drop',
+    title: 'Main Water Line',
+    description: 'We install and connect the main water service line from the municipal supply to the property, ensuring proper sizing, pressure, and long-term reliability. Our work includes trenching, pipe installation (copper, HDPE, or approved materials), shut-off valves, and secure tie-ins to the main. We also handle upgrades and replacements of existing water services to improve flow and meet current code requirements.',
+  },
+  {
+    icon: 'foundation',
+    title: 'Sewer Line',
+    description: 'We provide full installation and repair of sewer lines, connecting the building to the municipal sewer system. This includes proper grading for flow, installation of cleanouts, and ensuring all piping meets code standards. For both residential and commercial properties, we address new installations, replacements, and repairs, delivering systems designed for durability and efficient waste removal.',
+  },
+  {
+    icon: 'flood',
+    title: 'Storm Drainage Line',
+    description: 'We install stormwater drainage systems to safely direct rainwater away from the property and prevent flooding or water damage. This includes yard drains, downspout connections, catch basins, and underground piping systems. Proper layout and grading are key to ensuring effective water management and long-term protection of the structure.',
+  },
 ];
 
-const COMMERCIAL_INTRO: string[] = [
-  'On the interior, we handle full plumbing build-outs for a wide range of facilities, including office buildings, restaurants, healthcare facilities, hotels, and multi-unit properties. Our work includes installation of water supply lines, drain and vent systems, gas piping, restrooms, commercial kitchens, utility rooms, and mechanical systems such as water heaters and specialized equipment. We focus on proper system design, sizing, and durability to meet the high demands of commercial use.',
-  'On the exterior, we construct and connect complete underground infrastructure, including water service lines, sewer systems, storm drainage, and gas lines. Our scope also includes excavation, trenching, tie-ins to municipal systems, grease trap connections (for restaurants), backflow prevention systems, and other code-required installations. We ensure all exterior systems are built for long-term performance, safety, and reliability.',
-  'From underground work to final interior installation, our goal is to deliver efficient, code-compliant plumbing systems that support daily operations and stand the test of time.',
+const INTERIOR_INTRO: string[] = [
+  'On the interior, we provide complete plumbing systems from the ground up for both residential and commercial properties. Our work begins with rough-in installation of water lines, drain and vent piping, and gas piping, all carefully planned, properly sized, and installed in full compliance with code.',
+  'We handle full plumbing build-outs for a wide range of facilities, including homes, office buildings, restaurants, healthcare facilities, hotels, and multi-unit properties. This includes installation of water supply systems, drainage and venting, gas lines, restrooms, commercial kitchens, utility areas, and mechanical systems such as water heaters and specialized equipment.',
+  'The process is completed with precise final fixture installation, including toilets, vanities, bathtubs, showers, sinks, and appliances. Every detail is executed with a focus on performance, durability, and long-term reliability, ensuring the system is ready to meet the demands of daily use.',
+];
+
+const EXTERIOR_INTRO: string[] = [
+  'All exterior plumbing work is performed with a focus on safety, durability, and full compliance with Illinois plumbing code, ensuring dependable performance for years to come.',
+  'On the exterior, we construct and connect complete underground infrastructure, including water service lines, sewer systems, and storm drainage. Our scope also includes excavation, trenching, tie-ins to municipal systems, grease trap connections (for restaurants), backflow prevention systems, and other code-required installations.',
+  'We maintain a clean, organized, and controlled job site — ensuring proper drainage, safe conditions, and uninterrupted access so everything continues to function smoothly, including vehicle traffic. We ensure all exterior systems are built for long-term performance, safety, and reliability.',
 ];
 
 @Component({
@@ -54,11 +79,12 @@ export class ConstructionComponent implements OnInit, OnDestroy {
 
   phone = environment.phone;
   phoneDisplay = environment.phoneDisplay;
-  mode: ConstructionMode = 'residential';
-  cards: ConstructionCard[] = DEFAULT_CARDS;
+  mode: ConstructionMode = 'interior';
+  cards: ConstructionCard[] = DEFAULT_INTERIOR_CARDS;
+  selectedCard: ConstructionCard | null = null;
 
   get heading(): string {
-    return this.mode === 'commercial' ? 'Commercial Construction' : 'Residential Construction';
+    return this.mode === 'exterior' ? 'Exterior Construction' : 'Interior Construction';
   }
 
   get eyebrow(): string {
@@ -66,27 +92,28 @@ export class ConstructionComponent implements OnInit, OnDestroy {
   }
 
   get introParagraphs(): string[] {
-    return this.mode === 'commercial' ? COMMERCIAL_INTRO : RESIDENTIAL_INTRO;
+    return this.mode === 'exterior' ? EXTERIOR_INTRO : INTERIOR_INTRO;
   }
 
-  get exteriorCards(): ConstructionCard[] {
-    return this.cards.filter(c => c.section === 'exterior');
+  openCard(card: ConstructionCard): void {
+    this.selectedCard = card;
   }
 
-  get interiorCards(): ConstructionCard[] {
-    return this.cards.filter(c => c.section === 'interior');
+  closeCard(): void {
+    this.selectedCard = null;
   }
 
   async ngOnInit(): Promise<void> {
     this.routeSub = this.route.data.subscribe(async data => {
-      this.mode = (data['mode'] as ConstructionMode) || 'residential';
-      this.cards = DEFAULT_CARDS;
+      this.mode = (data['mode'] as ConstructionMode) || 'interior';
+      this.cards = this.mode === 'exterior' ? DEFAULT_EXTERIOR_CARDS : DEFAULT_INTERIOR_CARDS;
+      this.selectedCard = null;
 
       try {
         const res = await fetch(`/gallery-images/construction.json?t=${Date.now()}`);
         if (res.ok) {
-          const json: ConstructionData = await res.json();
-          const list = this.mode === 'commercial' ? json.commercial : json.residential;
+          const json: Partial<ConstructionData> = await res.json();
+          const list = this.mode === 'exterior' ? json.exterior : json.interior;
           if (list?.length) this.cards = list;
         }
       } catch { /* keep defaults */ }
