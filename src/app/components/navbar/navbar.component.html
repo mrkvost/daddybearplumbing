@@ -64,13 +64,13 @@
 
 <!-- Desktop sub-navigation -->
 <nav class="hidden nav:flex justify-center bg-surface-container-lowest border-b border-outline-variant/20 py-4 gap-12">
-  <a routerLink="/" routerLinkActive="text-primary border-b-2 border-primary" [routerLinkActiveOptions]="{exact: true}"
-    class="font-body text-sm uppercase tracking-widest text-secondary hover:text-primary transition-colors">Home</a>
-  <a routerLink="/about" routerLinkActive="text-primary border-b-2 border-primary"
-    class="font-body text-sm uppercase tracking-widest text-secondary hover:text-primary transition-colors">About Us</a>
+  <a routerLink="/" routerLinkActive="text-primary !border-primary" [routerLinkActiveOptions]="{exact: true}"
+    class="font-body text-sm uppercase tracking-widest text-secondary hover:text-primary transition-colors border-b-2 border-transparent">Home</a>
+  <a routerLink="/about" routerLinkActive="text-primary !border-primary"
+    class="font-body text-sm uppercase tracking-widest text-secondary hover:text-primary transition-colors border-b-2 border-transparent">About Us</a>
   <div class="group relative">
-    <span class="font-body text-sm uppercase tracking-widest text-secondary hover:text-primary transition-colors cursor-pointer flex items-center gap-1"
-      routerLinkActive="text-primary border-b-2 border-primary">
+    <span class="font-body text-sm uppercase tracking-widest text-secondary hover:text-primary transition-colors cursor-pointer flex items-center gap-1 border-b-2 border-transparent"
+      routerLinkActive="text-primary !border-primary">
       Services <span class="material-symbols-outlined text-sm">expand_more</span>
     </span>
     <div class="absolute top-full left-1/2 -translate-x-1/2 min-w-[240px] hidden group-hover:block z-50 pt-4">
@@ -81,8 +81,8 @@
     </div>
   </div>
   <div class="group relative">
-    <span class="font-body text-sm uppercase tracking-widest text-secondary hover:text-primary transition-colors cursor-pointer flex items-center gap-1"
-      routerLinkActive="text-primary border-b-2 border-primary">
+    <span class="font-body text-sm uppercase tracking-widest text-secondary hover:text-primary transition-colors cursor-pointer flex items-center gap-1 border-b-2 border-transparent"
+      routerLinkActive="text-primary !border-primary">
       Construction <span class="material-symbols-outlined text-sm">expand_more</span>
     </span>
     <div class="absolute top-full left-1/2 -translate-x-1/2 min-w-[240px] hidden group-hover:block z-50 pt-4">
@@ -92,10 +92,10 @@
       </div>
     </div>
   </div>
-  <a routerLink="/gallery" routerLinkActive="text-primary border-b-2 border-primary"
-    class="font-body text-sm uppercase tracking-widest text-secondary hover:text-primary transition-colors">Gallery</a>
-  <a routerLink="/reviews" routerLinkActive="text-primary border-b-2 border-primary"
-    class="font-body text-sm uppercase tracking-widest text-secondary hover:text-primary transition-colors">Reviews</a>
-  <a routerLink="/contact" routerLinkActive="text-primary border-b-2 border-primary"
-    class="font-body text-sm uppercase tracking-widest text-secondary hover:text-primary transition-colors">Contact</a>
+  <a routerLink="/gallery" routerLinkActive="text-primary !border-primary"
+    class="font-body text-sm uppercase tracking-widest text-secondary hover:text-primary transition-colors border-b-2 border-transparent">Gallery</a>
+  <a routerLink="/reviews" routerLinkActive="text-primary !border-primary"
+    class="font-body text-sm uppercase tracking-widest text-secondary hover:text-primary transition-colors border-b-2 border-transparent">Reviews</a>
+  <a routerLink="/contact" routerLinkActive="text-primary !border-primary"
+    class="font-body text-sm uppercase tracking-widest text-secondary hover:text-primary transition-colors border-b-2 border-transparent">Contact</a>
 </nav>
