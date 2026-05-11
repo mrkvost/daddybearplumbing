@@ -652,7 +652,14 @@ export class AdminComponent implements OnInit, OnDestroy {
   ogSuccess = false;
   ogError = '';
 
-  private siteMeta: { hero?: string; og?: string } = {};
+  aboutImageUrl: string | null = null;
+  aboutImageUploading = false;
+  aboutImageSuccess = false;
+  aboutImageError = '';
+  aboutImageStagedFile: File | null = null;
+  aboutImageStagedPreview: string | null = null;
+
+  private siteMeta: { hero?: string; og?: string; about?: string } = {};
   private readonly META_JSON_KEY = 'gallery-images/meta.json';
   private readonly META_PREFIX = '/gallery-images/meta/';
 
@@ -676,6 +683,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     await this.loadMeta();
     this.heroImageUrl = this.siteMeta.hero ? `${this.META_PREFIX}${this.siteMeta.hero}` : null;
     this.ogImageUrl = this.siteMeta.og ? `${this.META_PREFIX}${this.siteMeta.og}` : null;
+    this.aboutImageUrl = this.siteMeta.about ? `${this.META_PREFIX}${this.siteMeta.about}` : null;
     this.cdr.detectChanges();
   }
 
@@ -746,6 +754,74 @@ export class AdminComponent implements OnInit, OnDestroy {
       await this.loadSiteImages();
     } catch (e: any) {
       this.heroError = e.message || 'Delete failed';
+    }
+    this.cdr.detectChanges();
+  }
+
+  onAboutImageFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+
+    this.aboutImageError = '';
+    this.aboutImageSuccess = false;
+
+    if (this.aboutImageStagedPreview) URL.revokeObjectURL(this.aboutImageStagedPreview);
+
+    this.aboutImageStagedFile = input.files[0];
+    this.aboutImageStagedPreview = URL.createObjectURL(this.aboutImageStagedFile);
+    input.value = '';
+    this.cdr.detectChanges();
+  }
+
+  cancelAboutImageStaged(): void {
+    if (this.aboutImageStagedPreview) URL.revokeObjectURL(this.aboutImageStagedPreview);
+    this.aboutImageStagedFile = null;
+    this.aboutImageStagedPreview = null;
+    this.cdr.detectChanges();
+  }
+
+  async confirmAboutImageUpload(): Promise<void> {
+    if (!this.aboutImageStagedFile) return;
+
+    this.aboutImageUploading = true;
+    this.aboutImageError = '';
+    this.aboutImageSuccess = false;
+    this.cdr.detectChanges();
+
+    try {
+      const ext = this.aboutImageStagedFile.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const newName = `about-${this.randomHash()}.${ext}`;
+      await this.uploadService.upload(this.aboutImageStagedFile, `gallery-images/meta/${newName}`, GALLERY_BUCKET);
+      if (this.siteMeta.about) {
+        await this.uploadService.delete(`gallery-images/meta/${this.siteMeta.about}`, GALLERY_BUCKET).catch(() => {});
+      }
+      this.siteMeta.about = newName;
+      await this.saveMeta();
+      this.aboutImageUrl = `${this.META_PREFIX}${newName}`;
+      this.aboutImageSuccess = true;
+    } catch (e: any) {
+      this.aboutImageError = e.message || 'Upload failed';
+    }
+
+    if (this.aboutImageStagedPreview) URL.revokeObjectURL(this.aboutImageStagedPreview);
+    this.aboutImageStagedFile = null;
+    this.aboutImageStagedPreview = null;
+    this.aboutImageUploading = false;
+    this.cdr.detectChanges();
+  }
+
+  async deleteAboutImage(): Promise<void> {
+    this.aboutImageError = '';
+    this.aboutImageSuccess = false;
+    try {
+      if (this.siteMeta.about) {
+        await this.uploadService.delete(`gallery-images/meta/${this.siteMeta.about}`, GALLERY_BUCKET);
+      }
+      delete this.siteMeta.about;
+      await this.saveMeta();
+      await this.loadSiteImages();
+    } catch (e: any) {
+      this.aboutImageError = e.message || 'Delete failed';
     }
     this.cdr.detectChanges();
   }

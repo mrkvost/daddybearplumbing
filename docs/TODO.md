@@ -168,6 +168,13 @@ admin user creation, gallery photo convention, project structure.
       Renders Requests/4xx/5xx/bandwidth sparklines, Cost Explorer month-to-date + top services,
       contact-form Lambda + SES + Cognito user count. Browser cache via sessionStorage + SWR.
       Full plan in `docs/ADMIN_DASHBOARD_METRICS_PLAN.md`. ~$0.30/mo running cost.
+- [ ] Unify input styling across admin + contact form. Today they diverge: admin uses
+      `border-outline-variant/20` + `focus:ring-0` + `transition-colors`; contact uses
+      `border-outline-variant/60` + `focus:ring-2 focus:ring-primary/25` + `transition-all`.
+      Pick one canonical input/textarea/select class set, extract as a Tailwind component class
+      (`@layer components { .form-input { ... } }` in `styles.css`) or as a shared Angular
+      attribute directive, and replace inline copies. Same for primary/secondary buttons. Goal:
+      one place to tweak, consistent visual language.
 - [ ] Unify S3 buckets — currently 3 buckets (site `kvaking`, gallery `kvaking-gallery`, reviews
       `kvaking-reviews`), each with its own bucket policy, CORS, IAM scoping, and CloudFront origin.
       A single bucket with prefixes (`/site/*`, `/gallery-images/*`, `/reviews-data/*`, `/metrics/*`)
@@ -211,8 +218,12 @@ admin user creation, gallery photo convention, project structure.
       so the fallback never swaps to Public Sans mid-render. This eliminates the headline reflow
       that affected the brand title and the call button. IDPH logo `width`/`height` covered above.
 
-- [ ] About Us picture editable in admin area, same as hero (admin upload → S3 → static page reads it,
-      fallback to default if absent)
+- [x] About Us picture editable in admin — mirrors the hero upload flow. New section at the top
+      of the Admin "About" tab (preview with overlaid eyebrow + title, upload / cancel / remove).
+      Image stored at `gallery-images/meta/about-<hash>.<ext>`, filename tracked in `meta.json`
+      under the `about` key. Public `/about` page reads `meta.json` on init and renders the image
+      as background of the 300px header section (`object-cover`, `opacity-60`). Falls back to
+      solid black when unset.
 - [x] Services cards: include smaller versions of the pictures right on the card. Top h-40 block
       shows the image (object-cover, hover scale) when present, falls back to a centered 6xl icon
       otherwise. Cards grew h-64 → h-96. Applied to /residential, /commercial industries, and both

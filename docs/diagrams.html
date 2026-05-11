@@ -836,10 +836,11 @@ infrastructure/
   <div class="check check-done">Menu: About Us, Services (Residential/Commercial), Gallery, Reviews, Contact</div>
   <div class="check check-done">Enhanced footer (5-col: brand, services, navigate, info, accreditation + license numbers)</div>
   <div class="check check-done">Contact form (Turnstile + Lambda + SES)</div>
+  <div class="check check-todo">Unify input/button styling across admin + contact (today admin uses <code>border/20 + ring-0</code>, contact uses <code>border/60 + ring-2 + primary/25</code>). Extract a single canonical <code>.form-input</code> via <code>@layer components</code> or an Angular directive, replace inline copies</div>
   <div class="check check-todo">Unify the 3 S3 buckets (site / gallery / reviews) into a single bucket with prefixes — simpler IAM, one CloudFront origin, single bucket policy</div>
   <div class="check check-todo">Online chat integration</div>
   <div class="check check-todo">Polish service-card modal <code>alt</code> text — append a service qualifier (e.g. "Drain Cleaning service") for marginal SEO keyword density</div>
-  <div class="check check-todo">About Us picture editable in admin (same flow as hero image)</div>
+  <div class="check check-done">About Us picture editable in admin — same flow as hero. <code>meta.json.about</code> + <code>gallery-images/meta/about-&lt;hash&gt;.&lt;ext&gt;</code>; public <code>/about</code> header section uses it as background, opacity-60</div>
   <div class="check check-done">Services cards with thumbnail previews — top h-40 image block (or icon fallback), card h-96, applied to residential / commercial-industries / construction-interior / construction-exterior</div>
   <div class="check check-done">Admin pagination (top + bottom, 10/page, editable position numbers)</div>
   <div class="check check-todo">Admin-triggered AWS rebuild (static hero + locations + OG image baked into <code>index.html</code> at build time, since JS-less crawlers never see the runtime CanonicalService swap)</div>

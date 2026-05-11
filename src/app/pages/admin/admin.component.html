@@ -1608,7 +1608,78 @@
         <!-- About -->
         @if (activeTab === 'about') {
         <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2">About Page</p>
-        <p class="text-xs text-outline mb-8">Edit the History intro, Why Choose Us cards, and Our Promise epilogue shown on /about. Newlines treated as paragraph breaks.</p>
+        <p class="text-xs text-outline mb-8">Edit the header image, History intro, Why Choose Us cards, and Our Promise epilogue shown on /about. Newlines treated as paragraph breaks.</p>
+
+        <!-- About Page Header Image -->
+        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-2">Page Header Image</p>
+        <p class="text-xs text-outline mb-3">Background image for the "About Us" header on /about. Falls back to solid black if unset.</p>
+
+        @if (aboutImageSuccess) {
+          <div class="bg-surface-container-low ghost-border px-4 py-3 mb-6 text-sm" style="border-color: rgba(46, 125, 50, 0.3);">
+            <span class="material-symbols-outlined text-sm align-middle" style="color: #2e7d32;">check_circle</span>
+            About image updated.
+          </div>
+        }
+        @if (aboutImageError) {
+          <div class="bg-error-container text-on-error-container text-sm px-4 py-3 mb-6 ghost-border">
+            {{ aboutImageError }}
+          </div>
+        }
+
+        <!-- Staged preview -->
+        @if (aboutImageStagedPreview) {
+          <div class="mb-6">
+            <p class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold mb-2">New Image Preview</p>
+            <div class="ghost-border overflow-hidden relative h-[200px] bg-black">
+              <img [src]="aboutImageStagedPreview" alt="About staged" class="w-full h-full object-cover opacity-60" />
+              <div class="absolute inset-0 flex items-end p-6">
+                <div>
+                  <p class="text-white/50 text-[0.6rem] font-bold tracking-[0.3em] uppercase mb-2">Who We Are</p>
+                  <h1 class="font-headline font-black text-3xl md:text-5xl text-white leading-[0.9] tracking-tighter uppercase">About Us</h1>
+                </div>
+              </div>
+            </div>
+            <div class="flex gap-4 mt-3">
+              <button (click)="confirmAboutImageUpload()" [disabled]="aboutImageUploading"
+                class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50">
+                {{ aboutImageUploading ? 'Uploading...' : 'Confirm Upload' }}
+              </button>
+              <button (click)="cancelAboutImageStaged()" [disabled]="aboutImageUploading"
+                class="text-secondary hover:text-error text-xs font-headline font-bold uppercase tracking-widest transition-colors disabled:opacity-50">
+                Cancel
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- Current image -->
+        <div class="mb-6">
+          <p class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold mb-2">Current Image</p>
+          @if (aboutImageUrl) {
+            <div class="ghost-border overflow-hidden relative h-[200px] bg-black">
+              <img [src]="aboutImageUrl" alt="About current" class="w-full h-full object-cover opacity-60" />
+              <div class="absolute inset-0 flex items-end p-6">
+                <div>
+                  <p class="text-white/50 text-[0.6rem] font-bold tracking-[0.3em] uppercase mb-2">Who We Are</p>
+                  <h1 class="font-headline font-black text-3xl md:text-5xl text-white leading-[0.9] tracking-tighter uppercase">About Us</h1>
+                </div>
+              </div>
+            </div>
+            <button (click)="deleteAboutImage()"
+              class="mt-3 text-secondary hover:text-error text-xs font-headline font-bold uppercase tracking-widest transition-colors flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">delete</span> Remove
+            </button>
+          } @else {
+            <p class="text-outline text-xs">No image set. Header renders on solid black.</p>
+          }
+        </div>
+
+        <label class="flex items-center justify-center gap-3 ghost-border bg-surface-container-low hover:bg-surface-container-lowest transition-colors cursor-pointer px-6 py-3 mb-12"
+          [class.opacity-50]="aboutImageUploading" [class.pointer-events-none]="aboutImageUploading">
+          <span class="material-symbols-outlined text-xl text-outline-variant">cloud_upload</span>
+          <span class="text-secondary text-sm">{{ aboutImageUploading ? 'Uploading...' : 'Select image (JPG, PNG, WebP)' }}</span>
+          <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onAboutImageFileSelected($event)" class="hidden" [disabled]="aboutImageUploading" />
+        </label>
 
         @if (loadingAbout) {
           <div class="text-center py-16">
