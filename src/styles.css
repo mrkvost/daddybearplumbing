@@ -12,6 +12,14 @@ body {
   border: 1px solid rgba(198, 198, 198, 0.2);
 }
 
+@layer components {
+  /* Canonical input/textarea/select style used in admin + contact form.
+     Contact's calmer non-focused border (/60) + admin's quiet focus (no ring). */
+  .form-input {
+    @apply w-full bg-surface-container-lowest border border-outline-variant/60 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:outline-none focus:ring-0 transition-colors;
+  }
+}
+
 .grayscale-filter {
   filter: grayscale(100%);
 }

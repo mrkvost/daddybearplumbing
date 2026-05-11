@@ -165,7 +165,7 @@
           <div>
             <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Tag</label>
             <input type="text" [(ngModel)]="tag" placeholder="e.g. water-heaters"
-              class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors" />
+              class="form-input" />
           </div>
           <div>
             <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Files</label>
@@ -323,7 +323,7 @@
             <input type="text" [(ngModel)]="editingPhotoTagValue"
               (keydown.enter)="savePhoto()"
               placeholder="Tag (empty = infer from filename)"
-              class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
+              class="form-input"
               autofocus />
             <p class="text-outline text-xs mt-1 mb-6">Leave empty to use the filename-inferred tag.</p>
 
@@ -405,12 +405,12 @@
             <div>
               <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Customer Name</label>
               <input type="text" [(ngModel)]="reviewForm.name" placeholder="e.g. John D."
-                class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors" />
+                class="form-input" />
             </div>
             <div>
               <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Location</label>
               <input type="text" [(ngModel)]="reviewForm.location" placeholder="e.g. La Grange, IL"
-                class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors" />
+                class="form-input" />
             </div>
             <div>
               <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Rating (1-5)</label>
@@ -425,13 +425,13 @@
             <div>
               <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Date</label>
               <input type="date" [(ngModel)]="reviewForm.date"
-                class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors" />
+                class="form-input" />
             </div>
           </div>
           <div class="mb-6">
             <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Review Text</label>
             <textarea [(ngModel)]="reviewForm.text" rows="4" placeholder="What the customer said..."
-              class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors resize-y"></textarea>
+              class="form-input resize-y"></textarea>
           </div>
           <div class="flex gap-4">
             <button (click)="saveReview()"
@@ -677,7 +677,7 @@
               <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Location</label>
               <input type="text" [(ngModel)]="newLocation" placeholder="e.g. Riverside, IL"
                 (keydown.enter)="addLocation()"
-                class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
+                class="form-input"
                 autofocus />
               <div class="flex gap-4 mt-6">
                 <button (click)="addLocation()"
@@ -763,7 +763,7 @@
             <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Location</label>
             <input type="text" [(ngModel)]="editingLocationValue"
               (keydown.enter)="saveEditLocation()"
-              class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
+              class="form-input"
               autofocus />
             <div class="flex gap-4 mt-6">
               <button (click)="saveEditLocation()"
@@ -874,27 +874,27 @@
                 <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Title</label>
                 <input type="text" [(ngModel)]="albumForm.title" (ngModelChange)="onAlbumTitleInput()"
                   placeholder="e.g. Bathroom Remodel — La Grange"
-                  class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
+                  class="form-input"
                   autofocus />
               </div>
               <div>
                 <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Slug</label>
                 <input type="text" [(ngModel)]="albumForm.slug" (input)="onAlbumSlugInput()"
                   placeholder="e.g. bathroom-remodel-la-grange"
-                  class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors" />
+                  class="form-input" />
                 <p class="text-outline text-xs mt-1">URL: /gallery/album/{{ albumForm.slug || '…' }}</p>
               </div>
             </div>
             <div class="mb-6">
               <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Location (optional)</label>
               <input type="text" [(ngModel)]="albumForm.location" placeholder="e.g. La Grange, IL"
-                class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors" />
+                class="form-input" />
             </div>
             <div class="mb-6">
               <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Description (optional)</label>
               <textarea [(ngModel)]="albumForm.description" rows="3"
                 placeholder="Short description shown on the album page"
-                class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors resize-y"></textarea>
+                class="form-input resize-y"></textarea>
             </div>
             <div class="mb-6">
               <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Cover photo (optional)</label>
@@ -1000,17 +1000,17 @@
             <div class="mb-6">
               <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Question</label>
               <input type="text" [(ngModel)]="faqForm.question" placeholder="e.g. Do you offer emergency plumbing services?"
-                class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors" />
+                class="form-input" />
             </div>
             <div class="mb-6">
               <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Answer</label>
               <textarea [(ngModel)]="faqForm.answer" rows="4" placeholder="Short answer text..."
-                class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors resize-y"></textarea>
+                class="form-input resize-y"></textarea>
             </div>
             <div class="mb-6">
               <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Bullet List (optional)</label>
               <textarea [(ngModel)]="faqForm.bulletsText" rows="4" placeholder="One bullet per line (leave empty for no list)"
-                class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors resize-y"></textarea>
+                class="form-input resize-y"></textarea>
               <p class="text-outline text-xs mt-1">Each non-empty line becomes a bulleted item under the answer.</p>
             </div>
             <div class="flex gap-4">
@@ -1112,7 +1112,7 @@
             <div>
               <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Icon Name</label>
               <input type="text" [(ngModel)]="cardForm.icon" placeholder="e.g. water_drop"
-                class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors" />
+                class="form-input" />
               <p class="text-outline text-xs mt-1">
                 <a href="https://fonts.google.com/icons" target="_blank" rel="noopener" class="text-primary-fixed hover:underline">Browse icons</a>
               </p>
@@ -1120,13 +1120,13 @@
             <div>
               <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Title</label>
               <input type="text" [(ngModel)]="cardForm.title" placeholder="e.g. Drain Cleaning"
-                class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors" />
+                class="form-input" />
             </div>
           </div>
           <div class="mb-6">
             <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Description</label>
             <textarea [(ngModel)]="cardForm.description" rows="3" placeholder="Short description of this service..."
-              class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors resize-y"></textarea>
+              class="form-input resize-y"></textarea>
             <p class="text-outline text-xs mt-1">Leave empty for compact cards (commercial services and construction).</p>
           </div>
 
@@ -1693,7 +1693,7 @@
         <p class="text-xs text-outline mb-3">Top intro paragraphs. Separate paragraphs with a blank line.</p>
         <textarea [(ngModel)]="aboutHistoryText" (ngModelChange)="aboutHistoryDirty = true" rows="8"
           placeholder="Paragraph 1&#10;&#10;Paragraph 2"
-          class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors resize-y mb-3"></textarea>
+          class="form-input resize-y mb-3"></textarea>
         <div class="flex items-center gap-3 mb-12">
           <button (click)="saveAboutHistory()" [disabled]="!aboutHistoryDirty || aboutSaving"
             class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
@@ -1782,7 +1782,7 @@
         <p class="text-xs text-outline mb-3">Closing paragraphs (epilogue). Separate paragraphs with a blank line.</p>
         <textarea [(ngModel)]="aboutPromiseText" (ngModelChange)="aboutPromiseDirty = true" rows="8"
           placeholder="Paragraph 1&#10;&#10;Paragraph 2"
-          class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors resize-y mb-3"></textarea>
+          class="form-input resize-y mb-3"></textarea>
         <div class="flex items-center gap-3 mb-8">
           <button (click)="saveAboutPromise()" [disabled]="!aboutPromiseDirty || aboutSaving"
             class="bg-primary-fixed text-white px-6 py-2 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
@@ -1824,7 +1824,7 @@
               type="password"
               [(ngModel)]="passwordForm.current"
               autocomplete="current-password"
-              class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
+              class="form-input"
             />
           </div>
           <div>
@@ -1833,7 +1833,7 @@
               type="password"
               [(ngModel)]="passwordForm.newPassword"
               autocomplete="new-password"
-              class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
+              class="form-input"
             />
             <p class="text-outline text-xs mt-2">Minimum 8 characters, uppercase, lowercase, and numbers.</p>
           </div>
@@ -1843,7 +1843,7 @@
               type="password"
               [(ngModel)]="passwordForm.confirm"
               autocomplete="new-password"
-              class="w-full bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm font-body text-on-surface focus:border-primary focus:ring-0 transition-colors"
+              class="form-input"
             />
           </div>
           <button

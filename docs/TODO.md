@@ -171,13 +171,11 @@ admin user creation, gallery photo convention, project structure.
       Renders Requests/4xx/5xx/bandwidth sparklines, Cost Explorer month-to-date + top services,
       contact-form Lambda + SES + Cognito user count. Browser cache via sessionStorage + SWR.
       Full plan in `docs/ADMIN_DASHBOARD_METRICS_PLAN.md`. ~$0.30/mo running cost.
-- [ ] Unify input styling across admin + contact form. Today they diverge: admin uses
-      `border-outline-variant/20` + `focus:ring-0` + `transition-colors`; contact uses
-      `border-outline-variant/60` + `focus:ring-2 focus:ring-primary/25` + `transition-all`.
-      Pick one canonical input/textarea/select class set, extract as a Tailwind component class
-      (`@layer components { .form-input { ... } }` in `styles.css`) or as a shared Angular
-      attribute directive, and replace inline copies. Same for primary/secondary buttons. Goal:
-      one place to tweak, consistent visual language.
+- [x] Unify input styling across admin + contact form — canonical `.form-input` class added in
+      `src/styles.css` under `@layer components`. Combines contact's calmer non-focused border
+      (`outline-variant/60`) with admin's quiet focus (no ring, just `border-primary`). Applied
+      across admin, contact, and login (~12 input/textarea/select instances).
+      Button styling unification still open if you want one consistent primary/secondary set.
 - [ ] Unify S3 buckets — currently 3 buckets (site `kvaking`, gallery `kvaking-gallery`, reviews
       `kvaking-reviews`), each with its own bucket policy, CORS, IAM scoping, and CloudFront origin.
       A single bucket with prefixes (`/site/*`, `/gallery-images/*`, `/reviews-data/*`, `/metrics/*`)
