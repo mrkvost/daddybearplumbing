@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 export interface AboutCard {
   icon: string;
@@ -45,7 +46,7 @@ const DEFAULT_PROMISE: string[] = [
 @Component({
   selector: 'app-about',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PageHeaderComponent],
   templateUrl: './about.component.html',
 })
 export class AboutComponent implements OnInit, OnDestroy {
@@ -57,7 +58,6 @@ export class AboutComponent implements OnInit, OnDestroy {
   history: string[] = DEFAULT_HISTORY;
   whyChooseUs: AboutCard[] = DEFAULT_WHY_CHOOSE_US;
   promise: string[] = DEFAULT_PROMISE;
-  headerImageUrl: string | null = null;
 
   async ngOnInit(): Promise<void> {
     try {
@@ -70,17 +70,6 @@ export class AboutComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       }
     } catch { /* keep defaults */ }
-
-    try {
-      const metaRes = await fetch(`/gallery-images/meta.json?t=${Date.now()}`);
-      if (metaRes.ok) {
-        const meta: { about?: string } = await metaRes.json();
-        if (meta.about) {
-          this.headerImageUrl = `/gallery-images/meta/${meta.about}`;
-          this.cdr.detectChanges();
-        }
-      }
-    } catch { /* no header image */ }
   }
 
   ngOnDestroy(): void {}

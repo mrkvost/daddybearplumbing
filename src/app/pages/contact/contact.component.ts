@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
-import { DEFAULT_LOCATIONS } from '../../defaults/locations';
+import { SITE_DATA } from '../../../environments/site-data';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 declare global {
   interface Window {
@@ -23,7 +24,7 @@ declare global {
 @Component({
   selector: 'app-contact',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PageHeaderComponent],
   templateUrl: './contact.component.html',
 })
 export class ContactComponent implements AfterViewInit {
@@ -43,7 +44,7 @@ export class ContactComponent implements AfterViewInit {
     )}&zoom=14`
   );
 
-  locations = DEFAULT_LOCATIONS;
+  locations = SITE_DATA.locations;
 
   form = { name: '', email: '', phone: '', message: '', website: '' };
   turnstileToken = '';
@@ -54,20 +55,6 @@ export class ContactComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.loadTurnstile();
-    this.loadLocations();
-  }
-
-  private async loadLocations(): Promise<void> {
-    try {
-      const res = await fetch(`/gallery-images/locations.json?t=${Date.now()}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          this.locations = data;
-          this.cdr.detectChanges();
-        }
-      }
-    } catch { /* use defaults */ }
   }
 
   private loadTurnstile(): void {

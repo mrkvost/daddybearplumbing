@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { GalleryService, GalleryImage, Album } from '../../services/gallery.service';
 import { environment } from '../../../environments/environment';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 const BATCH_SIZE = 18;
 const FILTERS = ['All', 'Commercial', 'Residential', 'Kitchen', 'Bathroom', 'Heaters'];
@@ -16,7 +17,7 @@ interface AlbumCard extends Album {
 @Component({
   selector: 'app-gallery',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, PageHeaderComponent],
   templateUrl: './gallery.component.html',
 })
 export class GalleryComponent implements OnInit, OnDestroy {

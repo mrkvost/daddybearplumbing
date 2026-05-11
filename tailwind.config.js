@@ -5,6 +5,11 @@ module.exports = {
 
   theme: {
     extend: {
+      screens: {
+        // Navbar-specific breakpoint — switch to burger menu below 890px.
+        // Other components keep the default `md:` (768px) etc.
+        'nav': '890px',
+      },
       colors: {
         'primary':                '#000000',
         'primary-fixed':          '#b02f00',

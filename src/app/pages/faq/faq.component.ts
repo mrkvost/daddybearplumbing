@@ -2,6 +2,7 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 export interface FaqItem {
   question: string;
@@ -38,7 +39,7 @@ const DEFAULT_FAQ: FaqItem[] = [
 @Component({
   selector: 'app-faq',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, PageHeaderComponent],
   templateUrl: './faq.component.html',
 })
 export class FaqComponent implements OnInit {

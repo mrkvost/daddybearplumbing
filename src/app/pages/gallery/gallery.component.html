@@ -1,26 +1,15 @@
-<!-- Page header -->
-<section class="relative h-[300px] flex items-end overflow-hidden bg-black">
-  <div class="relative z-10 w-full max-w-7xl mx-auto px-6 pb-12">
-    @if (currentAlbum) {
-      <a routerLink="/gallery"
-        class="inline-flex items-center gap-2 text-white/50 hover:text-white text-[0.7rem] font-bold tracking-[0.3em] uppercase mb-4 transition-colors">
-        <span class="material-symbols-outlined text-sm">chevron_left</span>
-        Back to Gallery
-      </a>
-      <h1 class="font-headline font-black text-5xl md:text-7xl text-white leading-[0.9] tracking-tighter uppercase">
-        {{ currentAlbum.title }}
-      </h1>
-      @if (currentAlbum.location) {
-        <p class="text-white/60 text-sm mt-3 font-body">{{ currentAlbum.location }}</p>
-      }
-    } @else {
-      <p class="text-white/50 text-[0.7rem] font-bold tracking-[0.3em] uppercase mb-4">Documentation</p>
-      <h1 class="font-headline font-black text-5xl md:text-7xl text-white leading-[0.9] tracking-tighter uppercase">
-        Project Gallery
-      </h1>
-    }
+@if (currentAlbum) {
+  <app-page-header [eyebrow]="currentAlbum.location || 'Album'" [title]="currentAlbum.title" />
+  <div class="max-w-7xl mx-auto px-6 pt-6">
+    <a routerLink="/gallery"
+      class="inline-flex items-center gap-2 text-secondary hover:text-primary text-[0.7rem] font-bold tracking-[0.3em] uppercase transition-colors">
+      <span class="material-symbols-outlined text-sm">chevron_left</span>
+      Back to Gallery
+    </a>
   </div>
-</section>
+} @else {
+  <app-page-header eyebrow="Documentation" title="Project Gallery" />
+}
 
 <!-- Album not found -->
 @if (albumNotFound) {

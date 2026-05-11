@@ -383,8 +383,9 @@
   <h1>Build & Deploy Pipeline</h1>
   <p class="subtitle">From source code to production</p>
 
-  <div class="flow-step"><div class="flow-num">1</div><div class="flow-text"><strong>docker_build.sh</strong><br><small>Runs <code>npm install && npm run build</code> inside <code>node:22-alpine</code> container. Source mounted via bind mount. Output written to <code>dist/daddy-bear-plumbing/browser/</code> on host.</small></div></div>
-  <div class="flow-step"><div class="flow-num">2</div><div class="flow-text"><strong>Angular CLI (ng build)</strong><br><small>AOT compilation, tree shaking, code splitting. Produces hashed JS/CSS bundles. Lazy chunks per route (gallery, admin, login, reviews, home).</small></div></div>
+  <div class="flow-step"><div class="flow-num">1</div><div class="flow-text"><strong>docker_build.sh</strong><br><small>Runs <code>node scripts/generate-seo.js && npm install && npm run build</code> inside <code>node:22-alpine</code> container. Source mounted via bind mount. Output written to <code>dist/daddy-bear-plumbing/browser/</code> on host.</small></div></div>
+  <div class="flow-step"><div class="flow-num">2</div><div class="flow-text"><strong>Pre-build: generate-seo.js</strong><br><small>Generates <code>sitemap.xml</code> + <code>robots.txt</code>. Fetches <code>meta.json</code> + <code>locations.json</code> from <code>https://kvaking.com/gallery-images/…</code> and writes <code>src/environments/site-data.ts</code> with hero/about/OG image refs + locations. Substitutes <code>og:image</code> + <code>twitter:image</code> in <code>src/index.html</code> so non-JS crawlers see the real OG image. Aborts the build if S3 is unreachable.</small></div></div>
+  <div class="flow-step"><div class="flow-num">3</div><div class="flow-text"><strong>Angular CLI (ng build)</strong><br><small>AOT compilation, tree shaking, code splitting. Produces hashed JS/CSS bundles. Lazy chunks per route. <code>SITE_DATA</code> is compiled into the bundles so components don't need to fetch <code>meta.json</code>/<code>locations.json</code> at runtime.</small></div></div>
   <div class="flow-step"><div class="flow-num">3</div><div class="flow-text"><strong>Tailwind CSS (PostCSS)</strong><br><small>Scans all .html/.ts files for class usage. Purges unused CSS. Autoprefixer adds vendor prefixes. Final CSS in <code>styles-*.css</code>.</small></div></div>
   <div class="flow-step"><div class="flow-num">4</div><div class="flow-text"><strong>TypeScript Compiler</strong><br><small>ES2022 target, strict mode, Angular template type-checking. All standalone components, no NgModules.</small></div></div>
   <div class="flow-step"><div class="flow-num">5</div><div class="flow-text"><strong>deploy.sh</strong><br><small><code>aws s3 sync dist/.../browser/ s3://kvaking --delete</code><br>Syncs build output to site S3 bucket. Removes stale files.</small></div></div>
@@ -814,8 +815,8 @@ infrastructure/
   <div class="check check-done">robots.txt (created, disallows /admin)</div>
   <div class="check check-done">sitemap.xml + robots.txt Sitemap directive</div>
   <div class="check check-done">Canonical tags (CanonicalService, auto on navigation)</div>
-  <div class="check check-todo">Pre-rendering evaluation — research saved in <code>docs/SEO_RENDERING_RESEARCH.md</code> (CSR / static footer / app shell / SSG / SSR / dynamic rendering compared)</div>
-  <div class="check check-todo">Angular App Shell (<code>ng generate app-shell</code>) — bake navbar + footer + NAP into <code>index.html</code> at build time so non-JS crawlers see brand + phone + address. Approach D in the research doc</div>
+  <div class="check check-done">Build-time data injection — <code>scripts/generate-seo.js</code> fetches <code>meta.json</code>+<code>locations.json</code> from S3, writes <code>src/environments/site-data.ts</code>, substitutes <code>og:image</code>/<code>twitter:image</code> in <code>src/index.html</code>. Components import <code>SITE_DATA</code> instead of runtime fetch. Admin still fetches live for preview</div>
+  <div class="check check-todo">Optional: Angular SSG / App Shell for per-page content in static HTML (research in <code>docs/SEO_RENDERING_RESEARCH.md</code>)</div>
   <div class="check check-done">Self-hosted text fonts (Public Sans + Inter)</div>
   <div class="check check-done">Scroll-to-top on navigation</div>
   <div class="check check-done">Core Web Vitals: lazy-load Google Maps iframe + gallery thumbs; hero <code>fetchpriority="high"</code></div>

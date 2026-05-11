@@ -4,9 +4,9 @@ import { Title, Meta } from '@angular/platform-browser';
 import { DOCUMENT } from '@angular/common';
 import { filter, map, mergeMap } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { SITE_DATA } from '../../environments/site-data';
 
 const BRAND = 'Daddy Bear Plumbing';
-const OG_FALLBACK = '/og-placeholder.jpg';
 
 @Injectable({ providedIn: 'root' })
 export class CanonicalService {
@@ -16,17 +16,7 @@ export class CanonicalService {
   private meta = inject(Meta);
   private doc = inject(DOCUMENT);
 
-  private ogImagePath = OG_FALLBACK;
-
   init(): void {
-    // Load current OG image filename from meta.json
-    fetch(`/gallery-images/meta.json?t=${Date.now()}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(meta => {
-        if (meta?.og) this.ogImagePath = `/gallery-images/meta/${meta.og}`;
-      })
-      .catch(() => {});
-
     this.router.events.pipe(
       filter(e => e instanceof NavigationEnd),
       map(() => {
@@ -62,7 +52,7 @@ export class CanonicalService {
         this.meta.updateTag({ property: 'og:title', content: ogTitle });
         this.meta.updateTag({ property: 'og:description', content: description || '' });
         this.meta.updateTag({ property: 'og:url', content: fullUrl });
-        this.meta.updateTag({ property: 'og:image', content: `https://${environment.domain}${this.ogImagePath}` });
+        this.meta.updateTag({ property: 'og:image', content: SITE_DATA.ogImage });
       }
     });
   }

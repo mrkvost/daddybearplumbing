@@ -9,7 +9,7 @@ import { GalleryService, GalleryImage, GalleryEntry, Album } from '../../service
 import { Review } from '../../services/reviews.service';
 import { environment } from '../../../environments/environment';
 import { HeroComponent } from '../../components/hero/hero.component';
-import { DEFAULT_LOCATIONS } from '../../defaults/locations';
+import { SITE_DATA } from '../../../environments/site-data';
 
 interface AdminGalleryImage extends GalleryImage {
   deleting?: boolean;
@@ -901,7 +901,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   async initLocationDefaults(): Promise<void> {
-    this.locations = [...DEFAULT_LOCATIONS];
+    this.locations = [...SITE_DATA.locations];
     await this.saveLocations();
     this.cdr.detectChanges();
   }

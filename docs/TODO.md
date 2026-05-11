@@ -81,15 +81,18 @@ with some external steps that cannot be automated.
 - [x] Create `robots.txt` in Angular's `public/` folder (disallows /admin)
 - [x] Create `sitemap.xml` listing all public routes; robots.txt points to it
 - [x] Add `<link rel="canonical">` per page (CanonicalService, auto on navigation, skips /admin)
-- [ ] Evaluate Angular pre-rendering (`ng build` with `prerender` option) so crawlers receive
-      real HTML instead of a blank JS shell — enable if straightforward, document if deferred.
-      Research notes + comparison of approaches (CSR / static footer / app shell / SSG / SSR /
-      dynamic rendering) saved in `docs/SEO_RENDERING_RESEARCH.md`.
-- [ ] Angular App Shell (`ng generate app-shell`) — middle-ground SEO improvement. Bakes a
-      minimal static shell (navbar + footer + NAP) into `index.html` at build time, served
-      immediately while the SPA bootstraps. Crawlers (Bing, social, AI bots that don't run JS)
-      see the brand + phone + address + license numbers in raw HTML. Smaller scope than full
-      pre-rendering, S3-compatible. Approach D in `docs/SEO_RENDERING_RESEARCH.md`.
+- [x] Build-time data injection — chose this over Angular SSR/App Shell as a simpler path.
+      `scripts/generate-seo.js` fetches `meta.json` + `locations.json` from S3 on every build,
+      writes `src/environments/site-data.ts` (hero/about/OG image refs + locations), and
+      substitutes the `og:image`/`twitter:image` URLs in `src/index.html` so non-JS crawlers
+      (Facebook, LinkedIn, X) see the real OG image. Build aborts on S3 fetch failure.
+      Public components (Hero, PageHeader, ServiceArea, Contact, CanonicalService) import
+      `SITE_DATA` instead of fetching at runtime. Admin keeps live fetches for previewing
+      staged uploads. Old `src/app/defaults/locations.ts` removed — single source of truth.
+- [ ] Optional follow-up: Angular SSG/App Shell for per-page content visibility. Build-time
+      injection covers image refs + locations + OG tag; only the page body (h1, h2, service
+      cards, copy) is still client-rendered. Skip unless deeper SEO is needed. Research
+      comparing approaches: `docs/SEO_RENDERING_RESEARCH.md`.
 - [x] Self-host Public Sans + Inter fonts (eliminates Google Fonts round-trip for text fonts)
 - [x] Verify Core Web Vitals: Google Maps iframe + gallery thumbnails are `loading="lazy"`;
       hero image is `fetchpriority="high"` + `decoding="async"` to prioritise the LCP element

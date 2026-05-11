@@ -1,6 +1,7 @@
 import { Component, OnInit, HostListener, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 export interface ServiceCard {
   icon: string;
@@ -39,7 +40,7 @@ const DEFAULT_SERVICES: ServiceCard[] = [
 @Component({
   selector: 'app-commercial',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PageHeaderComponent],
   templateUrl: './commercial.component.html',
 })
 export class CommercialComponent implements OnInit {

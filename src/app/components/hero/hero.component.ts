@@ -1,6 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef, inject, Input } from '@angular/core';
-
-const FALLBACK_URL = '/gallery-images/meta/hero.jpg';
+import { Component, OnInit, Input } from '@angular/core';
+import { SITE_DATA } from '../../../environments/site-data';
 
 @Component({
   selector: 'app-hero',
@@ -9,33 +8,17 @@ const FALLBACK_URL = '/gallery-images/meta/hero.jpg';
   templateUrl: './hero.component.html',
 })
 export class HeroComponent implements OnInit {
-  private cdr = inject(ChangeDetectorRef);
-
-  /** When set, uses this URL directly instead of fetching meta.json */
+  /** When set, uses this URL directly. Admin previews staged uploads via this. */
   @Input() imageUrl: string | null = null;
 
   /** Compact mode for admin preview (shorter height, smaller text) */
   @Input() compact = false;
 
-  heroImage: string | null = null;
+  heroImage: string = SITE_DATA.heroImage;
 
-  async ngOnInit(): Promise<void> {
+  ngOnInit(): void {
     if (this.imageUrl !== null) {
       this.heroImage = this.imageUrl;
-      return;
     }
-    try {
-      const res = await fetch(`/gallery-images/meta.json?t=${Date.now()}`);
-      if (res.ok) {
-        const meta = await res.json();
-        if (meta.hero) {
-          this.heroImage = `/gallery-images/meta/${meta.hero}`;
-          this.cdr.detectChanges();
-          return;
-        }
-      }
-    } catch { /* use fallback */ }
-    this.heroImage = FALLBACK_URL;
-    this.cdr.detectChanges();
   }
 }
