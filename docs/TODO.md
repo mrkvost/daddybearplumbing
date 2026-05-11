@@ -85,6 +85,11 @@ with some external steps that cannot be automated.
       real HTML instead of a blank JS shell — enable if straightforward, document if deferred.
       Research notes + comparison of approaches (CSR / static footer / app shell / SSG / SSR /
       dynamic rendering) saved in `docs/SEO_RENDERING_RESEARCH.md`.
+- [ ] Angular App Shell (`ng generate app-shell`) — middle-ground SEO improvement. Bakes a
+      minimal static shell (navbar + footer + NAP) into `index.html` at build time, served
+      immediately while the SPA bootstraps. Crawlers (Bing, social, AI bots that don't run JS)
+      see the brand + phone + address + license numbers in raw HTML. Smaller scope than full
+      pre-rendering, S3-compatible. Approach D in `docs/SEO_RENDERING_RESEARCH.md`.
 - [x] Self-host Public Sans + Inter fonts (eliminates Google Fonts round-trip for text fonts)
 - [x] Verify Core Web Vitals: Google Maps iframe + gallery thumbnails are `loading="lazy"`;
       hero image is `fetchpriority="high"` + `decoding="async"` to prioritise the LCP element
@@ -154,8 +159,22 @@ admin user creation, gallery photo convention, project structure.
 - [x] Admin service cards editor (drag-and-drop reorder, add/edit/delete, load defaults)
 - [x] Enhanced footer (5-column layout: brand, services, navigate, information, accreditation with license numbers)
 - [ ] Admin-triggered rebuild: button in admin to trigger AWS build pipeline (CodeBuild or Lambda)
-      so that hero image + locations are statically embedded in the HTML at build time
+      so that hero image + locations + OG image (currently `og-placeholder.jpg` in `index.html`,
+      replaced at runtime by CanonicalService — but JS-less crawlers like Facebook/LinkedIn/X
+      never see that swap) are statically embedded in the HTML at build time
       (improves SEO — crawlers see real content instead of JS-fetched data)
+- [ ] Admin dashboard metrics — daily-snapshot Lambda writes `metrics/dashboard.json` to the gallery
+      bucket (admin-only path, no CloudFront behavior). EventBridge Scheduler at 04:00 America/Chicago.
+      Renders Requests/4xx/5xx/bandwidth sparklines, Cost Explorer month-to-date + top services,
+      contact-form Lambda + SES + Cognito user count. Browser cache via sessionStorage + SWR.
+      Full plan in `docs/ADMIN_DASHBOARD_METRICS_PLAN.md`. ~$0.30/mo running cost.
+- [ ] Unify S3 buckets — currently 3 buckets (site `kvaking`, gallery `kvaking-gallery`, reviews
+      `kvaking-reviews`), each with its own bucket policy, CORS, IAM scoping, and CloudFront origin.
+      A single bucket with prefixes (`/site/*`, `/gallery-images/*`, `/reviews-data/*`, `/metrics/*`)
+      would simplify Terraform, IAM scoping, and cache-policy management. Migration: copy contents,
+      flip CloudFront origin + behaviors, update environment.ts bucket names, update Cognito IAM
+      role resource ARNs, then delete the empty buckets. Done well, this is a one-shot change with
+      no user-visible impact.
 - [ ] Online chat integration - more complex
 - [ ] Polish service-card modal `alt` text — residential + commercial card modals currently use
       just `selectedCard.title` (e.g., "Drain Cleaning"). Append a service qualifier

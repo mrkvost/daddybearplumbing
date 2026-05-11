@@ -815,6 +815,7 @@ infrastructure/
   <div class="check check-done">sitemap.xml + robots.txt Sitemap directive</div>
   <div class="check check-done">Canonical tags (CanonicalService, auto on navigation)</div>
   <div class="check check-todo">Pre-rendering evaluation — research saved in <code>docs/SEO_RENDERING_RESEARCH.md</code> (CSR / static footer / app shell / SSG / SSR / dynamic rendering compared)</div>
+  <div class="check check-todo">Angular App Shell (<code>ng generate app-shell</code>) — bake navbar + footer + NAP into <code>index.html</code> at build time so non-JS crawlers see brand + phone + address. Approach D in the research doc</div>
   <div class="check check-done">Self-hosted text fonts (Public Sans + Inter)</div>
   <div class="check check-done">Scroll-to-top on navigation</div>
   <div class="check check-done">Core Web Vitals: lazy-load Google Maps iframe + gallery thumbs; hero <code>fetchpriority="high"</code></div>
@@ -835,12 +836,14 @@ infrastructure/
   <div class="check check-done">Menu: About Us, Services (Residential/Commercial), Gallery, Reviews, Contact</div>
   <div class="check check-done">Enhanced footer (5-col: brand, services, navigate, info, accreditation + license numbers)</div>
   <div class="check check-done">Contact form (Turnstile + Lambda + SES)</div>
+  <div class="check check-todo">Unify the 3 S3 buckets (site / gallery / reviews) into a single bucket with prefixes — simpler IAM, one CloudFront origin, single bucket policy</div>
   <div class="check check-todo">Online chat integration</div>
   <div class="check check-todo">Polish service-card modal <code>alt</code> text — append a service qualifier (e.g. "Drain Cleaning service") for marginal SEO keyword density</div>
   <div class="check check-todo">About Us picture editable in admin (same flow as hero image)</div>
   <div class="check check-done">Services cards with thumbnail previews — top h-40 image block (or icon fallback), card h-96, applied to residential / commercial-industries / construction-interior / construction-exterior</div>
   <div class="check check-done">Admin pagination (top + bottom, 10/page, editable position numbers)</div>
-  <div class="check check-todo">Admin-triggered AWS rebuild (static hero + locations at build time)</div>
+  <div class="check check-todo">Admin-triggered AWS rebuild (static hero + locations + OG image baked into <code>index.html</code> at build time, since JS-less crawlers never see the runtime CanonicalService swap)</div>
+  <div class="check check-todo">Admin dashboard metrics — daily snapshot Lambda + sparklines + Cost Explorer; full plan in <code>docs/ADMIN_DASHBOARD_METRICS_PLAN.md</code> (~$0.30/mo)</div>
   <div class="check check-done">Session persistence (sessionStorage + auto-refresh via refresh token)</div>
   <div class="check check-done">Home page hero image (admin-uploadable with preview, fallback default)</div>
   <div class="check check-done">Residential/commercial cards: fixed height, clickable → modal with full text + optional image</div>
