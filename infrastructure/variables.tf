@@ -31,3 +31,15 @@ variable "turnstile_secret" {
   sensitive   = true
   default     = ""
 }
+
+variable "github_repo_url" {
+  description = "HTTPS URL of the GitHub repo backing the CodeBuild source (e.g. https://github.com/owner/repo)"
+  type        = string
+  default     = ""
+}
+
+variable "github_branch" {
+  description = "Branch CodeBuild rebuilds from"
+  type        = string
+  default     = "master"
+}

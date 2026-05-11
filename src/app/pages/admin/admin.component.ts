@@ -7,6 +7,7 @@ import { AuthService } from '../../services/auth.service';
 import { UploadService } from '../../services/upload.service';
 import { GalleryService, GalleryImage, GalleryEntry, Album } from '../../services/gallery.service';
 import { Review } from '../../services/reviews.service';
+import { RebuildService, BuildSummary } from '../../services/rebuild.service';
 import { environment } from '../../../environments/environment';
 import { HeroComponent } from '../../components/hero/hero.component';
 import { SITE_DATA } from '../../../environments/site-data';
@@ -42,6 +43,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   private auth = inject(AuthService);
   private uploadService = inject(UploadService);
   private galleryService = inject(GalleryService);
+  private rebuildService = inject(RebuildService);
   private router = inject(Router);
   private meta = inject(Meta);
   private cdr = inject(ChangeDetectorRef);
@@ -121,6 +123,11 @@ export class AdminComponent implements OnInit, OnDestroy {
   editingReview: AdminReview | null = null;
   reviewForm = { name: '', rating: 5, text: '', location: '', date: '' };
 
+  rebuildBusy = false;
+  rebuildBuild: BuildSummary | null = null;
+  rebuildError = '';
+  private rebuildPollTimer: ReturnType<typeof setInterval> | null = null;
+
   ngOnInit(): void {
     this.meta.addTag({ name: 'robots', content: 'noindex, nofollow' });
     this.loadImages();
@@ -132,10 +139,12 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.loadAlbums();
     this.loadConstruction();
     this.loadAbout();
+    this.loadLatestRebuild();
   }
 
   ngOnDestroy(): void {
     this.meta.removeTag('name="robots"');
+    this.stopRebuildPolling();
   }
 
   /* ================================================================
@@ -1777,6 +1786,77 @@ export class AdminComponent implements OnInit, OnDestroy {
   signOut(): void {
     this.auth.signOut();
     this.router.navigate(['/admin/login']);
+  }
+
+  /* ================================================================
+   * SITE REBUILD
+   * ================================================================ */
+
+  async loadLatestRebuild(): Promise<void> {
+    if (!environment.rebuildStatusUrl) return;
+    try {
+      const build = await this.rebuildService.status();
+      this.rebuildBuild = build;
+      if (build && this.isBuildActive(build.status)) {
+        this.startRebuildPolling();
+      }
+    } catch (e) {
+      console.warn('Could not load latest rebuild status', e);
+    } finally {
+      this.cdr.detectChanges();
+    }
+  }
+
+  async startRebuild(): Promise<void> {
+    this.rebuildError = '';
+    if (!environment.rebuildTriggerUrl) {
+      this.rebuildError = 'Rebuild endpoint not configured yet.';
+      return;
+    }
+    this.rebuildBusy = true;
+    this.cdr.detectChanges();
+    try {
+      this.rebuildBuild = await this.rebuildService.start();
+      this.startRebuildPolling();
+    } catch (e: any) {
+      this.rebuildError = e?.message || 'Failed to trigger rebuild';
+      this.rebuildBusy = false;
+    } finally {
+      this.cdr.detectChanges();
+    }
+  }
+
+  private startRebuildPolling(): void {
+    this.stopRebuildPolling();
+    this.rebuildBusy = true;
+    this.rebuildPollTimer = setInterval(() => this.pollRebuild(), 5000);
+  }
+
+  private stopRebuildPolling(): void {
+    if (this.rebuildPollTimer !== null) {
+      clearInterval(this.rebuildPollTimer);
+      this.rebuildPollTimer = null;
+    }
+  }
+
+  private async pollRebuild(): Promise<void> {
+    if (!this.rebuildBuild) return;
+    try {
+      const build = await this.rebuildService.status(this.rebuildBuild.id);
+      this.rebuildBuild = build;
+      if (!build || !this.isBuildActive(build.status)) {
+        this.stopRebuildPolling();
+        this.rebuildBusy = false;
+      }
+    } catch (e) {
+      console.warn('Rebuild status poll failed', e);
+    } finally {
+      this.cdr.detectChanges();
+    }
+  }
+
+  private isBuildActive(status: string): boolean {
+    return status === 'IN_PROGRESS' || status === 'QUEUED';
   }
 
   /* ================================================================

@@ -166,16 +166,38 @@ admin user creation, gallery photo convention, project structure.
 - [x] Content pages: About Us, Residential Services, Commercial Services, FAQ, Terms, Privacy, Cookies
 - [x] Admin service cards editor (drag-and-drop reorder, add/edit/delete, load defaults)
 - [x] Enhanced footer (5-column layout: brand, services, navigate, information, accreditation with license numbers)
-- [ ] Admin-triggered rebuild: button in admin to trigger AWS build pipeline (CodeBuild or Lambda)
-      so that hero image + locations + OG image (currently `og-placeholder.jpg` in `index.html`,
-      replaced at runtime by CanonicalService — but JS-less crawlers like Facebook/LinkedIn/X
-      never see that swap) are statically embedded in the HTML at build time
-      (improves SEO — crawlers see real content instead of JS-fetched data)
+- [~] Admin-triggered rebuild — code wired up; needs Terraform apply + one-time GitHub
+      CodeStar connection before it can run end-to-end.
+      Wired up:
+      - `buildspec.yml` (repo root) — Node 22, generate-seo.js, npm install, ng build,
+        `aws s3 sync` site bucket, `cloudfront create-invalidation`.
+      - `infrastructure/lambda/trigger_rebuild.py` + `rebuild_status.py` — start build /
+        read CodeBuild state. Function URLs use `AWS_IAM` auth.
+      - `infrastructure/main.tf` — CodeBuild project (GitHub source via CodeStar
+        connection), Lambda function URLs, IAM. Cognito authenticated role gets
+        `lambda:InvokeFunctionUrl` on both URLs.
+      - `src/app/services/sigv4.ts` (generic AWS SigV4 signer) + `rebuild.service.ts`
+        (start + status polling).
+      - Admin → Dashboard tab → "Rebuild Site" button + status panel (5s poll).
+      Manual steps before first use (full walkthrough in README "Admin-Triggered Rebuild"):
+      1. Set `github_repo_url` + `github_branch` in `infrastructure/terraform.tfvars`.
+      2. `terraform apply` — creates everything, including the GitHub CodeConnections
+         connection (in PENDING state).
+      3. In AWS Console → CodeConnections, click the connection → "Update pending
+         connection" → authorise GitHub + install the AWS Connector app on the repo.
+         Status flips to AVAILABLE.
+      4. `terraform output rebuild_trigger_url rebuild_status_url` → paste into
+         `src/environments/environment.ts`.
+      5. `./docker_build.sh && ./deploy.sh` once locally to bake the URLs into the
+         deployed bundle. After that, admin → Rebuild Site works end-to-end.
 - [ ] Admin dashboard metrics — daily-snapshot Lambda writes `metrics/dashboard.json` to the gallery
       bucket (admin-only path, no CloudFront behavior). EventBridge Scheduler at 04:00 America/Chicago.
       Renders Requests/4xx/5xx/bandwidth sparklines, Cost Explorer month-to-date + top services,
       contact-form Lambda + SES + Cognito user count. Browser cache via sessionStorage + SWR.
       Full plan in `docs/ADMIN_DASHBOARD_METRICS_PLAN.md`. ~$0.30/mo running cost.
+      Also surface **rebuild count** (and most recent rebuild timestamp + status) — sourced from
+      CodeBuild project history (`ListBuildsForProject` + `BatchGetBuilds`), filtered to the
+      dashboard window. Useful for spotting how often admin edits trigger a republish.
 - [x] Unify input styling across admin + contact form — canonical `.form-input` class added in
       `src/styles.css` under `@layer components`. Combines contact's calmer non-focused border
       (`outline-variant/60`) with admin's quiet focus (no ring, just `border-primary`). Applied

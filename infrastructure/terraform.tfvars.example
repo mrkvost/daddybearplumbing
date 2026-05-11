@@ -2,3 +2,10 @@
 domain      = "daddybearplumbing.com"
 bucket_name = "daddybearplumbing-site"
 project     = "daddybear"
+
+# Admin-triggered rebuild (CodeBuild + GitHub via CodeConnections).
+# The connection itself is created by Terraform; you only need to authorise
+# it once in the AWS Console after `terraform apply`. See README
+# "Admin-Triggered Rebuild" section for details.
+github_repo_url = "https://github.com/<owner>/<repo>"
+github_branch   = "master"

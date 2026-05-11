@@ -1,0 +1,36 @@
+version: 0.2
+
+# CodeBuild spec for admin-triggered rebuilds.
+# Runs the same steps as docker_build.sh (without the docker wrapper)
+# plus a sync to the site S3 bucket and a CloudFront invalidation.
+#
+# Required environment variables (set on the CodeBuild project):
+#   BUCKET_NAME          - target S3 bucket for the built site (e.g. "kvaking")
+#   CLOUDFRONT_DIST_ID   - distribution to invalidate after publish
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 22
+
+  pre_build:
+    commands:
+      - node --version
+      - npm --version
+      - node scripts/generate-seo.js
+
+  build:
+    commands:
+      - npm install
+      - npm run build
+
+  post_build:
+    commands:
+      - aws s3 sync dist/daddy-bear-plumbing/browser/ "s3://${BUCKET_NAME}/" --delete
+      - aws cloudfront create-invalidation --distribution-id "${CLOUDFRONT_DIST_ID}" --paths "/*"
+
+artifacts:
+  files:
+    - 'dist/daddy-bear-plumbing/browser/**/*'
+  discard-paths: no
+  base-directory: .

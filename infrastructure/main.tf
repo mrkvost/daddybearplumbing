@@ -607,3 +607,240 @@ resource "aws_lambda_permission" "contact_form_invoke" {
   principal     = "*"
 }
 
+# ---------- CodeBuild: admin-triggered site rebuilds ----------
+
+# GitHub source connection. Terraform creates this in PENDING state.
+# After `terraform apply`, open the connection in the AWS Console
+# (CodePipeline → Settings → Connections) and click "Update pending connection"
+# to complete the GitHub OAuth handshake — the status flips to AVAILABLE.
+resource "aws_codestarconnections_connection" "github" {
+  name          = "${var.project}-github"
+  provider_type = "GitHub"
+}
+
+resource "aws_iam_role" "codebuild" {
+  name = "${var.project}-codebuild"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "codebuild.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "codebuild" {
+  name = "${var.project}-codebuild-policy"
+  role = aws_iam_role.codebuild.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+        ]
+        Resource = "arn:aws:logs:${var.region}:*:log-group:/aws/codebuild/${var.project}-site*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:GetObject",
+          "s3:ListBucket",
+        ]
+        Resource = [
+          aws_s3_bucket.site.arn,
+          "${aws_s3_bucket.site.arn}/*",
+        ]
+      },
+      {
+        Effect   = "Allow"
+        Action   = "cloudfront:CreateInvalidation"
+        Resource = aws_cloudfront_distribution.site.arn
+      },
+      {
+        Effect   = "Allow"
+        Action   = "codestar-connections:UseConnection"
+        Resource = aws_codestarconnections_connection.github.arn
+      },
+    ]
+  })
+}
+
+resource "aws_codebuild_project" "site" {
+  name         = "${var.project}-site"
+  service_role = aws_iam_role.codebuild.arn
+
+  artifacts {
+    type = "NO_ARTIFACTS"
+  }
+
+  environment {
+    compute_type = "BUILD_GENERAL1_SMALL"
+    type         = "LINUX_CONTAINER"
+    image        = "aws/codebuild/amazonlinux2-x86_64-standard:5.0"
+
+    environment_variable {
+      name  = "BUCKET_NAME"
+      value = aws_s3_bucket.site.bucket
+    }
+
+    environment_variable {
+      name  = "CLOUDFRONT_DIST_ID"
+      value = aws_cloudfront_distribution.site.id
+    }
+  }
+
+  source {
+    type            = "GITHUB"
+    location        = var.github_repo_url
+    git_clone_depth = 1
+    buildspec       = "infrastructure/buildspec.yml"
+  }
+
+  source_version = var.github_branch
+
+  logs_config {
+    cloudwatch_logs {
+      group_name = "/aws/codebuild/${var.project}-site"
+    }
+  }
+
+  build_timeout = 20 # minutes
+}
+
+# ---------- Lambdas: admin-triggered rebuild (trigger + status) ----------
+
+data "archive_file" "rebuild_trigger" {
+  type        = "zip"
+  source_file = "${path.module}/lambda/trigger_rebuild.py"
+  output_path = "${path.module}/lambda/trigger_rebuild.zip"
+}
+
+data "archive_file" "rebuild_status" {
+  type        = "zip"
+  source_file = "${path.module}/lambda/rebuild_status.py"
+  output_path = "${path.module}/lambda/rebuild_status.zip"
+}
+
+resource "aws_iam_role" "rebuild_lambda" {
+  name = "${var.project}-rebuild-lambda"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "lambda.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "rebuild_lambda" {
+  name = "${var.project}-rebuild-lambda-policy"
+  role = aws_iam_role.rebuild_lambda.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "codebuild:StartBuild",
+          "codebuild:BatchGetBuilds",
+          "codebuild:ListBuildsForProject",
+        ]
+        Resource = aws_codebuild_project.site.arn
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "rebuild_lambda_logs" {
+  role       = aws_iam_role.rebuild_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_lambda_function" "rebuild_trigger" {
+  function_name                  = "${var.project}-rebuild-trigger"
+  role                           = aws_iam_role.rebuild_lambda.arn
+  handler                        = "trigger_rebuild.handler"
+  runtime                        = "python3.12"
+  timeout                        = 10
+  reserved_concurrent_executions = 2
+  filename                       = data.archive_file.rebuild_trigger.output_path
+  source_code_hash               = data.archive_file.rebuild_trigger.output_base64sha256
+
+  environment {
+    variables = {
+      CODEBUILD_PROJECT = aws_codebuild_project.site.name
+    }
+  }
+}
+
+resource "aws_lambda_function" "rebuild_status" {
+  function_name                  = "${var.project}-rebuild-status"
+  role                           = aws_iam_role.rebuild_lambda.arn
+  handler                        = "rebuild_status.handler"
+  runtime                        = "python3.12"
+  timeout                        = 10
+  reserved_concurrent_executions = 5
+  filename                       = data.archive_file.rebuild_status.output_path
+  source_code_hash               = data.archive_file.rebuild_status.output_base64sha256
+
+  environment {
+    variables = {
+      CODEBUILD_PROJECT = aws_codebuild_project.site.name
+    }
+  }
+}
+
+resource "aws_lambda_function_url" "rebuild_trigger" {
+  function_name      = aws_lambda_function.rebuild_trigger.function_name
+  authorization_type = "AWS_IAM"
+
+  cors {
+    allow_origins = ["https://${var.domain}"]
+    allow_methods = ["POST"]
+    allow_headers = ["content-type", "authorization", "x-amz-date", "x-amz-security-token", "x-amz-content-sha256"]
+    max_age       = 3600
+  }
+}
+
+resource "aws_lambda_function_url" "rebuild_status" {
+  function_name      = aws_lambda_function.rebuild_status.function_name
+  authorization_type = "AWS_IAM"
+
+  cors {
+    allow_origins = ["https://${var.domain}"]
+    allow_methods = ["GET"]
+    allow_headers = ["content-type", "authorization", "x-amz-date", "x-amz-security-token", "x-amz-content-sha256"]
+    max_age       = 3600
+  }
+}
+
+# Allow the authenticated Cognito role to invoke these Function URLs.
+resource "aws_iam_role_policy" "cognito_invoke_rebuild" {
+  name = "${var.project}-cognito-invoke-rebuild"
+  role = aws_iam_role.cognito_authenticated.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = "lambda:InvokeFunctionUrl"
+      Resource = [
+        aws_lambda_function.rebuild_trigger.arn,
+        aws_lambda_function.rebuild_status.arn,
+      ]
+    }]
+  })
+}
+

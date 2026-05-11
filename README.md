@@ -125,6 +125,71 @@ See `docs/contact-form-setup.md` for full setup instructions (Turnstile, SES ver
 
 ---
 
+## Admin-Triggered Rebuild
+
+The admin **Dashboard** has a "Rebuild Site" button that kicks off a CodeBuild run
+which rebuilds the Angular app (baking in the latest hero/about/OG image refs and
+locations), syncs `dist/.../browser/` to the site bucket, and invalidates CloudFront.
+
+CodeBuild pulls source from GitHub via an AWS **CodeConnections** connection
+(formerly "CodeStar Connections"). Terraform creates the connection resource; the
+GitHub OAuth handshake itself has to be approved once in the console because AWS
+provides no API for it.
+
+### Setup
+
+1. Fill in the GitHub variables in `infrastructure/terraform.tfvars`:
+
+   ```hcl
+   github_repo_url = "https://github.com/mrkvost/daddybearplumbing"
+   github_branch   = "master"
+   ```
+
+2. Apply Terraform — this creates the connection in `PENDING` state along with
+   the CodeBuild project and the trigger/status Lambdas:
+
+   ```bash
+   cd infrastructure
+   terraform apply
+   ```
+
+3. Authorise the GitHub connection (one-time, browser-only). Easiest path is to
+   search **"CodeConnections"** in the AWS Console top search bar.
+   Direct URL: <https://console.aws.amazon.com/codesuite/settings/connections>.
+   Alternative path: **CodePipeline** service → left nav → **Settings → Connections**.
+   Make sure the region selector (top-right) is on `eu-central-1`.
+
+   - You should see a connection named `daddybear-github` (or whatever your
+     `project` var is) with status **Pending**.
+   - Click the connection name → **Update pending connection**.
+   - Sign in to GitHub when prompted, click **Authorize AWS Connector for GitHub**,
+     install the AWS Connector app on the `mrkvost` account, and grant it access
+     to the `daddybearplumbing` repo.
+   - Status flips to **Available**. No further Terraform action needed —
+     subsequent `terraform apply` runs leave the connection untouched.
+
+4. Grab the two Lambda Function URLs from outputs and paste them into
+   `src/environments/environment.ts` (`rebuildTriggerUrl` / `rebuildStatusUrl`):
+
+   ```bash
+   terraform output rebuild_trigger_url
+   terraform output rebuild_status_url
+   ```
+
+5. Rebuild + deploy once locally so the URLs are baked into the published bundle:
+
+   ```bash
+   cd ..
+   ./docker_build.sh
+   ./deploy.sh
+   ```
+
+After that, **Admin → Dashboard → Rebuild Site** triggers a real CodeBuild run,
+polls for completion every 5 seconds, and republishes + invalidates CloudFront on
+success.
+
+---
+
 ## Admin Area
 
 The `/admin` route is protected by Cognito authentication.

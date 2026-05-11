@@ -134,7 +134,50 @@
       <div>
         <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-4">Dashboard</p>
         <h2 class="font-headline font-black text-3xl tracking-tighter uppercase mb-4">Welcome</h2>
-        <p class="text-secondary text-sm">Use the navigation above to manage site content.</p>
+        <p class="text-secondary text-sm mb-10">Use the navigation above to manage site content.</p>
+
+        <div class="border-t border-outline-variant/40 pt-8 max-w-2xl">
+          <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-3">Publish</p>
+          <h3 class="font-headline font-black text-2xl tracking-tighter uppercase mb-3">Rebuild Site</h3>
+          <p class="text-secondary text-sm mb-5">
+            Republishes the static site so changes to hero / about / OG images and locations
+            are embedded in the HTML for non-JS crawlers. Takes 2–4 minutes.
+          </p>
+
+          <button (click)="startRebuild()" [disabled]="rebuildBusy"
+            class="bg-primary-fixed text-white px-5 py-3 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+            {{ rebuildBusy ? 'Rebuilding…' : 'Trigger Rebuild' }}
+          </button>
+
+          @if (rebuildError) {
+            <p class="mt-4 text-sm text-error">{{ rebuildError }}</p>
+          }
+
+          @if (rebuildBuild) {
+            <div class="mt-6 border border-outline-variant/60 p-4 text-sm">
+              <div class="flex justify-between mb-1">
+                <span class="text-secondary">Build</span>
+                <span class="font-mono">#{{ rebuildBuild.buildNumber ?? '—' }}</span>
+              </div>
+              <div class="flex justify-between mb-1">
+                <span class="text-secondary">Status</span>
+                <span class="font-mono">{{ rebuildBuild.status }}</span>
+              </div>
+              @if (rebuildBuild.currentPhase) {
+                <div class="flex justify-between mb-1">
+                  <span class="text-secondary">Phase</span>
+                  <span class="font-mono">{{ rebuildBuild.currentPhase }}</span>
+                </div>
+              }
+              @if (rebuildBuild.startedAt) {
+                <div class="flex justify-between">
+                  <span class="text-secondary">Started</span>
+                  <span class="font-mono">{{ rebuildBuild.startedAt | date:'short' }}</span>
+                </div>
+              }
+            </div>
+          }
+        </div>
       </div>
     }
 
