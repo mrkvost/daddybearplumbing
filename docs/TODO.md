@@ -81,7 +81,7 @@ with some external steps that cannot be automated.
 - [x] Create `robots.txt` in Angular's `public/` folder (disallows /admin)
 - [x] Create `sitemap.xml` listing all public routes; robots.txt points to it
 - [x] Add `<link rel="canonical">` per page (CanonicalService, auto on navigation, skips /admin)
-- [x] Build-time data injection — chose this over Angular SSR/App Shell as a simpler path.
+- [x] Build-time data injection — first wave of the SSR work.
       `scripts/generate-seo.js` fetches `meta.json` + `locations.json` from S3 on every build,
       writes `src/environments/site-data.ts` (hero/about/OG image refs + locations), and
       substitutes the `og:image`/`twitter:image` URLs in `src/index.html` so non-JS crawlers
@@ -89,10 +89,15 @@ with some external steps that cannot be automated.
       Public components (Hero, PageHeader, ServiceArea, Contact, CanonicalService) import
       `SITE_DATA` instead of fetching at runtime. Admin keeps live fetches for previewing
       staged uploads. Old `src/app/defaults/locations.ts` removed — single source of truth.
-- [ ] Optional follow-up: Angular SSG/App Shell for per-page content visibility. Build-time
-      injection covers image refs + locations + OG tag; only the page body (h1, h2, service
-      cards, copy) is still client-rendered. Skip unless deeper SEO is needed. Research
-      comparing approaches: `docs/SEO_RENDERING_RESEARCH.md`.
+- [x] Angular SSG app-shell — `@angular/ssr` installed, prerender configured via
+      `src/prerender-routes.txt` (only `/` and `/admin/login`). `main.server.ts` bootstraps
+      with `BootstrapContext` (Angular 21 API); `app.config.server.ts` adds
+      `provideServerRendering()`. `AuthService.loadTokens` / `saveTokens` / `clearTokens`
+      guarded with `isPlatformBrowser`. Result: `dist/.../browser/index.html` contains
+      `<app-navbar>`, `<app-hero>` (with baked-in image URL), and `<app-footer>` server-side;
+      `admin/login/index.html` contains `<app-login>` + footer with no navbar. Page body for
+      other routes is still client-rendered (intentional — cards are dynamic, body content
+      visibility to crawlers is not a concern).
 - [x] Self-host Public Sans + Inter fonts (eliminates Google Fonts round-trip for text fonts)
 - [x] Verify Core Web Vitals: Google Maps iframe + gallery thumbnails are `loading="lazy"`;
       hero image is `fetchpriority="high"` + `decoding="async"` to prioritise the LCP element

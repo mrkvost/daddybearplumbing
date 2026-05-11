@@ -1,13 +1,12 @@
 import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReviewsService, Review } from '../../services/reviews.service';
-import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-reviews',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent],
+  imports: [CommonModule],
   templateUrl: './reviews.component.html',
 })
 export class ReviewsComponent implements OnInit {

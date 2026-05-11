@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 export interface ConstructionCard {
   icon: string;
@@ -70,7 +69,7 @@ const EXTERIOR_INTRO: string[] = [
 @Component({
   selector: 'app-construction',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent],
+  imports: [CommonModule],
   templateUrl: './construction.component.html',
 })
 export class ConstructionComponent implements OnInit, OnDestroy {

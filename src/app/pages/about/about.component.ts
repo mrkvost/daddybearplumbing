@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
-import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 export interface AboutCard {
   icon: string;
@@ -46,7 +45,7 @@ const DEFAULT_PROMISE: string[] = [
 @Component({
   selector: 'app-about',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent],
+  imports: [CommonModule],
   templateUrl: './about.component.html',
 })
 export class AboutComponent implements OnInit, OnDestroy {

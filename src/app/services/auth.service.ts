@@ -5,7 +5,8 @@
  * to authenticate users and obtain temporary S3 credentials.
  * No Amplify dependency — just the lightweight AWS SDK clients.
  */
-import { Injectable } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../environments/environment';
 
 interface AuthTokens {
@@ -26,9 +27,10 @@ const STORAGE_KEY = 'auth_tokens';
 export class AuthService {
   private tokens: AuthTokens | null = null;
   private credentials: AwsCredentials | null = null;
+  private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   constructor() {
-    this.loadTokens();
+    if (this.isBrowser) this.loadTokens();
   }
 
   get isAuthenticated(): boolean {
@@ -40,7 +42,7 @@ export class AuthService {
   }
 
   private saveTokens(): void {
-    if (this.tokens) {
+    if (this.isBrowser && this.tokens) {
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(this.tokens));
     }
   }
@@ -60,7 +62,7 @@ export class AuthService {
   private clearTokens(): void {
     this.tokens = null;
     this.credentials = null;
-    sessionStorage.removeItem(STORAGE_KEY);
+    if (this.isBrowser) sessionStorage.removeItem(STORAGE_KEY);
   }
 
   /**

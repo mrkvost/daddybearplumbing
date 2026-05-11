@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
 import { SITE_DATA } from '../../../environments/site-data';
-import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 declare global {
   interface Window {
@@ -24,7 +23,7 @@ declare global {
 @Component({
   selector: 'app-contact',
   standalone: true,
-  imports: [CommonModule, FormsModule, PageHeaderComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './contact.component.html',
 })
 export class ContactComponent implements AfterViewInit {
