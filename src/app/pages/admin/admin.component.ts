@@ -1830,7 +1830,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   private startRebuildPolling(): void {
     this.stopRebuildPolling();
     this.rebuildBusy = true;
-    this.rebuildPollTimer = setInterval(() => this.pollRebuild(), 5000);
+    this.rebuildPollTimer = setInterval(() => this.pollRebuild(), 30000);
   }
 
   private stopRebuildPolling(): void {
