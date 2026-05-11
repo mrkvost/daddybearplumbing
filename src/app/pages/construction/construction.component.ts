@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angula
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { BUSINESS } from '../../globals';
 
 export interface ConstructionCard {
   icon: string;
@@ -77,8 +77,8 @@ export class ConstructionComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private routeSub?: Subscription;
 
-  phone = environment.phone;
-  phoneDisplay = environment.phoneDisplay;
+  phone = BUSINESS.phone;
+  phoneDisplay = BUSINESS.phoneDisplay;
   mode: ConstructionMode = 'interior';
   cards: ConstructionCard[] = DEFAULT_INTERIOR_CARDS;
   selectedCard: ConstructionCard | null = null;

@@ -826,21 +826,57 @@ resource "aws_lambda_function_url" "rebuild_status" {
   }
 }
 
+# Resource-based permission complementing the IAM identity policy.
+# `function_url_auth_type` is intentionally omitted: setting it adds a
+# `lambda:FunctionUrlAuthType` Condition that AWS appears not to populate
+# for these calls, which caused 403/AccessDenied on every invocation.
+resource "aws_lambda_permission" "rebuild_trigger_iam_invoke" {
+  statement_id  = "FunctionURLAllowCognitoIAMInvoke"
+  action        = "lambda:InvokeFunctionUrl"
+  function_name = aws_lambda_function.rebuild_trigger.function_name
+  principal     = aws_iam_role.cognito_authenticated.arn
+}
+
+resource "aws_lambda_permission" "rebuild_status_iam_invoke" {
+  statement_id  = "FunctionURLAllowCognitoIAMInvoke"
+  action        = "lambda:InvokeFunctionUrl"
+  function_name = aws_lambda_function.rebuild_status.function_name
+  principal     = aws_iam_role.cognito_authenticated.arn
+}
+
 # Allow the authenticated Cognito role to invoke these Function URLs.
+# Function URLs created after Oct 2025 require BOTH lambda:InvokeFunctionUrl
+# and lambda:InvokeFunction; the InvokedViaFunctionUrl condition restricts
+# the broader InvokeFunction action to only Function URL calls.
 resource "aws_iam_role_policy" "cognito_invoke_rebuild" {
   name = "${var.project}-cognito-invoke-rebuild"
   role = aws_iam_role.cognito_authenticated.id
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Action = "lambda:InvokeFunctionUrl"
-      Resource = [
-        aws_lambda_function.rebuild_trigger.arn,
-        aws_lambda_function.rebuild_status.arn,
-      ]
-    }]
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = "lambda:InvokeFunctionUrl"
+        Resource = [
+          aws_lambda_function.rebuild_trigger.arn,
+          aws_lambda_function.rebuild_status.arn,
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = "lambda:InvokeFunction"
+        Resource = [
+          aws_lambda_function.rebuild_trigger.arn,
+          aws_lambda_function.rebuild_status.arn,
+        ]
+        Condition = {
+          Bool = {
+            "lambda:InvokedViaFunctionUrl" = "true"
+          }
+        }
+      },
+    ]
   })
 }
 

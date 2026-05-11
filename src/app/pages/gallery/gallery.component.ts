@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { GalleryService, GalleryImage, Album } from '../../services/gallery.service';
-import { environment } from '../../../environments/environment';
+import { BUSINESS } from '../../globals';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 const BATCH_SIZE = 18;
@@ -26,8 +26,8 @@ export class GalleryComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private routeSub?: Subscription;
 
-  phone = environment.phone;
-  phoneDisplay = environment.phoneDisplay;
+  phone = BUSINESS.phone;
+  phoneDisplay = BUSINESS.phoneDisplay;
   allImages: GalleryImage[] = [];
   albums: Album[] = [];
   tags: string[] = FILTERS;

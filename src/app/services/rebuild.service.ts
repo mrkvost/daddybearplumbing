@@ -38,9 +38,9 @@ export class RebuildService {
       credentials: creds,
     });
 
-    const data = await res.json();
+    const data = await this.readJsonOrEmpty(res);
     if (!res.ok || !data.ok) {
-      throw new Error(data.error || `Trigger failed: ${res.status}`);
+      throw new Error(this.extractError(data, `Trigger failed: ${res.status}`));
     }
     return {
       id: data.buildId,
@@ -67,10 +67,20 @@ export class RebuildService {
       credentials: creds,
     });
 
-    const data = await res.json();
+    const data = await this.readJsonOrEmpty(res);
     if (!res.ok || !data.ok) {
-      throw new Error(data.error || `Status fetch failed: ${res.status}`);
+      throw new Error(this.extractError(data, `Status fetch failed: ${res.status}`));
     }
     return data.build ?? null;
+  }
+
+  private async readJsonOrEmpty(res: Response): Promise<any> {
+    const text = await res.text();
+    if (!text) return {};
+    try { return JSON.parse(text); } catch { return { rawBody: text }; }
+  }
+
+  private extractError(data: any, fallback: string): string {
+    return data?.Message || data?.message || data?.error || data?.rawBody || fallback;
   }
 }

@@ -1,6 +1,6 @@
 import { Component, OnInit, HostListener, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { environment } from '../../../environments/environment';
+import { BUSINESS } from '../../globals';
 
 export interface ServiceCard {
   icon: string;
@@ -33,8 +33,8 @@ const DEFAULT_CARDS: ServiceCard[] = [
 export class ResidentialComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
 
-  phone = environment.phone;
-  phoneDisplay = environment.phoneDisplay;
+  phone = BUSINESS.phone;
+  phoneDisplay = BUSINESS.phoneDisplay;
   cards: ServiceCard[] = DEFAULT_CARDS;
   selectedCard: ServiceCard | null = null;
 

@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { environment } from '../../../environments/environment';
+import { BUSINESS } from '../../globals';
 
 export interface AboutCard {
   icon: string;
@@ -51,8 +51,8 @@ const DEFAULT_PROMISE: string[] = [
 export class AboutComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
 
-  phone = environment.phone;
-  phoneDisplay = environment.phoneDisplay;
+  phone = BUSINESS.phone;
+  phoneDisplay = BUSINESS.phoneDisplay;
 
   history: string[] = DEFAULT_HISTORY;
   whyChooseUs: AboutCard[] = DEFAULT_WHY_CHOOSE_US;

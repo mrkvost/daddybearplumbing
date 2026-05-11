@@ -3,7 +3,7 @@ import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { Title, Meta } from '@angular/platform-browser';
 import { DOCUMENT } from '@angular/common';
 import { filter, map, mergeMap } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { BUSINESS } from '../globals';
 import { SITE_DATA } from '../../environments/site-data';
 
 const BRAND = 'Daddy Bear Plumbing';
@@ -45,7 +45,7 @@ export class CanonicalService {
         this.removeCanonical();
       } else {
         const cleanPath = url.split('?')[0].replace(/\/+$/, '');
-        const fullUrl = `https://${environment.domain}${cleanPath}`;
+        const fullUrl = `https://${BUSINESS.domain}${cleanPath}`;
         this.setCanonical(fullUrl);
 
         const ogTitle = pageTitle ? `${BRAND} | ${pageTitle}` : BRAND;

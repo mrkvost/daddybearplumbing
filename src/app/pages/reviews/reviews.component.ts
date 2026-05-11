@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReviewsService, Review } from '../../services/reviews.service';
-import { environment } from '../../../environments/environment';
+import { BUSINESS } from '../../globals';
 
 @Component({
   selector: 'app-reviews',
@@ -13,8 +13,8 @@ export class ReviewsComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private reviewsService = inject(ReviewsService);
 
-  phone = environment.phone;
-  phoneDisplay = environment.phoneDisplay;
+  phone = BUSINESS.phone;
+  phoneDisplay = BUSINESS.phoneDisplay;
   reviews: Review[] = [];
   loading = true;
 

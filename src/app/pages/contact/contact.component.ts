@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
+import { BUSINESS } from '../../globals';
 import { SITE_DATA } from '../../../environments/site-data';
 
 declare global {
@@ -30,16 +31,16 @@ export class ContactComponent implements AfterViewInit {
   private cdr = inject(ChangeDetectorRef);
   private sanitizer = inject(DomSanitizer);
 
-  phone = environment.phone;
-  phoneDisplay = environment.phoneDisplay;
-  email = environment.email;
-  address = environment.address;
+  phone = BUSINESS.phone;
+  phoneDisplay = BUSINESS.phoneDisplay;
+  email = BUSINESS.email;
+  address = BUSINESS.address;
   mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    `${environment.address.line1}, ${environment.address.city}, ${environment.address.state} ${environment.address.zip}`
+    `${BUSINESS.address.line1}, ${BUSINESS.address.city}, ${BUSINESS.address.state} ${BUSINESS.address.zip}`
   )}`;
   safeEmbedUrl: SafeResourceUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
     `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(
-      `${environment.address.line1}, ${environment.address.city}, ${environment.address.state} ${environment.address.zip}`
+      `${BUSINESS.address.line1}, ${BUSINESS.address.city}, ${BUSINESS.address.state} ${BUSINESS.address.zip}`
     )}&zoom=14`
   );
 

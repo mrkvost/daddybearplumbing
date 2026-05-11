@@ -17,10 +17,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const envFile = fs.readFileSync(path.join(__dirname, '../src/environments/environment.ts'), 'utf8');
-const domainMatch = envFile.match(/domain:\s*'([^']+)'/);
+const globalsFile = fs.readFileSync(path.join(__dirname, '../src/app/globals.ts'), 'utf8');
+const domainMatch = globalsFile.match(/domain:\s*'([^']+)'/);
 if (!domainMatch) {
-  console.error('Could not find domain in environment.ts');
+  console.error('Could not find domain in globals.ts');
   process.exit(1);
 }
 const domain = domainMatch[1];

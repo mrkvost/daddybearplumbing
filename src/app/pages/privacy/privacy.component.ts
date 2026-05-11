@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { environment } from '../../../environments/environment';
+import { BUSINESS } from '../../globals';
 
 @Component({
   selector: 'app-privacy',
@@ -9,5 +9,5 @@ import { environment } from '../../../environments/environment';
   templateUrl: './privacy.component.html',
 })
 export class PrivacyComponent {
-  email = environment.email;
+  email = BUSINESS.email;
 }
