@@ -197,14 +197,34 @@ admin user creation, gallery photo convention, project structure.
       `github_repo_url`/`github_branch`, `terraform apply`, authorise the GitHub
       `CodeConnections` connection in the AWS console, paste the two Function URLs
       into `src/environments/environment.ts`, bake + deploy once locally.
-- [ ] Admin dashboard metrics — daily-snapshot Lambda writes `metrics/dashboard.json` to the gallery
-      bucket (admin-only path, no CloudFront behavior). EventBridge Scheduler at 04:00 America/Chicago.
-      Renders Requests/4xx/5xx/bandwidth sparklines, Cost Explorer month-to-date + top services,
-      contact-form Lambda + SES + Cognito user count. Browser cache via sessionStorage + SWR.
-      Full plan in `docs/ADMIN_DASHBOARD_METRICS_PLAN.md`. ~$0.30/mo running cost.
-      Also surface **rebuild count** (and most recent rebuild timestamp + status) — sourced from
-      CodeBuild project history (`ListBuildsForProject` + `BatchGetBuilds`), filtered to the
-      dashboard window. Useful for spotting how often admin edits trigger a republish.
+- [x] Admin dashboard metrics — implemented end-to-end. **Schema is at v4**:
+      `cloudfront.{requests,bytesDownloaded,errors4xxRate,errors5xxRate,totalErrorRate,errorsTotal}`,
+      `contactForm.{invocations30d,errors30d,series,errorsSeries}`,
+      `rebuilds.{total30d,succeeded30d,failed30d,series,successSeries,failedSeries,lastBuild}`,
+      `ses.*`, `cognito.userCount`, `cost.{monthToDate,previousMonth,topServices,forecastRemainder,
+      forecastEndOfMonth,forecastLower,forecastUpper}`. All daily series are padded to exactly 30
+      entries (missing days → 0).
+      - Lambda: `infrastructure/lambda/metrics_snapshot.py` (Python 3.13, 256 MB, 60 s timeout).
+        Fetches CloudWatch (CloudFront in us-east-1 + Lambda metrics in eu-central-1), Cost Explorer
+        (`GetCostAndUsage` + `GetCostForecast`), SES `GetSendStatistics`, Cognito `ListUsers`,
+        CodeBuild `ListBuildsForProject` + `BatchGetBuilds`. Writes
+        `s3://kvaking-gallery/metrics/dashboard.json` with `Cache-Control: max-age=300`.
+      - EventBridge Scheduler: daily at 04:00 America/Chicago (DST-aware).
+      - IAM: dedicated exec role for the Lambda; scheduler role with `lambda:InvokeFunction`;
+        Cognito authenticated role extended with read-only `s3:GetObject` on `metrics/*`.
+      - SPA: `MetricsService` reads via SigV4 directly from S3 (no CloudFront in path). Sends
+        `cache: 'no-cache'` so the 5-min HTTP cache doesn't hide fresh snapshots after a manual
+        re-invoke. sessionStorage cache (`metrics-dashboard-v4`) for stale-while-revalidate paint.
+      - UI: KPI cards removed in favour of three sparklines side-by-side:
+        CF requests (with error count overlaid in red), contact form invocations (errors in red),
+        rebuilds (failed builds in red). Beneath: cost MTD + previous month + end-of-month forecast
+        with 80% interval bounds + top services; activity block with SES/Cognito/last build.
+        Footer shows snapshot timestamp with timezone (`'M/d/yy, h:mm a zzz'`).
+      - Sparkline component (`src/app/components/sparkline/sparkline.component.ts`) is a single
+        standalone SVG, no charting library. Supports an optional `overlayPoints` (drawn first in
+        red, primary line on top); shared Y-axis between primary + overlay. Single-day series
+        renders as a labelled value instead of "No data".
+      - Cost: ~$0.30/mo (Cost Explorer is the only non-free item).
 - [x] Unify input styling across admin + contact form — canonical `.form-input` class added in
       `src/styles.css` under `@layer components`. Combines contact's calmer non-focused border
       (`outline-variant/60`) with admin's quiet focus (no ring, just `border-primary`). Applied
@@ -233,18 +253,31 @@ admin user creation, gallery photo convention, project structure.
       schematic) that integrates with the build. Outcome of the investigation should be:
       either a recommendation with concrete wins (LCP / repeat-load numbers, what gets
       cached, what doesn't) or a documented "not worth it" with reasons.
-- [ ] **"Pending changes — rebuild needed" indicator in admin.** Any admin action that
-      mutates content the public site reads at build time (hero image, OG image, about
-      image, locations, service/construction cards, FAQ, albums, etc.) should set a
-      "dirty" flag. Surface that as an icon to the left of the Settings cog, visible on
-      every admin tab. Clicking opens a small panel listing what changed and offers a
-      "Rebuild now" button (same call as Dashboard → Rebuild Site). Clears once a
-      successful rebuild completes. Storage: probably a `pending-rebuild.json` in the
-      gallery bucket (last-mutation timestamp) compared against the latest CodeBuild
-      `endTime`; or just sessionStorage if we accept losing the flag across logins.
-- [ ] **Remove welcome text from Dashboard.** Reclaim that vertical space for the
-      actual metrics + rebuild status block — landing on the dashboard should put the
-      useful info above the fold instead of a greeting.
+- [x] **"Pending changes — rebuild needed" indicator in admin.** Implemented as a new
+      `rebuild` tab in admin (the old "Rebuild Site" card was extracted from the Dashboard
+      tab) and an icon button left of the Settings cog (inline SVG of
+      `published_with_changes` — no FOUT). A small yellow `!` badge overlays the icon when
+      changes are pending; the Rebuild tab shows a "Changes pending in: …" callout listing
+      the specific areas (Hero image, OG image, About image, Locations — only the data
+      that actually feeds the prerender; everything else is runtime-fetched and goes live
+      immediately, see [Rebuild triggers](../../.claude/projects/-home-sven-matej/memory/project_rebuild_triggers.md)).
+      - **State**: `pendingSet: Set<string>` on AdminComponent. `rebuildNeeded` / `pendingChanges`
+        are getters derived from it. Persisted to `gallery-images/admin-pending.json` on S3
+        (source of truth, survives cookie/cache/sessionStorage clears; sessionStorage cache
+        is the fast-paint mirror).
+      - **Baseline**: separate `gallery-images/admin-baseline.json` captures
+        `{hero, og, about, locations}` at the moment of the last successful CodeBuild.
+        Each save calls `reconcilePendingArea(area)` which diffs current vs baseline and
+        either adds or *removes* the area from the pending set — so an add+delete that
+        returns the data to the published state correctly clears the badge instead of
+        sticking on. Before the baseline exists (no rebuild has succeeded since this code
+        deployed) reconciliation falls back to "mark pending" (safe default); after the
+        first SUCCEEDED it works fully.
+      - **Lifecycle**: `loadBaseline()` + `loadRebuildNeeded()` run in `ngOnInit`. On rebuild
+        SUCCEEDED in `pollRebuild`, the SPA snapshots the current state as the new baseline
+        and clears the pending file.
+- [x] **Remove welcome text from Dashboard.** Done. The "Welcome / Use the navigation above"
+      block is gone; the dashboard now opens directly on the metrics sparklines.
 - [ ] **Admin documentation page.** New tab (or a `?` icon link) inside admin that
       walks through each tab's workflow: how to upload hero/OG/about images, edit
       service & construction cards, manage albums, edit FAQ/locations, trigger a

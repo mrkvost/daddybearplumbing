@@ -38,7 +38,7 @@ ng serve
 ## Building & Deploying
 
 ```bash
-./docker_build.sh    # Build Angular app in Docker
+./docker_build.sh    # Build Angular app in Docker (node:24-alpine)
 ./deploy.sh          # Sync to S3 + invalidate CloudFront cache
 ```
 
@@ -217,7 +217,7 @@ The `/admin` route is protected by Cognito authentication.
 - Only manually created users can log in (no self-signup)
 - First login requires setting a new password
 - Session survives page refresh (tokens in sessionStorage, auto-refreshed; cleared on tab close)
-- Tabs: **Dashboard**, **Hero**, **OG**, **About**, **Residential**, **Commercial**, **Construction**, **Gallery**, **Albums**, **Reviews**, **Locations**, **FAQ**, **Settings**
+- Tabs: **Dashboard**, **Hero**, **OG**, **About**, **Residential**, **Commercial**, **Construction**, **Gallery**, **Albums**, **Reviews**, **Locations**, **FAQ**, **Settings**, plus a top-bar **Rebuild** icon (publish button, with a yellow `!` when changes are pending)
 - **Hero image**: select file → full grayscale preview (matches homepage look) → confirm upload. Hash-based filenames for cache busting. Falls back to default `hero.jpg` if no custom image set.
 - **OG image**: same flow, used for social media link previews (1200×630 recommended)
 - Both tracked via `meta.json` in the gallery bucket
@@ -229,6 +229,38 @@ The `/admin` route is protected by Cognito authentication.
 - All list tabs share: editable position numbers (click to edit, clamps to valid range), drag-and-drop reorder, pagination (10/page, top + bottom).
 - Admin pages are not indexed (noindex meta + robots.txt)
 
+### Dashboard
+
+Opens directly on metrics — no welcome page. Reads `s3://kvaking-gallery/metrics/dashboard.json`
+(written daily at 04:00 America/Chicago by `kvaking-metrics-snapshot` Lambda; admin SPA fetches it
+via SigV4 directly, with `cache: 'no-cache'` so manual re-invokes show up without waiting for the
+5-min HTTP cache).
+
+- Three sparklines side-by-side (CF requests, contact form invocations, rebuilds) with **error
+  counts overlaid in red**. Single-day series renders as a labelled value.
+- Cost block: month-to-date, previous month, end-of-month forecast with 80% interval bounds, top 5 services.
+- Activity block: SES sends/bounces/complaints, admin user count, latest CodeBuild run.
+- Footer: "Snapshot generated …" with timezone.
+
+Schema is at **v4**. When the Lambda changes the shape, bump `SCHEMA_VERSION` (Lambda) and the
+sessionStorage `CACHE_KEY` (`metrics-dashboard-v4` in `src/app/services/metrics.service.ts`) in lockstep
+so stale client caches don't crash the new template.
+
+### Rebuild Indicator
+
+The top-bar **Rebuild** icon shows a yellow `!` badge when admin has made changes that aren't yet
+baked into the prerendered HTML. **Only four areas trigger a rebuild**: Hero image, OG image,
+About image, Locations. Everything else (gallery, reviews, FAQ, cards, albums, …) is fetched at
+runtime by the public SPA and goes live as soon as the JSON is uploaded.
+
+- Pending state is stored at `s3://kvaking-gallery/admin-pending.json` (cross-session, cross-device).
+- Baseline state (last published values) lives at `s3://kvaking-gallery/admin-baseline.json`; updated
+  by the SPA when a rebuild reaches `SUCCEEDED`.
+- Each save calls `reconcilePendingArea(area)` which diffs current vs baseline — so an add+delete
+  that returns the data to the published state correctly clears the badge.
+- Before the first SUCCEEDED build (no baseline yet), reconciliation falls back to "always mark";
+  one rebuild seeds the baseline and the diff logic takes over.
+
 ---
 
 ## Project Structure
@@ -238,7 +270,8 @@ src/
   app/
     components/        # Reusable UI (navbar, footer, hero, trust-stats, services-grid, service-area)
     pages/             # Route pages (home, gallery, reviews, contact, about, residential, commercial, faq, terms, privacy, cookies, admin, login)
-    services/          # AuthService, UploadService, GalleryService, ReviewsService, CanonicalService, RebuildService, sigv4
+    services/          # AuthService, UploadService, GalleryService, ReviewsService, CanonicalService, RebuildService, MetricsService, sigv4
+    components/sparkline/ # SVG sparkline used by admin Dashboard (supports an optional red error overlay)
     guards/            # authGuard (protects /admin, SSR-aware so /admin can prerender)
     app.routes.ts      # Route configuration
     app.ts / app.html  # Root layout shell
@@ -250,12 +283,13 @@ src/
   styles.css           # Tailwind directives + custom utilities
   index.html           # HTML entry point
 infrastructure/
-  main.tf              # All AWS resources (S3 x3, CloudFront + spa_router Function, Route53, ACM, Cognito, SES, CodeBuild, Lambda x3)
-  buildspec.yml        # CodeBuild spec used by admin-triggered rebuild
+  main.tf              # All AWS resources (S3 x3, CloudFront + spa_router Function, Route53, ACM, Cognito, SES, CodeBuild, Lambda x4, EventBridge Scheduler)
+  buildspec.yml        # CodeBuild spec used by admin-triggered rebuild (Node 24)
   lambda/
-    contact_form.py    # Contact form handler (Turnstile + SES)
-    trigger_rebuild.py # Starts a CodeBuild run
-    rebuild_status.py  # Reads latest build state
+    contact_form.py     # Contact form handler (Turnstile + SES)
+    trigger_rebuild.py  # Starts a CodeBuild run
+    rebuild_status.py   # Reads latest build state
+    metrics_snapshot.py # Daily metrics snapshot → metrics/dashboard.json (Python 3.13)
   variables.tf         # Input variables (incl. github_repo_url, github_branch)
   outputs.tf           # Terraform outputs (incl. rebuild_trigger_url, rebuild_status_url, github_connection_status)
   import.tf            # Import blocks for existing resources

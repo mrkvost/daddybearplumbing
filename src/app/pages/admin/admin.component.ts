@@ -62,13 +62,28 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   /**
    * Set of areas whose latest admin edits haven't been baked into the prerendered
-   * HTML yet (hero/OG/about images, locations). Lights up the yellow badge on the
-   * Rebuild icon and drives the "Changes pending in:" list on the Rebuild tab.
-   * Persisted in sessionStorage so it survives tab navigation; cleared automatically
-   * when a rebuild completes successfully.
+   * HTML yet (hero/OG/about images, locations). Drives the yellow badge on the
+   * Rebuild icon and the "Changes pending in:" list on the Rebuild tab.
+   *
+   * Source of truth: `gallery-images/admin-pending.json` on S3 — survives cookie /
+   * cache / sessionStorage clears and is consistent across browsers and devices.
+   * sessionStorage is a fast-read cache; S3 is fetched on init and updated on every
+   * mark/clear. Deleted after a successful rebuild.
    */
   private pendingSet = new Set<string>();
   private readonly REBUILD_NEEDED_KEY = 'admin-rebuild-pending';
+  private readonly REBUILD_NEEDED_S3_KEY = 'gallery-images/admin-pending.json';
+
+  /**
+   * Snapshot of what was last *published* (baked into the prerendered HTML).
+   * Updated when a rebuild reaches SUCCEEDED. Each save compares its area's
+   * current value against this baseline to decide mark vs unmark — so an
+   * add+delete that returns the data to its published state correctly clears
+   * the pending badge instead of permanently signalling.
+   */
+  private baseline: { hero?: string; og?: string; about?: string; locations?: string; updatedAt?: string } = {};
+  private baselineLoaded = false;
+  private readonly BASELINE_S3_KEY = 'gallery-images/admin-baseline.json';
 
   get rebuildNeeded(): boolean {
     return this.pendingSet.size > 0;
@@ -78,29 +93,114 @@ export class AdminComponent implements OnInit, OnDestroy {
     return [...this.pendingSet].sort();
   }
 
-  private loadRebuildNeeded(): void {
+  private async loadRebuildNeeded(): Promise<void> {
     if (!this.isBrowser) return;
+    // First: hydrate from sessionStorage for an instant first paint.
     try {
       const raw = sessionStorage.getItem(this.REBUILD_NEEDED_KEY);
-      if (!raw) return;
-      const arr = JSON.parse(raw);
-      if (Array.isArray(arr)) {
-        this.pendingSet = new Set(arr.filter((x): x is string => typeof x === 'string'));
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) {
+          this.pendingSet = new Set(arr.filter((x): x is string => typeof x === 'string'));
+        }
       }
     } catch { /* malformed cache — ignore */ }
+    // Then: replace with the authoritative copy from S3.
+    try {
+      const data = await this.uploadService.getJson<{ areas?: string[] }>(this.REBUILD_NEEDED_S3_KEY, GALLERY_BUCKET);
+      this.pendingSet = new Set(Array.isArray(data?.areas) ? data.areas.filter((x): x is string => typeof x === 'string') : []);
+      this.writeSessionCache();
+      this.cdr.detectChanges();
+    } catch {
+      // 403/404 means no pending file → nothing to merge. Network failure → keep cache.
+    }
   }
 
-  /** Call after any admin mutation that the public site reads at build time. */
+  /** Call after any admin mutation the public site reads at build time. */
   markRebuildNeeded(area: string): void {
     this.pendingSet.add(area);
-    if (this.isBrowser) {
-      sessionStorage.setItem(this.REBUILD_NEEDED_KEY, JSON.stringify([...this.pendingSet]));
+    this.writeSessionCache();
+    this.persistPending();
+  }
+
+  /**
+   * Diff the current value of a tracked area against the last-published baseline
+   * and add it to / remove it from the pending set accordingly. Falls back to
+   * marking pending if the baseline hasn't loaded yet (safe default).
+   */
+  private reconcilePendingArea(area: 'Hero image' | 'OG image' | 'About image' | 'Locations'): void {
+    if (!this.baselineLoaded) {
+      this.markRebuildNeeded(area);
+      return;
     }
+    let matches = false;
+    switch (area) {
+      case 'Hero image':
+        matches = (this.siteMeta.hero ?? null) === (this.baseline.hero ?? null);
+        break;
+      case 'OG image':
+        matches = (this.siteMeta.og ?? null) === (this.baseline.og ?? null);
+        break;
+      case 'About image':
+        matches = (this.siteMeta.about ?? null) === (this.baseline.about ?? null);
+        break;
+      case 'Locations':
+        matches = JSON.stringify(this.locations) === (this.baseline.locations ?? null);
+        break;
+    }
+    if (matches) {
+      this.pendingSet.delete(area);
+    } else {
+      this.pendingSet.add(area);
+    }
+    this.writeSessionCache();
+    this.persistPending();
+  }
+
+  private currentBaselineSnapshot() {
+    return {
+      hero: this.siteMeta.hero,
+      og: this.siteMeta.og,
+      about: this.siteMeta.about,
+      locations: JSON.stringify(this.locations),
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  private async loadBaseline(): Promise<void> {
+    if (!this.isBrowser) return;
+    try {
+      this.baseline = await this.uploadService.getJson(this.BASELINE_S3_KEY, GALLERY_BUCKET, { cacheBypass: true });
+    } catch {
+      // No baseline yet — first rebuild SUCCEEDED will create it.
+      this.baseline = {};
+    }
+    this.baselineLoaded = true;
   }
 
   clearRebuildNeeded(): void {
     this.pendingSet.clear();
     if (this.isBrowser) sessionStorage.removeItem(this.REBUILD_NEEDED_KEY);
+    this.persistPending(); // best-effort delete
+  }
+
+  private writeSessionCache(): void {
+    if (!this.isBrowser) return;
+    try {
+      sessionStorage.setItem(this.REBUILD_NEEDED_KEY, JSON.stringify([...this.pendingSet]));
+    } catch { /* quota / safari private — ignore */ }
+  }
+
+  /** Fire-and-forget. S3 writes shouldn't block UI; failures fall back to local cache. */
+  private persistPending(): void {
+    if (!this.isBrowser) return;
+    const op = this.pendingSet.size === 0
+      ? this.uploadService.delete(this.REBUILD_NEEDED_S3_KEY, GALLERY_BUCKET)
+      : this.uploadService.putJson(this.REBUILD_NEEDED_S3_KEY, {
+          areas: [...this.pendingSet],
+          updatedAt: new Date().toISOString(),
+        }, GALLERY_BUCKET);
+    op.catch(e => console.warn('Pending-changes persistence failed', e));
   }
 
   /* Pagination */
@@ -196,6 +296,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.loadLatestRebuild();
     this.loadDashboard();
     this.loadRebuildNeeded();
+    this.loadBaseline();
   }
 
   async loadDashboard(): Promise<void> {
@@ -833,7 +934,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       }
       this.siteMeta.hero = newName;
       await this.saveMeta();
-      this.markRebuildNeeded('Hero image');
+      this.reconcilePendingArea('Hero image');
       this.heroImageUrl = `${this.META_PREFIX}${newName}`;
       this.heroSuccess = true;
     } catch (e: any) {
@@ -856,7 +957,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       }
       delete this.siteMeta.hero;
       await this.saveMeta();
-      this.markRebuildNeeded('Hero image');
+      this.reconcilePendingArea('Hero image');
       // Re-fetch from server to confirm deletion persisted
       await this.loadSiteImages();
     } catch (e: any) {
@@ -904,7 +1005,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       }
       this.siteMeta.about = newName;
       await this.saveMeta();
-      this.markRebuildNeeded('About image');
+      this.reconcilePendingArea('About image');
       this.aboutImageUrl = `${this.META_PREFIX}${newName}`;
       this.aboutImageSuccess = true;
     } catch (e: any) {
@@ -927,7 +1028,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       }
       delete this.siteMeta.about;
       await this.saveMeta();
-      this.markRebuildNeeded('About image');
+      this.reconcilePendingArea('About image');
       await this.loadSiteImages();
     } catch (e: any) {
       this.aboutImageError = e.message || 'Delete failed';
@@ -956,7 +1057,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       }
       this.siteMeta.og = newName;
       await this.saveMeta();
-      this.markRebuildNeeded('OG image');
+      this.reconcilePendingArea('OG image');
       this.ogImageUrl = `${this.META_PREFIX}${newName}`;
       this.ogSuccess = true;
     } catch (e: any) {
@@ -976,7 +1077,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       }
       delete this.siteMeta.og;
       await this.saveMeta();
-      this.markRebuildNeeded('OG image');
+      this.reconcilePendingArea('OG image');
       this.ogImageUrl = null;
     } catch (e: any) {
       this.ogError = e.message || 'Delete failed';
@@ -1096,7 +1197,7 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   private async saveLocations(): Promise<void> {
     await this.uploadService.putJson(this.LOC_KEY, this.locations, GALLERY_BUCKET);
-    this.markRebuildNeeded('Locations');
+    this.reconcilePendingArea('Locations');
   }
 
   /* ================================================================
@@ -1952,6 +2053,11 @@ export class AdminComponent implements OnInit, OnDestroy {
         this.stopRebuildPolling();
         this.rebuildBusy = false;
         if (build && build.status === 'SUCCEEDED') {
+          // What's in S3 right now is what just got baked into the new prerender.
+          this.baseline = this.currentBaselineSnapshot();
+          this.baselineLoaded = true;
+          this.uploadService.putJson(this.BASELINE_S3_KEY, this.baseline, GALLERY_BUCKET)
+            .catch(e => console.warn('Baseline persistence failed', e));
           this.clearRebuildNeeded();
         }
       }

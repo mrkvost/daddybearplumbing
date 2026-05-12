@@ -71,7 +71,7 @@ export class UploadService {
     }
   }
 
-  async getJson<T>(filename: string, bucket: string): Promise<T> {
+  async getJson<T>(filename: string, bucket: string, opts?: { cacheBypass?: boolean }): Promise<T> {
     const credentials = await this.auth.getCredentials();
     const host = `${bucket}.s3.${this.region}.amazonaws.com`;
     const bodyHash = await this.sha256Hex(new Uint8Array(0));
@@ -83,7 +83,7 @@ export class UploadService {
       'x-amz-security-token': credentials.sessionToken,
     };
 
-    const response = await this.signedRequest('GET', host, filename, headers, bodyHash, credentials);
+    const response = await this.signedRequest('GET', host, filename, headers, bodyHash, credentials, undefined, opts?.cacheBypass);
     if (!response.ok) {
       throw new Error(`Get failed: ${response.status} ${await response.text()}`);
     }
@@ -118,6 +118,7 @@ export class UploadService {
     headers: Record<string, string>, bodyHash: string,
     credentials: { accessKeyId: string; secretAccessKey: string; sessionToken: string },
     body?: ArrayBuffer,
+    cacheBypass?: boolean,
   ): Promise<Response> {
     const dateStamp = headers['x-amz-date'];
     const shortDate = dateStamp.substring(0, 8);
@@ -146,6 +147,9 @@ export class UploadService {
       method,
       headers: { ...headers, 'Authorization': authorization },
       body: body ?? undefined,
+      // Force revalidation when the caller needs the freshest copy
+      // (e.g. dashboard snapshot after a manual Lambda invoke).
+      cache: cacheBypass ? 'no-cache' : 'default',
     });
   }
 

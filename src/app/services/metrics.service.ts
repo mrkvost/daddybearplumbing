@@ -75,7 +75,11 @@ export class MetricsService {
 
   /** Fetches fresh snapshot from S3 and updates cache. */
   async fetch(): Promise<DashboardSnapshot> {
-    const snapshot = await this.uploadService.getJson<DashboardSnapshot>(KEY, this.bucket);
+    // cacheBypass: the snapshot JSON has Cache-Control: max-age=300 from the Lambda,
+    // so without this the browser HTTP cache serves a stale copy for up to 5 minutes
+    // after the Lambda re-runs. no-cache makes the browser do a conditional GET
+    // (cheap when unchanged, fresh when changed).
+    const snapshot = await this.uploadService.getJson<DashboardSnapshot>(KEY, this.bucket, { cacheBypass: true });
     if (this.isBrowser) {
       try {
         sessionStorage.setItem(CACHE_KEY, JSON.stringify({ savedAt: Date.now(), snapshot }));

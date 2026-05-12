@@ -1,7 +1,12 @@
 # Admin Dashboard — Daily Metrics Snapshot
 
 **Date:** 2026-05-07
-**Status:** Plan only, not yet implemented.
+**Status:** **IMPLEMENTED** (2026-05-12). Schema is at v4. See the matching `[x]` entry
+in `docs/TODO.md` for the as-built shape and any deviations from this plan
+(notably: the Lambda is a single flat `metrics_snapshot.py` rather than the multi-file
+layout, matching the existing `contact_form.py` / `trigger_rebuild.py` style; schema
+gained `cloudfront.totalErrorRate`, `cloudfront.errorsTotal`, `contactForm.series`
++ `errorsSeries`, full `rebuilds` block, and Cost Explorer forecast fields).
 **Decision recap:**
 - Daily snapshot pattern (not live proxy) — admin loads a static JSON, instant render
 - Run once per day at **04:00 America/Chicago** via EventBridge Scheduler (timezone-aware → no DST drift)
