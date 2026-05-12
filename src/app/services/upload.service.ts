@@ -19,7 +19,12 @@ export class UploadService {
     const body = await file.arrayBuffer();
     const bodyHash = await this.sha256Hex(new Uint8Array(body));
 
+    // All upload() callers write content-hashed image filenames (hero-<hash>.jpg,
+    // card-<hash>.jpg, gallery photos, …), so the URL itself is the cache key and
+    // the object can be cached forever. JSON manifests go through putJson() and
+    // intentionally don't get this header.
     const headers: Record<string, string> = {
+      'cache-control': 'public, max-age=31536000, immutable',
       'host': host,
       'x-amz-content-sha256': bodyHash,
       'x-amz-date': this.amzDate(),
