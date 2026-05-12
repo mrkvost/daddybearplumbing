@@ -247,12 +247,19 @@ admin user creation, gallery photo convention, project structure.
 - [x] Session persistence (tokens in sessionStorage + auto-refresh)
 - [x] Google Maps: update to real business coordinates
 - [ ] Google Business Profile link on map/address
-- [ ] Investigate whether a **service worker** would help — offline shell, faster repeat
-      visits, background sync for the contact form, push notifications, or precaching the
-      prerendered route HTML + JS bundles. Angular has `@angular/service-worker` (PWA
-      schematic) that integrates with the build. Outcome of the investigation should be:
-      either a recommendation with concrete wins (LCP / repeat-load numbers, what gets
-      cached, what doesn't) or a documented "not worth it" with reasons.
+- [x] Investigated **service worker / PWA** — decided **not worth it** for this site.
+      Visitor profile is one-time / low-frequency lookups whose primary CTA is the call
+      button (no-internet failure mode = call, not "wait to retry contact form"), and
+      the site is already well-optimized: SSG with 15 prerendered routes, hashed JS
+      bundles cached forever by CloudFront, `fetchpriority="high"` on the hero LCP
+      image, `font-display: optional` on Public Sans so the fallback never swaps.
+      A service worker would add real costs — SW update / versioning story, stale-cache
+      debugging, iOS Safari quirks, admin-area exclusion (admin relies on live S3
+      fetches and would be silently masked by a SW cache) — for marginal LCP gains on
+      repeat visits the HTTP cache already covers. The one borderline case
+      (background-sync queueing for offline contact-form submits) is a tiny slice of
+      visitors and adds queue/retry logic that has to be tested per-browser. Revisit
+      if site usage shifts toward returning visitors (e.g. customer portal, dashboard).
 - [x] **"Pending changes — rebuild needed" indicator in admin.** Implemented as a new
       `rebuild` tab in admin (the old "Rebuild Site" card was extracted from the Dashboard
       tab) and an icon button left of the Settings cog (inline SVG of
