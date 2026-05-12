@@ -26,8 +26,8 @@ phases:
 
   post_build:
     commands:
-      - aws s3 sync dist/daddy-bear-plumbing/browser/ "s3://${BUCKET_NAME}/" --delete
-      - aws cloudfront create-invalidation --distribution-id "${CLOUDFRONT_DIST_ID}" --paths "/*"
+      # Layered upload + CloudFront invalidation. Shared with the local deploy.sh.
+      - bash scripts/publish.sh
 
 artifacts:
   files:
