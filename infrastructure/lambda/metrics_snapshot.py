@@ -40,10 +40,12 @@ s3 = boto3.client("s3")
 
 
 def handler(event, context):
-    # Use today (start-of-day in Chicago) as the exclusive end of the window.
-    # Every daily series in the snapshot covers the 30 days ending yesterday-Chicago.
+    # Use tomorrow (start-of-day in Chicago) as the exclusive end of the window,
+    # so the 30-day series covers the 30 days ending *today* (today included).
+    # CloudWatch will simply return partial data for today since the day isn't over
+    # yet — the right behaviour for a snapshot that may be re-invoked on demand.
     now_chicago = datetime.now(CHICAGO)
-    end_chicago = now_chicago.replace(hour=0, minute=0, second=0, microsecond=0)
+    end_chicago = (now_chicago + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
     end = end_chicago.astimezone(timezone.utc)
     start_30d = end - timedelta(days=SERIES_30D_DAYS)
 
