@@ -227,6 +227,29 @@ admin user creation, gallery photo convention, project structure.
 - [x] Session persistence (tokens in sessionStorage + auto-refresh)
 - [x] Google Maps: update to real business coordinates
 - [ ] Google Business Profile link on map/address
+- [ ] Investigate whether a **service worker** would help — offline shell, faster repeat
+      visits, background sync for the contact form, push notifications, or precaching the
+      prerendered route HTML + JS bundles. Angular has `@angular/service-worker` (PWA
+      schematic) that integrates with the build. Outcome of the investigation should be:
+      either a recommendation with concrete wins (LCP / repeat-load numbers, what gets
+      cached, what doesn't) or a documented "not worth it" with reasons.
+- [ ] **"Pending changes — rebuild needed" indicator in admin.** Any admin action that
+      mutates content the public site reads at build time (hero image, OG image, about
+      image, locations, service/construction cards, FAQ, albums, etc.) should set a
+      "dirty" flag. Surface that as an icon to the left of the Settings cog, visible on
+      every admin tab. Clicking opens a small panel listing what changed and offers a
+      "Rebuild now" button (same call as Dashboard → Rebuild Site). Clears once a
+      successful rebuild completes. Storage: probably a `pending-rebuild.json` in the
+      gallery bucket (last-mutation timestamp) compared against the latest CodeBuild
+      `endTime`; or just sessionStorage if we accept losing the flag across logins.
+- [ ] **Remove welcome text from Dashboard.** Reclaim that vertical space for the
+      actual metrics + rebuild status block — landing on the dashboard should put the
+      useful info above the fold instead of a greeting.
+- [ ] **Admin documentation page.** New tab (or a `?` icon link) inside admin that
+      walks through each tab's workflow: how to upload hero/OG/about images, edit
+      service & construction cards, manage albums, edit FAQ/locations, trigger a
+      rebuild, what each indicator means. Markdown rendered in-app, content lives in
+      the repo so it stays in sync with code changes.
 
 ---
 
