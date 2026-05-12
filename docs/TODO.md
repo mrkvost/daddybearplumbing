@@ -230,6 +230,31 @@ admin user creation, gallery photo convention, project structure.
       (`outline-variant/60`) with admin's quiet focus (no ring, just `border-primary`). Applied
       across admin, contact, and login (~12 input/textarea/select instances).
       Button styling unification still open if you want one consistent primary/secondary set.
+- [x] Browser cache headers — Lighthouse "Use efficient cache lifetimes" had flagged ~351 KiB
+      missing `Cache-Control`. Fixed end-to-end:
+      - Extracted publish step into `scripts/publish.sh` (shared by `deploy.sh` and CodeBuild
+        `buildspec.yml` so cache strategy lives in one place).
+      - Layered 3-pass upload: `chunk-*.js` / `styles-*.css` / `logo.svg` → `max-age=31536000,
+        immutable` (1y); `fonts/*` → `max-age=2592000` (30d); HTML / sitemap / robots →
+        `max-age=300, must-revalidate` (5min).
+      - Side-fix: the old `deploy.sh` excluded only the root `index.html` from immutable
+        caching, so the prerendered nested `*/index.html` files were wrongly being tagged
+        for a year. Now they get the short cache like the root.
+      - `UploadService.upload()` sets `Cache-Control: public, max-age=31536000, immutable`
+        on every PutObject — safe because every admin-uploaded image is content-hashed
+        (`hero-<hash>.jpg`, `card-<hash>.png`, gallery photos) so the URL is the cache key.
+        `putJson()` deliberately doesn't set it: JSON manifests are runtime data and must
+        stay fresh.
+      - One-shot backfill on existing gallery objects via
+        `aws s3 cp s3://kvaking-gallery/gallery-images/ ... --recursive --metadata-directive
+        REPLACE --exclude "*.json"` followed by per-extension `--content-type` passes
+        (REPLACE wipes Content-Type, had to re-set image/jpeg, image/png, image/svg+xml)
+        and a CloudFront invalidation for `/gallery-images/*`.
+- [x] Dashboard "today" inclusion — `metrics_snapshot.py` now sets `end` to tomorrow-start
+      (Chicago) instead of today-start, so every 30-day series includes today's
+      partial-day data as the most recent point. Matters when admin manually re-invokes
+      the Lambda from the dashboard during the day; before the change today was always
+      missing.
 - [ ] Unify S3 buckets — currently 3 buckets (site `kvaking`, gallery `kvaking-gallery`, reviews
       `kvaking-reviews`), each with its own bucket policy, CORS, IAM scoping, and CloudFront origin.
       A single bucket with prefixes (`/site/*`, `/gallery-images/*`, `/reviews-data/*`, `/metrics/*`)
