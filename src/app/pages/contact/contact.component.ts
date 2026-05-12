@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectorRef, AfterViewInit, PLATFORM_ID } from '@angular/core';
+import { Component, inject, ChangeDetectorRef, AfterViewInit, OnDestroy, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -17,6 +17,7 @@ declare global {
         theme?: string;
       }) => string;
       reset: (widgetId: string) => void;
+      remove: (widgetId: string) => void;
     };
   }
 }
@@ -27,7 +28,7 @@ declare global {
   imports: [CommonModule, FormsModule],
   templateUrl: './contact.component.html',
 })
-export class ContactComponent implements AfterViewInit {
+export class ContactComponent implements AfterViewInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private sanitizer = inject(DomSanitizer);
   private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
@@ -56,6 +57,13 @@ export class ContactComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     if (this.isBrowser) this.loadTurnstile();
+  }
+
+  ngOnDestroy(): void {
+    if (this.isBrowser && this.widgetId && window.turnstile?.remove) {
+      window.turnstile.remove(this.widgetId);
+      this.widgetId = '';
+    }
   }
 
   private loadTurnstile(): void {
