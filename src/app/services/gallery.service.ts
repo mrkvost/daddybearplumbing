@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 export interface GalleryImage {
   filename: string;
@@ -26,8 +27,10 @@ const IMAGE_EXTENSIONS = /\.(jpg|jpeg|png|webp)$/i;
 
 @Injectable({ providedIn: 'root' })
 export class GalleryService {
+  private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   async listImages(): Promise<GalleryImage[]> {
+    if (!this.isBrowser) return [];
     const response = await fetch(`/gallery-images/gallery.json?t=${Date.now()}`);
     if (!response.ok) throw new Error(`Failed to load gallery: ${response.status}`);
     const entries: GalleryEntry[] = await response.json();
@@ -38,6 +41,7 @@ export class GalleryService {
   }
 
   async listAlbums(): Promise<Album[]> {
+    if (!this.isBrowser) return [];
     try {
       const response = await fetch(`/gallery-images/albums.json?t=${Date.now()}`);
       if (!response.ok) return [];

@@ -1,5 +1,5 @@
-import { Component, inject, ChangeDetectorRef, AfterViewInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, ChangeDetectorRef, AfterViewInit, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
@@ -30,6 +30,7 @@ declare global {
 export class ContactComponent implements AfterViewInit {
   private cdr = inject(ChangeDetectorRef);
   private sanitizer = inject(DomSanitizer);
+  private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   phone = BUSINESS.phone;
   phoneDisplay = BUSINESS.phoneDisplay;
@@ -54,7 +55,7 @@ export class ContactComponent implements AfterViewInit {
   private widgetId = '';
 
   ngAfterViewInit(): void {
-    this.loadTurnstile();
+    if (this.isBrowser) this.loadTurnstile();
   }
 
   private loadTurnstile(): void {
