@@ -58,7 +58,16 @@ export class AdminComponent implements OnInit, OnDestroy {
   dashboardLoading = false;
   dashboardError = '';
 
-  activeTab: 'dashboard' | 'hero' | 'og' | 'about' | 'residential' | 'commercial' | 'construction' | 'gallery' | 'albums' | 'reviews' | 'locations' | 'faq' | 'settings' = 'dashboard';
+  activeTab: 'dashboard' | 'hero' | 'og' | 'about' | 'residential' | 'commercial' | 'construction' | 'gallery' | 'albums' | 'reviews' | 'locations' | 'faq' | 'settings' | 'rebuild' = 'dashboard';
+
+  /**
+   * True when an admin action mutated content the public site reads at build time
+   * (hero/OG/about images, locations, service & construction cards, FAQ, albums…)
+   * and a rebuild hasn't happened since. Used to light up the yellow badge on the
+   * Rebuild icon. Wiring of the actual detection (compare last-mutation vs latest
+   * CodeBuild endTime) is a separate TODO; this stub keeps the UI inert for now.
+   */
+  rebuildNeeded = false;
 
   /* Pagination */
   pageSize = 10;

@@ -52,14 +52,38 @@
       DADDY BEAR PLUMBING
     </a>
     <div class="flex-1 flex justify-end items-center gap-2">
+      <button (click)="activeTab = 'rebuild'"
+        [class.text-primary]="activeTab === 'rebuild'"
+        class="relative p-2 text-secondary hover:text-primary transition-colors"
+        [title]="rebuildNeeded ? 'Rebuild Site — changes pending' : 'Rebuild Site'"
+        aria-label="Rebuild Site">
+        <!-- Inline SVG (Material Symbols Outlined: published_with_changes) — avoids icon-font FOUT. -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor"
+          class="w-6 h-6" aria-hidden="true">
+          <path d="M440-82q-76-8-141.5-41.5t-114-87Q136-264 108-333T80-480q0-91 36.5-168T216-780h-96v-80h240v240h-80v-109q-55 44-87.5 108.5T160-480q0 123 80.5 212.5T440-163v81Zm-17-214L254-466l56-56 113 113 227-227 56 57-283 283Zm177 196v-240h80v109q55-45 87.5-109T800-480q0-123-80.5-212.5T520-797v-81q152 15 256 128t104 270q0 91-36.5 168T744-180h96v80H600Z"/>
+        </svg>
+        @if (rebuildNeeded) {
+          <span class="absolute top-0 right-0 -translate-y-0.5 translate-x-0.5 flex items-center justify-center w-3.5 h-3.5 bg-yellow-400 text-black rounded-full text-[0.55rem] font-black leading-none"
+            aria-label="Changes pending — rebuild required">!</span>
+        }
+      </button>
       <button (click)="activeTab = 'settings'"
         [class.text-primary]="activeTab === 'settings'"
-        class="p-2 text-secondary hover:text-primary transition-colors" title="Settings">
-        <span class="material-symbols-outlined">settings</span>
+        class="p-2 text-secondary hover:text-primary transition-colors" title="Settings"
+        aria-label="Settings">
+        <!-- Inline SVG (Material Symbols Outlined: settings) — avoids the icon-font FOUT in the top bar. -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor"
+          class="w-6 h-6" aria-hidden="true">
+          <path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z"/>
+        </svg>
       </button>
       <button (click)="signOut()"
         class="bg-primary-fixed text-white px-4 py-3 font-headline font-bold text-xs tracking-tight flex items-center justify-center gap-2 hover:opacity-90 transition-all shrink-0">
-        <span class="material-symbols-outlined text-sm shrink-0">logout</span>
+        <!-- Inline SVG (Material Symbols Outlined: logout) — avoids the icon-font FOUT in the top bar. -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor"
+          class="w-4 h-4 shrink-0" aria-hidden="true">
+          <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"/>
+        </svg>
         <span class="text-center leading-tight">SIGN OUT</span>
       </button>
     </div>
@@ -247,14 +271,27 @@
         } @else if (dashboardLoading) {
           <p class="text-sm text-secondary mb-10">Loading metrics…</p>
         }
+      </div>
+    }
+
+    <!-- ==================== REBUILD TAB ==================== -->
+    @if (activeTab === 'rebuild') {
+      <div>
+        <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-4">Publish</p>
 
         <div class="max-w-2xl">
-          <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-3">Publish</p>
           <h3 class="font-headline font-black text-2xl tracking-tighter uppercase mb-3">Rebuild Site</h3>
           <p class="text-secondary text-sm mb-5">
             Republishes the static site so changes to hero / about / OG images and locations
             are embedded in the HTML for non-JS crawlers. Takes 2–4 minutes.
           </p>
+
+          @if (rebuildNeeded) {
+            <p class="text-sm mb-5 px-4 py-3 border border-yellow-400/60 bg-yellow-400/10 text-on-surface">
+              <span class="font-bold">Changes pending.</span>
+              Recent admin edits have not been published. Trigger a rebuild to make them visible to crawlers and first-paint visitors.
+            </p>
+          }
 
           <button (click)="startRebuild()" [disabled]="rebuildBusy"
             class="bg-primary-fixed text-white px-5 py-3 font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
