@@ -20,6 +20,8 @@ infrastructure/.terraform/
 infrastructure/.terraform.lock.hcl
 infrastructure/*.tfstate*
 infrastructure/lambda/contact_form.zip
+infrastructure/lambda/rebuild_status.zip
+infrastructure/lambda/trigger_rebuild.zip
 
 
 # build files

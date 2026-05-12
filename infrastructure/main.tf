@@ -229,6 +229,32 @@ data "aws_cloudfront_cache_policy" "caching_disabled" {
   name = "Managed-CachingDisabled"
 }
 
+# ---------- CloudFront Function: pretty URLs → index.html ----------
+# S3 with OAC has no directory-index resolution, so we rewrite incoming URIs:
+#   /admin/login          -> /admin/login/index.html
+#   /admin/               -> /admin/index.html
+#   /styles-abc.css       (left alone — already a file)
+# This is what makes the prerendered /admin/index.html and /admin/login/index.html
+# actually get served, instead of falling back to the public home shell.
+
+resource "aws_cloudfront_function" "spa_router" {
+  name    = "${var.project}-spa-router"
+  runtime = "cloudfront-js-2.0"
+  publish = true
+  code    = <<-EOT
+    function handler(event) {
+      var request = event.request;
+      var uri = request.uri;
+      var lastSegment = uri.split('/').pop();
+      if (lastSegment && lastSegment.indexOf('.') !== -1) {
+        return request;
+      }
+      request.uri = uri.charAt(uri.length - 1) === '/' ? uri + 'index.html' : uri + '/index.html';
+      return request;
+    }
+  EOT
+}
+
 # ---------- CloudFront Distribution ----------
 
 resource "aws_cloudfront_distribution" "site" {
@@ -269,6 +295,11 @@ resource "aws_cloudfront_distribution" "site" {
     cached_methods         = ["GET", "HEAD"]
     compress               = true
     cache_policy_id        = data.aws_cloudfront_cache_policy.caching_optimized.id
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.spa_router.arn
+    }
   }
 
   # Gallery JSON manifests (gallery.json, meta.json): no cache so changes are instant

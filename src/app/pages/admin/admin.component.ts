@@ -1,5 +1,5 @@
-import { Component, HostListener, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, HostListener, inject, OnInit, OnDestroy, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Meta } from '@angular/platform-browser';
@@ -48,6 +48,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private meta = inject(Meta);
   private cdr = inject(ChangeDetectorRef);
+  private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   activeTab: 'dashboard' | 'hero' | 'og' | 'about' | 'residential' | 'commercial' | 'construction' | 'gallery' | 'albums' | 'reviews' | 'locations' | 'faq' | 'settings' = 'dashboard';
 
@@ -131,6 +132,7 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.meta.addTag({ name: 'robots', content: 'noindex, nofollow' });
+    if (!this.isBrowser) return; // skip data loads during prerender
     this.loadImages();
     this.loadReviews();
     this.loadSiteImages();
