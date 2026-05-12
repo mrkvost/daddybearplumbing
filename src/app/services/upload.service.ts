@@ -71,6 +71,25 @@ export class UploadService {
     }
   }
 
+  async getJson<T>(filename: string, bucket: string): Promise<T> {
+    const credentials = await this.auth.getCredentials();
+    const host = `${bucket}.s3.${this.region}.amazonaws.com`;
+    const bodyHash = await this.sha256Hex(new Uint8Array(0));
+
+    const headers: Record<string, string> = {
+      'host': host,
+      'x-amz-content-sha256': bodyHash,
+      'x-amz-date': this.amzDate(),
+      'x-amz-security-token': credentials.sessionToken,
+    };
+
+    const response = await this.signedRequest('GET', host, filename, headers, bodyHash, credentials);
+    if (!response.ok) {
+      throw new Error(`Get failed: ${response.status} ${await response.text()}`);
+    }
+    return response.json() as Promise<T>;
+  }
+
   async putJson(filename: string, data: unknown, bucket: string): Promise<void> {
     const credentials = await this.auth.getCredentials();
     const host = `${bucket}.s3.${this.region}.amazonaws.com`;

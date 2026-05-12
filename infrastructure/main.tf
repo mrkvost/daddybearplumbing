@@ -499,6 +499,13 @@ resource "aws_iam_role_policy" "cognito_s3_admin" {
         ]
       },
       {
+        # Admin SPA reads the daily metrics snapshot (written by the
+        # metrics-snapshot Lambda). Read-only; never written from the browser.
+        Effect   = "Allow"
+        Action   = "s3:GetObject"
+        Resource = "${aws_s3_bucket.gallery.arn}/metrics/*"
+      },
+      {
         Effect   = "Allow"
         Action   = "s3:ListBucket"
         Resource = [
@@ -595,7 +602,7 @@ resource "aws_lambda_function" "contact_form" {
   function_name                  = "${var.project}-contact-form"
   role                           = aws_iam_role.contact_lambda.arn
   handler                        = "contact_form.handler"
-  runtime                        = "python3.12"
+  runtime                        = "python3.13"
   timeout                        = 10
   reserved_concurrent_executions = 10
   filename         = data.archive_file.contact_form.output_path
@@ -803,7 +810,7 @@ resource "aws_lambda_function" "rebuild_trigger" {
   function_name                  = "${var.project}-rebuild-trigger"
   role                           = aws_iam_role.rebuild_lambda.arn
   handler                        = "trigger_rebuild.handler"
-  runtime                        = "python3.12"
+  runtime                        = "python3.13"
   timeout                        = 10
   reserved_concurrent_executions = 2
   filename                       = data.archive_file.rebuild_trigger.output_path
@@ -820,7 +827,7 @@ resource "aws_lambda_function" "rebuild_status" {
   function_name                  = "${var.project}-rebuild-status"
   role                           = aws_iam_role.rebuild_lambda.arn
   handler                        = "rebuild_status.handler"
-  runtime                        = "python3.12"
+  runtime                        = "python3.13"
   timeout                        = 10
   reserved_concurrent_executions = 5
   filename                       = data.archive_file.rebuild_status.output_path
@@ -911,3 +918,145 @@ resource "aws_iam_role_policy" "cognito_invoke_rebuild" {
   })
 }
 
+
+# ---------- Lambda: Daily Metrics Snapshot ----------
+# Runs once per day (04:00 America/Chicago) via EventBridge Scheduler. Reads
+# CloudWatch / SES / Cognito / Cost Explorer and writes
+# metrics/dashboard.json to the gallery bucket. Admin SPA fetches that file
+# via Cognito temp credentials (read-only — see cognito_s3_admin policy).
+
+data "archive_file" "metrics_snapshot" {
+  type        = "zip"
+  source_file = "${path.module}/lambda/metrics_snapshot.py"
+  output_path = "${path.module}/lambda/metrics_snapshot.zip"
+}
+
+resource "aws_iam_role" "metrics_snapshot_lambda" {
+  name = "${var.project}-metrics-snapshot-lambda"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "lambda.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "metrics_snapshot_logs" {
+  role       = aws_iam_role.metrics_snapshot_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy" "metrics_snapshot_perms" {
+  name = "${var.project}-metrics-snapshot"
+  role = aws_iam_role.metrics_snapshot_lambda.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        # CloudWatch GetMetricData/Statistics doesn't support resource-level scoping.
+        Effect   = "Allow"
+        Action   = ["cloudwatch:GetMetricStatistics", "cloudwatch:GetMetricData"]
+        Resource = "*"
+      },
+      {
+        # Cost Explorer is account-scoped; no resource-level permissions.
+        Effect   = "Allow"
+        Action   = ["ce:GetCostAndUsage", "ce:GetCostForecast"]
+        Resource = "*"
+      },
+      {
+        # CodeBuild rebuild history feeds the rebuilds-per-day chart.
+        Effect   = "Allow"
+        Action   = ["codebuild:ListBuildsForProject", "codebuild:BatchGetBuilds"]
+        Resource = aws_codebuild_project.site.arn
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["ses:GetSendStatistics"]
+        Resource = "*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["cognito-idp:ListUsers"]
+        Resource = aws_cognito_user_pool.admin.arn
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["s3:PutObject"]
+        Resource = "${aws_s3_bucket.gallery.arn}/metrics/*"
+      },
+    ]
+  })
+}
+
+resource "aws_lambda_function" "metrics_snapshot" {
+  function_name    = "${var.project}-metrics-snapshot"
+  role             = aws_iam_role.metrics_snapshot_lambda.arn
+  handler          = "metrics_snapshot.handler"
+  runtime          = "python3.13"
+  timeout          = 60
+  memory_size      = 256
+  filename         = data.archive_file.metrics_snapshot.output_path
+  source_code_hash = data.archive_file.metrics_snapshot.output_base64sha256
+
+  environment {
+    variables = {
+      GALLERY_BUCKET    = aws_s3_bucket.gallery.id
+      DISTRIBUTION_ID   = aws_cloudfront_distribution.site.id
+      CONTACT_FN        = aws_lambda_function.contact_form.function_name
+      USER_POOL_ID      = aws_cognito_user_pool.admin.id
+      COGNITO_REGION    = var.region
+      SES_REGION        = var.region
+      CODEBUILD_PROJECT = aws_codebuild_project.site.name
+    }
+  }
+}
+
+# EventBridge Scheduler invokes the Lambda once per day. America/Chicago so DST is handled.
+resource "aws_iam_role" "metrics_scheduler" {
+  name = "${var.project}-metrics-scheduler"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "scheduler.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "metrics_scheduler_invoke" {
+  name = "${var.project}-metrics-scheduler-invoke"
+  role = aws_iam_role.metrics_scheduler.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = "lambda:InvokeFunction"
+      Resource = aws_lambda_function.metrics_snapshot.arn
+    }]
+  })
+}
+
+resource "aws_scheduler_schedule" "metrics_snapshot_daily" {
+  name        = "${var.project}-metrics-snapshot-daily"
+  group_name  = "default"
+
+  flexible_time_window {
+    mode = "OFF"
+  }
+
+  schedule_expression          = "cron(0 4 * * ? *)"
+  schedule_expression_timezone = "America/Chicago"
+
+  target {
+    arn      = aws_lambda_function.metrics_snapshot.arn
+    role_arn = aws_iam_role.metrics_scheduler.arn
+  }
+}

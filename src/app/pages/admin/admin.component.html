@@ -133,10 +133,122 @@
     @if (activeTab === 'dashboard') {
       <div>
         <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-4">Dashboard</p>
-        <h2 class="font-headline font-black text-3xl tracking-tighter uppercase mb-4">Welcome</h2>
-        <p class="text-secondary text-sm mb-10">Use the navigation above to manage site content.</p>
 
-        <div class="border-t border-outline-variant/40 pt-8 max-w-2xl">
+        @if (dashboardError && !dashboard) {
+          <p class="text-sm text-error mb-6">{{ dashboardError }}</p>
+        }
+
+        @if (dashboard) {
+          <!-- Sparklines: requests + contact form + rebuilds -->
+          <div class="grid md:grid-cols-3 gap-3 mb-6">
+            <div class="ghost-border p-4">
+              <p class="text-[0.6rem] font-bold tracking-[0.25em] uppercase text-secondary mb-2">CF requests · 30 days</p>
+              <div class="h-16 text-primary">
+                <app-sparkline
+                  [points]="dashboard.cloudfront.requests.series"
+                  [overlayPoints]="dashboard.cloudfront.errorsTotal?.series ?? []"
+                  label="Daily CloudFront requests with errors overlay" />
+              </div>
+              <p class="text-[0.65rem] text-secondary mt-2">
+                {{ dashboard.cloudfront.requests.total30d | number }} requests ·
+                <span class="text-error">{{ (dashboard.cloudfront.errorsTotal?.total30d ?? 0) | number }} errors</span>
+              </p>
+            </div>
+            <div class="ghost-border p-4">
+              <p class="text-[0.6rem] font-bold tracking-[0.25em] uppercase text-secondary mb-2">Contact form · 30 days</p>
+              <div class="h-16 text-primary">
+                <app-sparkline
+                  [points]="dashboard.contactForm.series"
+                  [overlayPoints]="dashboard.contactForm.errorsSeries"
+                  label="Daily contact form invocations with errors overlay" />
+              </div>
+              <p class="text-[0.65rem] text-secondary mt-2">
+                {{ dashboard.contactForm.invocations30d }} submissions ·
+                <span class="text-error">{{ dashboard.contactForm.errors30d }} errors</span>
+              </p>
+            </div>
+            <div class="ghost-border p-4">
+              <p class="text-[0.6rem] font-bold tracking-[0.25em] uppercase text-secondary mb-2">Rebuilds · 30 days</p>
+              <div class="h-16 text-primary">
+                <app-sparkline
+                  [points]="dashboard.rebuilds.series"
+                  [overlayPoints]="dashboard.rebuilds.failedSeries"
+                  label="Daily rebuild runs with failures overlay" />
+              </div>
+              <p class="text-[0.65rem] text-secondary mt-2">
+                {{ dashboard.rebuilds.total30d }} total · {{ dashboard.rebuilds.succeeded30d }} ok ·
+                <span class="text-error">{{ dashboard.rebuilds.failed30d }} failed</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Cost + activity -->
+          <div class="grid md:grid-cols-2 gap-3 mb-10">
+            <div class="ghost-border p-4">
+              <p class="text-[0.6rem] font-bold tracking-[0.25em] uppercase text-secondary mb-2">Cost · month-to-date</p>
+              <p class="font-headline font-black text-2xl tracking-tighter">${{ dashboard.cost.monthToDate.toFixed(2) }}</p>
+              <p class="text-[0.65rem] text-secondary mb-3">Previous month: ${{ dashboard.cost.previousMonth.toFixed(2) }}</p>
+
+              @if (dashboard.cost.forecastEndOfMonth != null) {
+                <p class="text-[0.6rem] font-bold tracking-[0.25em] uppercase text-secondary mb-1">Forecast · end of month</p>
+                <p class="font-body text-sm">${{ dashboard.cost.forecastEndOfMonth.toFixed(2) }}
+                  @if (dashboard.cost.forecastLower != null && dashboard.cost.forecastUpper != null) {
+                    <span class="text-secondary text-xs">
+                      (range ${{ (dashboard.cost.monthToDate + dashboard.cost.forecastLower).toFixed(2) }} – ${{ (dashboard.cost.monthToDate + dashboard.cost.forecastUpper).toFixed(2) }})
+                    </span>
+                  }
+                </p>
+              }
+
+              @if (dashboard.cost.topServices.length) {
+                <div class="border-t border-outline-variant/40 mt-3 pt-3 space-y-1">
+                  @for (s of dashboard.cost.topServices; track s.service) {
+                    <div class="flex justify-between text-xs">
+                      <span class="text-secondary">{{ s.service }}</span>
+                      <span class="font-mono">${{ s.monthToDate.toFixed(2) }}</span>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="ghost-border p-4">
+              <p class="text-[0.6rem] font-bold tracking-[0.25em] uppercase text-secondary mb-2">Activity · 30 days</p>
+              <div class="space-y-1.5 text-xs">
+                <div class="flex justify-between">
+                  <span class="text-secondary">SES sends</span>
+                  <span class="font-mono">{{ dashboard.ses.sends30d }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-secondary">SES bounces</span>
+                  <span class="font-mono">{{ dashboard.ses.bounces30d }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-secondary">SES complaints</span>
+                  <span class="font-mono">{{ dashboard.ses.complaints30d }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-secondary">Admin users</span>
+                  <span class="font-mono">{{ dashboard.cognito.userCount }}</span>
+                </div>
+              </div>
+
+              @if (dashboard.rebuilds.lastBuild) {
+                <div class="border-t border-outline-variant/40 mt-3 pt-3">
+                  <p class="text-[0.6rem] font-bold tracking-[0.25em] uppercase text-secondary mb-1">Latest rebuild</p>
+                  <p class="text-xs font-mono">#{{ dashboard.rebuilds.lastBuild.buildNumber }} · {{ dashboard.rebuilds.lastBuild.status }}</p>
+                  <p class="text-[0.65rem] text-secondary">{{ dashboard.rebuilds.lastBuild.startedAt | date:'short' }}</p>
+                </div>
+              }
+            </div>
+          </div>
+
+          <p class="text-[0.65rem] text-secondary mb-8">Snapshot generated {{ dashboard.generatedAt | date:'short' }} {{ dashboard.generatedAt | date:'zzz' }}</p>
+        } @else if (dashboardLoading) {
+          <p class="text-sm text-secondary mb-10">Loading metrics…</p>
+        }
+
+        <div class="max-w-2xl">
           <p class="text-[0.7rem] font-bold tracking-[0.3em] uppercase text-secondary mb-3">Publish</p>
           <h3 class="font-headline font-black text-2xl tracking-tighter uppercase mb-3">Rebuild Site</h3>
           <p class="text-secondary text-sm mb-5">

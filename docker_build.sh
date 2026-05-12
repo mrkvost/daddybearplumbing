@@ -5,5 +5,5 @@
 docker run --rm \
   -v "$(pwd)":/app \
   -w /app \
-  node:22-alpine \
+  node:24-alpine \
   sh -c "node scripts/generate-seo.js && npm install && npm run build"

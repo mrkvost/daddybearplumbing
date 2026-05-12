@@ -8,9 +8,11 @@ import { UploadService } from '../../services/upload.service';
 import { GalleryService, GalleryImage, GalleryEntry, Album } from '../../services/gallery.service';
 import { Review } from '../../services/reviews.service';
 import { RebuildService, BuildSummary } from '../../services/rebuild.service';
+import { MetricsService, DashboardSnapshot } from '../../services/metrics.service';
 import { environment } from '../../../environments/environment';
 import { BUSINESS } from '../../globals';
 import { HeroComponent } from '../../components/hero/hero.component';
+import { SparklineComponent } from '../../components/sparkline/sparkline.component';
 import { SITE_DATA } from '../../../environments/site-data';
 
 interface AdminGalleryImage extends GalleryImage {
@@ -37,7 +39,7 @@ const REGION = environment.aws.region;
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeroComponent, RouterLink],
+  imports: [CommonModule, FormsModule, HeroComponent, RouterLink, SparklineComponent],
   templateUrl: './admin.component.html',
 })
 export class AdminComponent implements OnInit, OnDestroy {
@@ -45,10 +47,16 @@ export class AdminComponent implements OnInit, OnDestroy {
   private uploadService = inject(UploadService);
   private galleryService = inject(GalleryService);
   private rebuildService = inject(RebuildService);
+  private metricsService = inject(MetricsService);
   private router = inject(Router);
   private meta = inject(Meta);
   private cdr = inject(ChangeDetectorRef);
   private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+
+  /* Dashboard metrics */
+  dashboard: DashboardSnapshot | null = null;
+  dashboardLoading = false;
+  dashboardError = '';
 
   activeTab: 'dashboard' | 'hero' | 'og' | 'about' | 'residential' | 'commercial' | 'construction' | 'gallery' | 'albums' | 'reviews' | 'locations' | 'faq' | 'settings' = 'dashboard';
 
@@ -143,6 +151,45 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.loadConstruction();
     this.loadAbout();
     this.loadLatestRebuild();
+    this.loadDashboard();
+  }
+
+  async loadDashboard(): Promise<void> {
+    const cached = this.metricsService.readCache();
+    if (cached) {
+      this.dashboard = cached;
+      this.cdr.detectChanges();
+    } else {
+      this.dashboardLoading = true;
+    }
+    try {
+      const fresh = await this.metricsService.fetch();
+      if (!cached || fresh.generatedAt > cached.generatedAt) {
+        this.dashboard = fresh;
+      }
+      this.dashboardError = '';
+    } catch (e) {
+      if (!cached) this.dashboardError = 'Could not load metrics. The daily snapshot may not have generated yet.';
+      console.warn('Dashboard load failed', e);
+    } finally {
+      this.dashboardLoading = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  /** Bytes → human-readable. */
+  fmtBytes(n: number): string {
+    if (!n) return '0 B';
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(n) / Math.log(1024));
+    return `${(n / Math.pow(1024, i)).toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+  }
+
+  /** Format a small fraction (0.0123) as percentage with 1 decimal (1.2%). */
+  fmtPct(n: number): string {
+    if (n == null) return '—';
+    // CloudFront returns these already as percentages, not fractions.
+    return `${n.toFixed(2)}%`;
   }
 
   ngOnDestroy(): void {
