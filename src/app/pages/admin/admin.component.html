@@ -48,10 +48,10 @@
 <header class="bg-surface-container-lowest border-b border-outline-variant/20 w-full">
   <div class="flex flex-row justify-between items-center px-4 py-3 w-full max-w-7xl mx-auto gap-4">
     <div class="flex-1 hidden md:block"></div>
-    <a routerLink="/" class="font-headline tracking-tighter uppercase font-black text-lg md:text-xl text-primary leading-tight hover:opacity-80 transition-opacity">
+    <a routerLink="/" class="font-headline tracking-tighter uppercase font-black text-base md:text-xl text-primary leading-tight hover:opacity-80 transition-opacity min-w-0 truncate">
       DADDY BEAR PLUMBING
     </a>
-    <div class="flex-1 flex justify-end items-center gap-2">
+    <div class="flex-1 flex justify-end items-center gap-1 md:gap-2 shrink-0">
       <button (click)="activeTab = 'rebuild'"
         [class.text-primary]="activeTab === 'rebuild'"
         class="relative p-2 text-secondary hover:text-primary transition-colors"
@@ -78,13 +78,14 @@
         </svg>
       </button>
       <button (click)="signOut()"
-        class="bg-primary-fixed text-white px-4 py-3 font-headline font-bold text-xs tracking-tight flex items-center justify-center gap-2 hover:opacity-90 transition-all shrink-0">
+        class="bg-primary-fixed text-white px-3 py-3 md:px-4 font-headline font-bold text-xs tracking-tight flex items-center justify-center gap-2 hover:opacity-90 transition-all shrink-0"
+        aria-label="Sign out">
         <!-- Inline SVG (Material Symbols Outlined: logout) — avoids the icon-font FOUT in the top bar. -->
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor"
           class="w-4 h-4 shrink-0" aria-hidden="true">
           <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"/>
         </svg>
-        <span class="text-center leading-tight">SIGN OUT</span>
+        <span class="hidden sm:inline text-center leading-tight">SIGN OUT</span>
       </button>
     </div>
   </div>
@@ -146,6 +147,7 @@
     <option value="reviews">Reviews</option>
     <option value="locations">Locations</option>
     <option value="faq">FAQ</option>
+    <option value="rebuild">Rebuild</option>
     <option value="settings">Settings</option>
   </select>
 </nav>
