@@ -287,10 +287,15 @@
           </p>
 
           @if (rebuildNeeded) {
-            <p class="text-sm mb-5 px-4 py-3 border border-yellow-400/60 bg-yellow-400/10 text-on-surface">
-              <span class="font-bold">Changes pending.</span>
-              Recent admin edits have not been published. Trigger a rebuild to make them visible to crawlers and first-paint visitors.
-            </p>
+            <div class="text-sm mb-5 px-4 py-3 border border-yellow-400/60 bg-yellow-400/10 text-on-surface">
+              <p class="mb-1"><span class="font-bold">Changes pending</span> in:</p>
+              <ul class="list-disc list-inside ml-2">
+                @for (change of pendingChanges; track change) {
+                  <li>{{ change }}</li>
+                }
+              </ul>
+              <p class="mt-2 text-secondary">Trigger a rebuild to make these visible to crawlers and first-paint visitors.</p>
+            </div>
           }
 
           <button (click)="startRebuild()" [disabled]="rebuildBusy"

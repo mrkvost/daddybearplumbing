@@ -61,13 +61,47 @@ export class AdminComponent implements OnInit, OnDestroy {
   activeTab: 'dashboard' | 'hero' | 'og' | 'about' | 'residential' | 'commercial' | 'construction' | 'gallery' | 'albums' | 'reviews' | 'locations' | 'faq' | 'settings' | 'rebuild' = 'dashboard';
 
   /**
-   * True when an admin action mutated content the public site reads at build time
-   * (hero/OG/about images, locations, service & construction cards, FAQ, albums…)
-   * and a rebuild hasn't happened since. Used to light up the yellow badge on the
-   * Rebuild icon. Wiring of the actual detection (compare last-mutation vs latest
-   * CodeBuild endTime) is a separate TODO; this stub keeps the UI inert for now.
+   * Set of areas whose latest admin edits haven't been baked into the prerendered
+   * HTML yet (hero/OG/about images, locations). Lights up the yellow badge on the
+   * Rebuild icon and drives the "Changes pending in:" list on the Rebuild tab.
+   * Persisted in sessionStorage so it survives tab navigation; cleared automatically
+   * when a rebuild completes successfully.
    */
-  rebuildNeeded = false;
+  private pendingSet = new Set<string>();
+  private readonly REBUILD_NEEDED_KEY = 'admin-rebuild-pending';
+
+  get rebuildNeeded(): boolean {
+    return this.pendingSet.size > 0;
+  }
+
+  get pendingChanges(): string[] {
+    return [...this.pendingSet].sort();
+  }
+
+  private loadRebuildNeeded(): void {
+    if (!this.isBrowser) return;
+    try {
+      const raw = sessionStorage.getItem(this.REBUILD_NEEDED_KEY);
+      if (!raw) return;
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) {
+        this.pendingSet = new Set(arr.filter((x): x is string => typeof x === 'string'));
+      }
+    } catch { /* malformed cache — ignore */ }
+  }
+
+  /** Call after any admin mutation that the public site reads at build time. */
+  markRebuildNeeded(area: string): void {
+    this.pendingSet.add(area);
+    if (this.isBrowser) {
+      sessionStorage.setItem(this.REBUILD_NEEDED_KEY, JSON.stringify([...this.pendingSet]));
+    }
+  }
+
+  clearRebuildNeeded(): void {
+    this.pendingSet.clear();
+    if (this.isBrowser) sessionStorage.removeItem(this.REBUILD_NEEDED_KEY);
+  }
 
   /* Pagination */
   pageSize = 10;
@@ -161,6 +195,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.loadAbout();
     this.loadLatestRebuild();
     this.loadDashboard();
+    this.loadRebuildNeeded();
   }
 
   async loadDashboard(): Promise<void> {
@@ -744,6 +779,8 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   private async saveMeta(): Promise<void> {
+    // Specific area (Hero/OG/About image) is marked by the caller, since saveMeta
+    // doesn't know which field changed.
     await this.uploadService.putJson(this.META_JSON_KEY, this.siteMeta, GALLERY_BUCKET);
   }
 
@@ -796,6 +833,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       }
       this.siteMeta.hero = newName;
       await this.saveMeta();
+      this.markRebuildNeeded('Hero image');
       this.heroImageUrl = `${this.META_PREFIX}${newName}`;
       this.heroSuccess = true;
     } catch (e: any) {
@@ -818,6 +856,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       }
       delete this.siteMeta.hero;
       await this.saveMeta();
+      this.markRebuildNeeded('Hero image');
       // Re-fetch from server to confirm deletion persisted
       await this.loadSiteImages();
     } catch (e: any) {
@@ -865,6 +904,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       }
       this.siteMeta.about = newName;
       await this.saveMeta();
+      this.markRebuildNeeded('About image');
       this.aboutImageUrl = `${this.META_PREFIX}${newName}`;
       this.aboutImageSuccess = true;
     } catch (e: any) {
@@ -887,6 +927,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       }
       delete this.siteMeta.about;
       await this.saveMeta();
+      this.markRebuildNeeded('About image');
       await this.loadSiteImages();
     } catch (e: any) {
       this.aboutImageError = e.message || 'Delete failed';
@@ -915,6 +956,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       }
       this.siteMeta.og = newName;
       await this.saveMeta();
+      this.markRebuildNeeded('OG image');
       this.ogImageUrl = `${this.META_PREFIX}${newName}`;
       this.ogSuccess = true;
     } catch (e: any) {
@@ -934,6 +976,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       }
       delete this.siteMeta.og;
       await this.saveMeta();
+      this.markRebuildNeeded('OG image');
       this.ogImageUrl = null;
     } catch (e: any) {
       this.ogError = e.message || 'Delete failed';
@@ -980,6 +1023,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.locations.push(loc);
     this.newLocation = '';
     await this.saveLocations();
+    this.showLocationForm = false;
     this.cdr.detectChanges();
   }
 
@@ -1052,6 +1096,7 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   private async saveLocations(): Promise<void> {
     await this.uploadService.putJson(this.LOC_KEY, this.locations, GALLERY_BUCKET);
+    this.markRebuildNeeded('Locations');
   }
 
   /* ================================================================
@@ -1906,6 +1951,9 @@ export class AdminComponent implements OnInit, OnDestroy {
       if (!build || !this.isBuildActive(build.status)) {
         this.stopRebuildPolling();
         this.rebuildBusy = false;
+        if (build && build.status === 'SUCCEEDED') {
+          this.clearRebuildNeeded();
+        }
       }
     } catch (e) {
       console.warn('Rebuild status poll failed', e);
