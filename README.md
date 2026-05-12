@@ -42,6 +42,19 @@ ng serve
 ./deploy.sh          # Sync to S3 + invalidate CloudFront cache
 ```
 
+The build uses Angular's `@angular/ssr` to **prerender every static route** in
+`app.routes.ts` (15 files for the current routes). Each route gets its own
+`<path>/index.html` so the initial paint already contains that page's content —
+no flash of home shell when navigating directly to e.g. `/contact` or `/admin`.
+`angular.json` has `prerender.discoverRoutes: true`; nothing in
+`src/prerender-routes.txt` is needed (file deleted).
+
+S3 + OAC doesn't auto-resolve `/admin/login` to `/admin/login/index.html`, so a
+small CloudFront viewer-request Function (`aws_cloudfront_function.spa_router`)
+rewrites incoming URIs to append `/index.html` for any path without a file
+extension. Without it, every non-root URL falls through to the SPA 403 fallback
+and serves the home shell.
+
 ---
 
 ## Infrastructure Setup (first time)
@@ -185,8 +198,16 @@ provides no API for it.
    ```
 
 After that, **Admin → Dashboard → Rebuild Site** triggers a real CodeBuild run,
-polls for completion every 5 seconds, and republishes + invalidates CloudFront on
+polls for completion every 30 seconds, and republishes + invalidates CloudFront on
 success.
+
+> The Cognito-authenticated IAM role must grant **both** `lambda:InvokeFunctionUrl`
+> and `lambda:InvokeFunction` (the latter scoped with
+> `lambda:InvokedViaFunctionUrl=true`) on the two rebuild Lambdas. AWS started
+> enforcing this dual-permission requirement on Function URLs created after October
+> 2025 — missing the second action returns 403 from the URL even when the first
+> is granted. The Terraform `aws_iam_role_policy.cognito_invoke_rebuild` already
+> sets both.
 
 ---
 
@@ -217,20 +238,26 @@ src/
   app/
     components/        # Reusable UI (navbar, footer, hero, trust-stats, services-grid, service-area)
     pages/             # Route pages (home, gallery, reviews, contact, about, residential, commercial, faq, terms, privacy, cookies, admin, login)
-    services/          # AuthService, UploadService, GalleryService, ReviewsService, CanonicalService
-    guards/            # authGuard (protects /admin)
+    services/          # AuthService, UploadService, GalleryService, ReviewsService, CanonicalService, RebuildService, sigv4
+    guards/            # authGuard (protects /admin, SSR-aware so /admin can prerender)
     app.routes.ts      # Route configuration
     app.ts / app.html  # Root layout shell
-  environments/        # AWS config (Cognito IDs, bucket names, phone number)
+    globals.ts         # BUSINESS const — phone, email, address, domain (used by 16+ files)
+  environments/        # AWS/infra config only (Cognito IDs, bucket names, Function URLs, Turnstile site key)
+                       # — business info lives in src/app/globals.ts
+  main.server.ts       # Angular SSR bootstrap (BootstrapContext, Angular 21 API)
   fonts.css            # Self-hosted @font-face (Public Sans + Inter)
   styles.css           # Tailwind directives + custom utilities
   index.html           # HTML entry point
 infrastructure/
-  main.tf              # All AWS resources (S3 x3, CloudFront, Route53, ACM, Cognito, SES, Lambda)
+  main.tf              # All AWS resources (S3 x3, CloudFront + spa_router Function, Route53, ACM, Cognito, SES, CodeBuild, Lambda x3)
+  buildspec.yml        # CodeBuild spec used by admin-triggered rebuild
   lambda/
     contact_form.py    # Contact form handler (Turnstile + SES)
-  variables.tf         # Input variables
-  outputs.tf           # Terraform outputs
+    trigger_rebuild.py # Starts a CodeBuild run
+    rebuild_status.py  # Reads latest build state
+  variables.tf         # Input variables (incl. github_repo_url, github_branch)
+  outputs.tf           # Terraform outputs (incl. rebuild_trigger_url, rebuild_status_url, github_connection_status)
   import.tf            # Import blocks for existing resources
   bootstrap.sh         # Creates state bucket + lock table
   terraform.tfvars.example

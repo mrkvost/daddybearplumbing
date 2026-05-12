@@ -89,15 +89,29 @@ with some external steps that cannot be automated.
       Public components (Hero, PageHeader, ServiceArea, Contact, CanonicalService) import
       `SITE_DATA` instead of fetching at runtime. Admin keeps live fetches for previewing
       staged uploads. Old `src/app/defaults/locations.ts` removed — single source of truth.
-- [x] Angular SSG app-shell — `@angular/ssr` installed, prerender configured via
-      `src/prerender-routes.txt` (only `/` and `/admin/login`). `main.server.ts` bootstraps
-      with `BootstrapContext` (Angular 21 API); `app.config.server.ts` adds
-      `provideServerRendering()`. `AuthService.loadTokens` / `saveTokens` / `clearTokens`
-      guarded with `isPlatformBrowser`. Result: `dist/.../browser/index.html` contains
-      `<app-navbar>`, `<app-hero>` (with baked-in image URL), and `<app-footer>` server-side;
-      `admin/login/index.html` contains `<app-login>` + footer with no navbar. Page body for
-      other routes is still client-rendered (intentional — cards are dynamic, body content
-      visibility to crawlers is not a concern).
+- [x] Angular SSG full prerender — `@angular/ssr` installed, `angular.json` uses
+      `prerender.discoverRoutes: true` so every static route in `app.routes.ts` gets its
+      own `index.html`. **15 files** generated (`/`, `/about`, `/contact`, `/residential`,
+      `/commercial`, `/construction/interior`, `/construction/exterior`, `/gallery`,
+      `/reviews`, `/faq`, `/terms`, `/privacy`, `/cookies`, `/admin`, `/admin/login`).
+      `main.server.ts` bootstraps with `BootstrapContext` (Angular 21 API);
+      `app.config.server.ts` adds `provideServerRendering()`.
+      SSR-safety guards added so prerender doesn't hang or crash:
+      `AuthService.loadTokens` / `saveTokens` / `clearTokens` skip on server;
+      `authGuard` returns `true` on server so `/admin` prerenders the shell instead of
+      redirecting; `AdminComponent.ngOnInit` skips all data fetches on server;
+      `GalleryService` + `ReviewsService` return empty arrays on server;
+      `ContactComponent.ngAfterViewInit` skips Turnstile widget init on server (also
+      cleans up via `turnstile.remove(widgetId)` on destroy).
+      Companion CloudFront viewer-request Function (`aws_cloudfront_function.spa_router`
+      in `infrastructure/main.tf`) rewrites incoming URIs like `/admin/login` →
+      `/admin/login/index.html` so the prerendered files actually get served (S3 with
+      OAC has no directory-index resolution; without this rewrite every non-root path
+      hits the 403 fallback and serves the home shell, causing a navbar flash before
+      Angular routes client-side).
+      Business info (domain, phone, email, address) moved out of `environment.ts` into
+      `src/app/globals.ts` (`BUSINESS` const) — clean split between business data and
+      AWS/infra config. `generate-seo.js` reads `domain` from `globals.ts`.
 - [x] Self-host Public Sans + Inter fonts (eliminates Google Fonts round-trip for text fonts)
 - [x] Verify Core Web Vitals: Google Maps iframe + gallery thumbnails are `loading="lazy"`;
       hero image is `fetchpriority="high"` + `decoding="async"` to prioritise the LCP element
@@ -166,30 +180,23 @@ admin user creation, gallery photo convention, project structure.
 - [x] Content pages: About Us, Residential Services, Commercial Services, FAQ, Terms, Privacy, Cookies
 - [x] Admin service cards editor (drag-and-drop reorder, add/edit/delete, load defaults)
 - [x] Enhanced footer (5-column layout: brand, services, navigate, information, accreditation with license numbers)
-- [~] Admin-triggered rebuild — code wired up; needs Terraform apply + one-time GitHub
-      CodeStar connection before it can run end-to-end.
-      Wired up:
-      - `buildspec.yml` (repo root) — Node 22, generate-seo.js, npm install, ng build,
+- [x] Admin-triggered rebuild — fully wired end-to-end.
+      - `infrastructure/buildspec.yml` — Node 22, generate-seo.js, npm install, ng build,
         `aws s3 sync` site bucket, `cloudfront create-invalidation`.
       - `infrastructure/lambda/trigger_rebuild.py` + `rebuild_status.py` — start build /
         read CodeBuild state. Function URLs use `AWS_IAM` auth.
-      - `infrastructure/main.tf` — CodeBuild project (GitHub source via CodeStar
-        connection), Lambda function URLs, IAM. Cognito authenticated role gets
-        `lambda:InvokeFunctionUrl` on both URLs.
+      - `infrastructure/main.tf` — CodeBuild project (GitHub source via CodeConnections),
+        Lambda function URLs, IAM. Cognito authenticated role gets **both**
+        `lambda:InvokeFunctionUrl` *and* `lambda:InvokeFunction` (the latter with
+        `lambda:InvokedViaFunctionUrl=true` condition) — AWS started requiring both on
+        Function URLs created after October 2025; missing the second caused 403s.
       - `src/app/services/sigv4.ts` (generic AWS SigV4 signer) + `rebuild.service.ts`
         (start + status polling).
-      - Admin → Dashboard tab → "Rebuild Site" button + status panel (5s poll).
-      Manual steps before first use (full walkthrough in README "Admin-Triggered Rebuild"):
-      1. Set `github_repo_url` + `github_branch` in `infrastructure/terraform.tfvars`.
-      2. `terraform apply` — creates everything, including the GitHub CodeConnections
-         connection (in PENDING state).
-      3. In AWS Console → CodeConnections, click the connection → "Update pending
-         connection" → authorise GitHub + install the AWS Connector app on the repo.
-         Status flips to AVAILABLE.
-      4. `terraform output rebuild_trigger_url rebuild_status_url` → paste into
-         `src/environments/environment.ts`.
-      5. `./docker_build.sh && ./deploy.sh` once locally to bake the URLs into the
-         deployed bundle. After that, admin → Rebuild Site works end-to-end.
+      - Admin → Dashboard tab → "Rebuild Site" button + status panel (30 s poll).
+      One-time setup (full walkthrough in README "Admin-Triggered Rebuild"): set
+      `github_repo_url`/`github_branch`, `terraform apply`, authorise the GitHub
+      `CodeConnections` connection in the AWS console, paste the two Function URLs
+      into `src/environments/environment.ts`, bake + deploy once locally.
 - [ ] Admin dashboard metrics — daily-snapshot Lambda writes `metrics/dashboard.json` to the gallery
       bucket (admin-only path, no CloudFront behavior). EventBridge Scheduler at 04:00 America/Chicago.
       Renders Requests/4xx/5xx/bandwidth sparklines, Cost Explorer month-to-date + top services,
