@@ -351,3 +351,6 @@ admin user creation, gallery photo convention, project structure.
       shows the image (object-cover, hover scale) when present, falls back to a centered 6xl icon
       otherwise. Cards grew h-64 → h-96. Applied to /residential, /commercial industries, and both
       /construction/* pages. Modal still shows the full-size image + description as before.
+
+- should we remove dead code?
+- should we refactor (make parts that repeat re-usable)?

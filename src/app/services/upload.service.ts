@@ -102,7 +102,12 @@ export class UploadService {
     const body = encoded.buffer as ArrayBuffer;
     const bodyHash = await this.sha256Hex(encoded);
 
+    // putJson() writes runtime manifests (gallery.json, meta.json, reviews.json, …)
+    // that the public SPA reads on every page load. `no-cache` makes browsers
+    // revalidate on every fetch — they may still store the bytes and benefit from
+    // 304 responses, but they'll never serve stale data from heuristic caching.
     const headers: Record<string, string> = {
+      'cache-control': 'no-cache',
       'content-type': 'application/json',
       'host': host,
       'x-amz-content-sha256': bodyHash,
