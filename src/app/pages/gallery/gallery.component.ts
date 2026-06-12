@@ -7,7 +7,6 @@ import { BUSINESS } from '../../globals';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 const BATCH_SIZE = 18;
-const FILTERS = ['All', 'Commercial', 'Residential', 'Kitchen', 'Bathroom', 'Heaters'];
 
 interface AlbumCard extends Album {
   photoCount: number;
@@ -30,8 +29,6 @@ export class GalleryComponent implements OnInit, OnDestroy {
   phoneDisplay = BUSINESS.phoneDisplay;
   allImages: GalleryImage[] = [];
   albums: Album[] = [];
-  tags: string[] = FILTERS;
-  activeTag = 'All';
   visibleCount = BATCH_SIZE;
   loading = true;
   error = false;
@@ -63,7 +60,6 @@ export class GalleryComponent implements OnInit, OnDestroy {
         this.currentAlbum = null;
         this.albumNotFound = false;
       }
-      this.activeTag = 'All';
       this.visibleCount = BATCH_SIZE;
       this.cdr.detectChanges();
     });
@@ -92,9 +88,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
     if (this.currentAlbum) {
       return this.allImages.filter(img => img.albumId === this.currentAlbum!.id);
     }
-    if (this.activeTag === 'All') return this.allImages;
-    const needle = this.activeTag.toLowerCase();
-    return this.allImages.filter(img => img.tagLabel.toLowerCase().includes(needle));
+    return this.allImages;
   }
 
   get visibleImages(): GalleryImage[] {
@@ -103,11 +97,6 @@ export class GalleryComponent implements OnInit, OnDestroy {
 
   get hasMore(): boolean {
     return this.visibleCount < this.filteredImages.length;
-  }
-
-  setTag(tag: string): void {
-    this.activeTag = tag;
-    this.visibleCount = BATCH_SIZE;
   }
 
   loadMore(): void {

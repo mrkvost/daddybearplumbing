@@ -31,25 +31,6 @@
   </section>
 }
 
-<!-- Tag filter bar (landing only) -->
-@if (!loading && !error && !currentAlbum && !albumNotFound) {
-  <div class="bg-surface-container-lowest border-b border-outline-variant/20">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex gap-3 overflow-x-auto">
-      @for (tag of tags; track tag) {
-        <button
-          (click)="setTag(tag)"
-          [class]="activeTag === tag
-            ? 'bg-primary text-white'
-            : 'bg-surface-container-low text-secondary hover:bg-surface-container-high'"
-          class="px-4 py-2 text-xs font-headline font-bold uppercase tracking-widest whitespace-nowrap transition-all"
-        >
-          {{ tag }}
-        </button>
-      }
-    </div>
-  </div>
-}
-
 <!-- Loading state -->
 @if (loading) {
   <div class="max-w-7xl mx-auto px-6 py-24 text-center">
@@ -155,17 +136,14 @@
 
     @if (filteredImages.length === 0) {
       <div class="text-center py-16">
-        <span class="material-symbols-outlined text-6xl text-outline-variant mb-4 block">filter_alt_off</span>
+        <span class="material-symbols-outlined text-6xl text-outline-variant mb-4 block">photo_library</span>
         @if (currentAlbum) {
           <p class="text-on-surface font-headline font-bold uppercase mb-4">No photos in this album yet</p>
           <a routerLink="/gallery" class="text-primary-fixed font-headline font-bold text-sm uppercase tracking-widest hover:underline">
             View all albums
           </a>
         } @else {
-          <p class="text-on-surface font-headline font-bold uppercase mb-4">No photos with this tag</p>
-          <button (click)="setTag('All')" class="text-primary-fixed font-headline font-bold text-sm uppercase tracking-widest hover:underline">
-            View all photos
-          </button>
+          <p class="text-on-surface font-headline font-bold uppercase">No photos yet</p>
         }
       </div>
     }
