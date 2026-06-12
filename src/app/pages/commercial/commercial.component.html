@@ -37,7 +37,14 @@
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
     @for (card of services; track card.title) {
       <div class="ghost-border bg-surface-container-low p-6 flex flex-col items-center text-center">
-        <span class="material-symbols-outlined text-3xl text-primary-fixed mb-4">{{ card.icon }}</span>
+        <div class="w-20 h-20 flex items-center justify-center mb-4 overflow-hidden">
+          @if (card.image) {
+            <img [src]="card.image" [alt]="card.title" loading="lazy"
+              class="w-full h-full object-cover" />
+          } @else {
+            <span class="material-symbols-outlined text-5xl text-primary-fixed">{{ card.icon }}</span>
+          }
+        </div>
         <h3 class="font-headline font-bold text-xs uppercase tracking-tight">{{ card.title }}</h3>
       </div>
     }

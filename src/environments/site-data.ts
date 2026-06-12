@@ -9,7 +9,7 @@ export interface SiteData {
 }
 
 export const SITE_DATA: SiteData = {
-  heroImage: "/gallery-images/meta/hero-4f0215.jpg",
+  heroImage: "/gallery-images/meta/hero-003f8c.jpg",
   aboutImage: "/gallery-images/meta/about-029612.png",
   ogImage: "https://kvaking.com/gallery-images/meta/og-c7b3b4.jpg",
   locations: [

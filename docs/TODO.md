@@ -354,3 +354,5 @@ admin user creation, gallery photo convention, project structure.
 
 - should we remove dead code?
 - should we refactor (make parts that repeat re-usable)?
+- rebuilder and metrics as one (with possible parameters?)
+- og-placeholder can be removed (og-<hash> is enough)

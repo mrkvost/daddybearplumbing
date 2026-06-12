@@ -1330,8 +1330,8 @@
           </div>
 
 
-          <!-- Image (optional) — not shown on compact commercial-services or about-why cards -->
-          @if (editingList !== 'commercial-services' && editingList !== 'about-why') {
+          <!-- Image (optional) — not shown on about-why cards -->
+          @if (editingList !== 'about-why') {
             <div class="mb-6">
               <label class="text-[0.65rem] uppercase tracking-widest text-secondary font-bold block mb-2">Image (optional)</label>
 
@@ -1384,7 +1384,14 @@
             @if (editingList === 'commercial-services') {
               <!-- Compact tile (no description, no modal on the public page) -->
               <div class="ghost-border bg-surface-container-lowest p-6 mb-6 mx-auto w-[180px] flex flex-col items-center text-center">
-                <span class="material-symbols-outlined text-3xl text-primary-fixed mb-4">{{ cardForm.icon || 'category' }}</span>
+                <div class="w-20 h-20 flex items-center justify-center mb-4 overflow-hidden">
+                  @if (cardImageStagedPreview || cardForm.image) {
+                    <img [src]="cardImageStagedPreview || cardForm.image" [alt]="cardForm.title || 'Card image'"
+                      class="w-full h-full object-cover" />
+                  } @else {
+                    <span class="material-symbols-outlined text-5xl text-primary-fixed">{{ cardForm.icon || 'category' }}</span>
+                  }
+                </div>
                 <h3 class="font-headline font-bold text-xs uppercase tracking-tight">{{ cardForm.title || 'Title' }}</h3>
               </div>
             } @else {
@@ -1622,7 +1629,12 @@
                     title="Click to change position">{{ i + 1 }}</span>
                 }
                 <span class="material-symbols-outlined text-lg text-outline-variant shrink-0">drag_indicator</span>
-                <span class="material-symbols-outlined text-xl text-primary-fixed shrink-0">{{ commercialServices[i].icon }}</span>
+                @if (commercialServices[i].image) {
+                  <img [src]="commercialServices[i].image" [alt]="commercialServices[i].title"
+                    class="w-9 h-9 object-cover ghost-border shrink-0" />
+                } @else {
+                  <span class="material-symbols-outlined text-xl text-primary-fixed shrink-0">{{ commercialServices[i].icon }}</span>
+                }
                 <div class="flex-1 min-w-0">
                   <p class="text-sm font-headline font-bold uppercase tracking-tight text-on-surface truncate">{{ commercialServices[i].title }}</p>
                 </div>
