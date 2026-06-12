@@ -265,8 +265,20 @@ export class AdminComponent implements OnInit, OnDestroy {
   images: AdminGalleryImage[] = [];
   uploads: UploadItem[] = [];
   tag = '';
+  uploadAlbumInput = '';
   loadingImages = true;
   uploading = false;
+
+  /** Match the typed album name against existing albums. Used to label the
+   *  upload form ("will create new album" vs "will be added to existing"). */
+  get uploadAlbumMatch(): { kind: 'empty' } | { kind: 'existing'; album: Album } | { kind: 'new'; title: string } {
+    const trimmed = this.uploadAlbumInput.trim();
+    if (!trimmed) return { kind: 'empty' };
+    const lower = trimmed.toLowerCase();
+    const existing = this.albums.find(a => a.title.toLowerCase() === lower);
+    if (existing) return { kind: 'existing', album: existing };
+    return { kind: 'new', title: trimmed };
+  }
 
   /* Reviews state */
   reviews: AdminReview[] = [];
@@ -602,6 +614,30 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   async uploadAll(): Promise<void> {
+    // Resolve the album BEFORE uploading photos so we can tag each one as we go.
+    // If the user typed a new album name, create it now (and persist albums.json
+    // separately from the gallery manifest).
+    const match = this.uploadAlbumMatch;
+    let resolvedAlbumId: string | undefined;
+    if (match.kind === 'existing') {
+      resolvedAlbumId = match.album.id;
+    } else if (match.kind === 'new') {
+      let slug = this.slugify(match.title);
+      if (this.albums.some(a => a.slug === slug)) {
+        let n = 2;
+        while (this.albums.some(a => a.slug === `${slug}-${n}`)) n++;
+        slug = `${slug}-${n}`;
+      }
+      const newAlbum: Album = {
+        id: `a${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
+        slug,
+        title: match.title,
+      };
+      this.albums.push(newAlbum);
+      await this.saveAlbums();
+      resolvedAlbumId = newAlbum.id;
+    }
+
     this.uploading = true;
     for (const item of this.uploads.filter(u => u.status === 'pending')) {
       item.status = 'uploading';
@@ -622,12 +658,15 @@ export class AdminComponent implements OnInit, OnDestroy {
 
     // Append new uploads to existing order and save manifest
     for (const fn of newFilenames) {
-      this.images.push(this.galleryService.parseFilename(fn) as AdminGalleryImage);
+      const img = this.galleryService.parseFilename(fn) as AdminGalleryImage;
+      if (resolvedAlbumId) img.albumId = resolvedAlbumId;
+      this.images.push(img);
     }
     await this.saveGalleryManifest();
     // Close the upload form if everything uploaded successfully
     if (this.uploads.length === 0) {
       this.showUploadForm = false;
+      this.uploadAlbumInput = '';
     }
     this.cdr.detectChanges();
   }
