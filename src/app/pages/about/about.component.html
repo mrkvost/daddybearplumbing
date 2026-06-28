@@ -1,54 +1,146 @@
-<section class="max-w-4xl mx-auto px-6 py-16">
+<!-- Hero banner — wide image with a soft fade into the page background.
+     The visible heading is "Our History" in the section below; the h1 here
+     keeps the page accessible for screen readers without competing visually. -->
+<section class="relative flex items-center justify-center overflow-hidden bg-white aspect-[3/1]">
+  <div class="absolute inset-0 z-0">
+    @if (bannerImage) {
+      <img [src]="bannerImage" alt="Daddy Bear Plumbing — about banner"
+        class="w-full h-full object-cover hero-banner-blend"
+        fetchpriority="high" decoding="async" />
+    }
+  </div>
+  <div class="sr-only">
+    <h1>About Us — Daddy Bear Plumbing</h1>
+  </div>
+</section>
 
-  <!-- Our History -->
-  @if (history.length > 0) {
-    <h2 class="font-headline font-black text-2xl tracking-tighter uppercase mb-6">Our History</h2>
-    <div class="space-y-4 text-secondary text-sm leading-relaxed mb-16">
-      @for (p of history; track $index) {
-        <p>{{ p }}</p>
-      }
-    </div>
-  }
-
-  <!-- Why Choose Us -->
-  @if (whyChooseUs.length > 0) {
-    <h2 class="font-headline font-black text-2xl tracking-tighter uppercase mb-8">Why Choose Us</h2>
-    <div class="space-y-8 mb-16">
-      @for (card of whyChooseUs; track card.title) {
-        <div class="ghost-border bg-surface-container-low p-6">
-          <div class="flex items-start gap-4">
-            <span class="material-symbols-outlined text-2xl text-primary-fixed shrink-0 mt-0.5">{{ card.icon }}</span>
-            <div>
-              <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-2">{{ card.title }}</h3>
-              <p class="text-secondary text-sm leading-relaxed">{{ card.description }}</p>
-            </div>
+<!-- Our History — text + watermark bear logo on the right. -->
+@if (history.length > 0) {
+  <section class="py-16 md:py-24 bg-white relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div class="max-w-3xl text-center md:text-left">
+          <h2 class="font-headline text-3xl md:text-5xl text-navy mb-12 inline-block relative uppercase font-bold leading-tight">
+            Our History
+            <span class="absolute -bottom-4 left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0 w-24 h-1.5 bg-primary-orange rounded-full"></span>
+          </h2>
+          <div class="space-y-6 text-on-surface-variant font-body text-lg leading-relaxed">
+            @for (p of history; track $index) {
+              <p>{{ p }}</p>
+            }
           </div>
         </div>
-      }
+        <div class="flex justify-center items-center mt-8 md:mt-0">
+          <div class="relative w-full max-w-md opacity-20 md:opacity-100">
+            <img src="/logo.svg" alt="" aria-hidden="true"
+              class="w-full h-auto object-contain watermark-blend" />
+          </div>
+        </div>
+      </div>
     </div>
-  }
+  </section>
+}
 
-  <!-- Our Promise -->
-  @if (promise.length > 0) {
-    <h2 class="font-headline font-black text-2xl tracking-tighter uppercase mb-6">Our Promise</h2>
-    <div class="space-y-4 text-secondary text-sm leading-relaxed mb-16">
-      @for (p of promise; track $index) {
-        <p>{{ p }}</p>
-      }
+<!-- Why Choose Us — 3 cards on a tinted band, each with a decorative wave at the bottom. -->
+@if (whyChooseUs.length > 0) {
+  <section class="py-16 md:py-24 bg-surface-container-low">
+    <div class="max-w-7xl mx-auto px-4 md:px-6">
+      <div class="text-center mb-16">
+        <h2 class="font-headline text-3xl md:text-5xl text-navy uppercase tracking-tight font-bold">Why Choose Us</h2>
+        <div class="mx-auto mt-4 w-12 h-1.5 bg-primary-orange rounded-full"></div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        @for (card of whyChooseUs; track card.title; let i = $index) {
+          <div class="bg-white rounded-2xl p-10 shadow-xl shadow-navy/5 relative overflow-hidden flex flex-col min-h-[400px]">
+            <div class="mb-8">
+              <span class="material-symbols-outlined text-5xl"
+                [class.text-navy]="i % 2 === 0"
+                [class.text-primary-orange]="i % 2 === 1">{{ card.icon }}</span>
+            </div>
+            <h3 class="font-headline text-xl md:text-2xl text-navy mb-4 uppercase font-bold">{{ card.title }}</h3>
+            <p class="text-on-surface-variant text-base flex-grow leading-relaxed">{{ card.description }}</p>
+            <!-- Decorative wave footer; navy for cards 1/3, orange for card 2. -->
+            <div class="absolute bottom-0 left-0 w-full h-3">
+              <svg class="w-full h-full"
+                [class.fill-navy]="i % 2 === 0"
+                [class.fill-primary-orange]="i % 2 === 1"
+                preserveAspectRatio="none" viewBox="0 0 100 10" aria-hidden="true">
+                <path [attr.d]="i % 2 === 0 ? 'M0 10 V 5 Q 25 0 50 5 T 100 5 V 10 Z' : 'M0 10 V 5 Q 25 10 50 5 T 100 5 V 10 Z'"/>
+              </svg>
+            </div>
+          </div>
+        }
+      </div>
     </div>
-  }
+  </section>
+}
 
-  <!-- CTA -->
-  <div class="ghost-border bg-surface-container-low p-8 text-center">
-    <h2 class="font-headline font-black text-xl tracking-tighter uppercase mb-3">Call Us Today</h2>
-    <p class="text-secondary text-sm mb-6">We are here for all of your plumbing needs.</p>
-    <a
-      [href]="'tel:' + phone"
-      class="inline-flex items-center gap-2 bg-primary-fixed text-white px-8 py-3 font-headline font-bold text-sm uppercase tracking-widest hover:opacity-90 transition-all"
-    >
-      <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">call</span>
-      Call {{ phoneDisplay }}
-    </a>
+<!-- Our Promise — text on left, decorative blended graphic on right. -->
+@if (promise.length > 0) {
+  <section class="py-16 md:py-24 bg-white overflow-hidden relative">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 flex flex-col md:flex-row items-center gap-16 relative z-10">
+      <div class="md:w-1/2">
+        <h2 class="font-headline text-3xl md:text-5xl text-navy mb-8 uppercase tracking-tight font-bold">Our Promise</h2>
+        <div class="space-y-6 text-on-surface-variant font-body text-lg leading-relaxed">
+          @for (p of promise; track $index) {
+            <p>{{ p }}</p>
+          }
+        </div>
+        <div class="mt-12 h-1.5 w-40 bg-primary-orange rounded-full"></div>
+      </div>
+      <div class="md:w-1/2 relative">
+        <!-- Dynamic background flow: two blurred gradient ellipses + curved fluid lines that echo the logo. -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] pointer-events-none">
+          <div class="promise-shape-blue absolute w-full h-full opacity-10 rotate-12 scale-110 blur-3xl"></div>
+          <div class="promise-shape-orange absolute w-full h-full opacity-5 -rotate-12 scale-105 blur-2xl"></div>
+          <svg class="absolute inset-0 w-full h-full opacity-20" viewBox="0 0 400 400" aria-hidden="true">
+            <path d="M50,300 C150,350 250,200 350,250" fill="none" stroke="#0D2B6B" stroke-width="20"/>
+            <path d="M30,280 C130,330 230,180 330,230" fill="none" stroke="#FF5A1F" stroke-width="15"/>
+          </svg>
+        </div>
+        <div class="relative z-10 flex justify-center">
+          <img src="/logo.svg" alt="" aria-hidden="true"
+            class="w-full max-w-lg h-auto logo-edge-fade transition-transform hover:scale-105 duration-700" />
+        </div>
+      </div>
+    </div>
+  </section>
+}
+
+<!-- Need Plumbing Help? — navy band with orange call CTA. Matches the home page's bottom banner. -->
+<section class="relative bg-navy py-12 overflow-hidden">
+  <div class="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+      <div class="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
+        <div class="relative">
+          <div class="absolute inset-0 bg-black/20 rounded-full scale-110 blur-sm"></div>
+          <div class="relative w-16 h-16 bg-primary-orange rounded-full flex items-center justify-center shadow-xl">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor"
+              class="w-8 h-8 text-white" aria-hidden="true">
+              <path d="M798-120q-125 0-247-54.5T329-329Q229-429 174.5-551T120-798q0-18 12-30t30-12h162q14 0 25 9.5t13 22.5l26 140q2 16-1 27t-11 19l-97 98q20 37 47.5 71.5T387-386q31 31 65 57.5t72 48.5l94-94q9-9 23.5-13.5T670-390l138 28q14 4 23 14.5t9 23.5v162q0 18-12 30t-30 12Z"/>
+            </svg>
+          </div>
+        </div>
+        <div class="space-y-1">
+          <h2 class="text-white font-headline text-3xl md:text-4xl font-bold uppercase tracking-tight">Need Plumbing Help?</h2>
+          <p class="text-white/90 font-body text-lg">Fast, reliable, and honest service — call us today.</p>
+        </div>
+      </div>
+      <div class="relative group">
+        <div class="absolute inset-0 bg-primary-orange/30 blur-xl rounded-2xl group-hover:bg-primary-orange/50 transition-all"></div>
+        <a [href]="'tel:' + phone"
+          class="relative inline-flex items-center justify-center bg-primary-orange text-white px-8 md:px-10 py-5 rounded-2xl font-bold text-xl md:text-2xl shadow-2xl hover:scale-105 transition-transform whitespace-nowrap">
+          Call {{ phoneDisplay }}
+        </a>
+      </div>
+    </div>
   </div>
-
+  <!-- Bottom-right wave accent -->
+  <div class="absolute bottom-0 right-0 w-40 h-24 pointer-events-none opacity-30">
+    <svg class="w-full h-full" viewBox="0 0 200 100" aria-hidden="true">
+      <path d="M0,100 C50,50 150,150 200,100 L200,100 L0,100 Z" fill="#F4F9FF"/>
+      <path d="M0,110 C60,60 140,140 200,90 L200,110 L0,110 Z" fill="#FF5A1F"/>
+    </svg>
+  </div>
+  <div class="absolute bottom-0 left-0 w-full h-1 bg-white"></div>
 </section>

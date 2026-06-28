@@ -34,6 +34,32 @@ body {
   }
 }
 
+/* About page — hero banner softly fades into the page background at the bottom. */
+.hero-banner-blend {
+  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+}
+/* About page — watermark bear logo behind Our History (radial fade + multiply blend). */
+.watermark-blend {
+  mix-blend-mode: multiply;
+  mask-image: radial-gradient(circle, black 30%, transparent 70%);
+  -webkit-mask-image: radial-gradient(circle, black 30%, transparent 70%);
+}
+/* About page — soft circular fade around the Our Promise blended graphic. */
+.logo-edge-fade {
+  mask-image: radial-gradient(circle at center, black 50%, transparent 90%);
+  -webkit-mask-image: radial-gradient(circle at center, black 50%, transparent 90%);
+}
+/* About page — Our Promise decorative gradient shapes (blue + orange). */
+.promise-shape-blue {
+  background: linear-gradient(135deg, #0B2A6B 0%, #1c6afe 100%);
+  clip-path: ellipse(80% 50% at 50% 50%);
+}
+.promise-shape-orange {
+  background: linear-gradient(135deg, #FF5A1F 0%, #ff8c4a 100%);
+  clip-path: ellipse(80% 50% at 50% 50%);
+}
+
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
 }

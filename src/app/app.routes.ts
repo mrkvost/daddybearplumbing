@@ -57,8 +57,7 @@ export const routes: Routes = [
     data: {
       title: 'About Us',
       description: 'Learn about Daddy Bear Plumbing — a family-owned plumbing company serving Chicago\'s Western Suburbs. Licensed, insured, and all work guaranteed.',
-      eyebrow: 'Who We Are',
-      imageKey: 'about',
+      // No `eyebrow` — the redesigned about page builds its own hero banner.
     },
   },
   {

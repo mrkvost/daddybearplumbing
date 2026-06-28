@@ -358,7 +358,7 @@ admin user creation, gallery photo convention, project structure.
 - og-placeholder can be removed (og-<hash> is enough)
 
 - on the home page fix text in the need plumbing help
-- on the home page divider on the bottom does not match
+- on the home page divider on the bottom does not match, how should the divider on the about us page look like? i do not like current white line
 - logo for the footer needs rework (white background)
 - footer text should be updated
 - footer IDPH add slightly more white around it
@@ -367,6 +367,11 @@ admin user creation, gallery photo convention, project structure.
 - ask about the accessibility in the footer
 - ask about the navigate links in the footer
 - ask about the social media icons and links to web-pages
+- ask about the texts in the about us page. remind them that they can edit it via admin. bold text would be a bit tricky (probably require rebuild)
+- ask about the bottom right wave thing on the about us page.
+- ask about the animation on hover on the about us page.
+- icons in the about us page in the 'why choose us' can be also changed (since they differ)
+- ask about the image by our history on about us page
 
 - privacy design
 - faq desing
