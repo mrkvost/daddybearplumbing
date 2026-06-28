@@ -1,43 +1,60 @@
-<section class="py-24 px-6 bg-surface-container-low">
-  <div class="max-w-7xl mx-auto">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-      <!-- Left: CTA -->
-      <div>
-        <p class="text-secondary text-[0.7rem] font-bold tracking-[0.3em] uppercase mb-4">Direct Communication</p>
-        <p class="text-secondary text-lg mb-12 font-light leading-relaxed">
-          Ready to resolve your plumbing challenges? Reach out to our technical team
-          for immediate scheduling and expert consultation.
-        </p>
-        <a routerLink="/contact"
-          class="inline-block bg-primary-fixed text-white w-full px-12 py-8 font-headline font-black text-2xl tracking-widest uppercase text-center hover:opacity-90 transition-all">
-          Contact Us
-        </a>
-      </div>
-      <!-- Right: Address + Locations -->
-      <div class="bg-surface-container-lowest p-12 ghost-border space-y-12">
-        <div>
-          <h3 class="font-headline font-bold text-xs uppercase tracking-[0.2em] text-secondary mb-4">Business Address</h3>
-          <a [href]="mapsUrl" target="_blank" rel="noopener" class="font-body text-xl font-medium hover:text-primary-fixed transition-colors block">
-            {{ address.line1 }}<br>
-            {{ address.city }}, {{ address.state }} {{ address.zip }}
-          </a>
+<!-- "Ready to Help Today?" section: left bold headline + Contact CTA, right card with address + service radius. -->
+<section class="py-20 bg-white relative overflow-hidden">
+  <div class="max-w-7xl mx-auto px-4 md:px-6 relative z-10 grid lg:grid-cols-2 gap-16 items-center">
+    <!-- Left: headline + CTA -->
+    <div>
+      <div class="w-20 h-2 bg-primary-orange mb-8 rounded-full"></div>
+      <h2 class="font-headline text-5xl md:text-6xl font-black text-navy leading-[0.9] mb-8 uppercase">
+        Ready to<br>Help Today?
+      </h2>
+      <p class="text-xl text-navy font-bold mb-10 max-w-md">
+        Reach out to our team for immediate scheduling and expert consultation.
+      </p>
+      <a routerLink="/contact"
+        class="bg-primary-orange text-white px-10 py-5 rounded-2xl font-black text-lg md:text-xl inline-flex items-center justify-center gap-3 shadow-[0_20px_40px_rgba(255,90,31,0.3)] hover:scale-105 transition-transform uppercase tracking-tight">
+        <span class="material-symbols-outlined">forum</span>
+        Contact Us
+      </a>
+    </div>
+
+    <!-- Right: glass card -->
+    <div class="bg-white/80 backdrop-blur-md p-10 md:p-12 rounded-[40px] border-2 border-navy-medium/20 shadow-2xl relative overflow-hidden">
+      <div class="space-y-10 relative z-10">
+        <div class="flex items-start gap-5">
+          <div class="text-primary-orange shrink-0">
+            <span class="material-symbols-outlined text-4xl">location_on</span>
+          </div>
+          <div>
+            <p class="font-headline text-xs font-black text-navy/60 uppercase tracking-[0.2em] mb-2">Business Address</p>
+            <a [href]="mapsUrl" target="_blank" rel="noopener"
+              class="text-xl md:text-2xl font-black text-navy leading-tight hover:text-primary-orange transition-colors block">
+              {{ address.line1 }}<br>{{ address.city }}, {{ address.state }} {{ address.zip }}
+            </a>
+            <div class="w-12 h-1 bg-navy-medium/40 mt-4"></div>
+          </div>
         </div>
-        <div>
-          <h3 class="font-headline font-bold text-xs uppercase tracking-[0.2em] text-secondary mb-4">Service Radius</h3>
-          <ul class="grid grid-cols-2 gap-y-2">
-            @for (loc of locations.slice(0, 7); track loc) {
-              <li class="flex items-center gap-2 text-sm font-bold uppercase tracking-tight">
-                <span class="w-1.5 h-1.5 bg-primary-fixed shrink-0"></span> {{ loc }}
-              </li>
-            }
-            @if (locations.length > 7) {
-              <li>
-                <a routerLink="/contact" class="flex items-center gap-2 text-sm font-bold uppercase tracking-tight text-primary-fixed hover:opacity-80 transition-colors">
-                  <span class="w-1.5 h-1.5 bg-primary-fixed shrink-0"></span> and more...
-                </a>
-              </li>
-            }
-          </ul>
+        <div class="flex items-start gap-5">
+          <div class="text-primary-orange shrink-0">
+            <span class="material-symbols-outlined text-4xl">radar</span>
+          </div>
+          <div class="w-full">
+            <p class="font-headline text-xs font-black text-navy/60 uppercase tracking-[0.2em] mb-4">Service Radius</p>
+            <ul class="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-8 text-navy font-bold uppercase text-sm tracking-tight">
+              @for (loc of locations.slice(0, 7); track loc) {
+                <li class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-primary-orange shrink-0"></span> {{ loc }}
+                </li>
+              }
+              @if (locations.length > 7) {
+                <li>
+                  <a routerLink="/contact"
+                    class="font-black text-primary-orange bg-soft-orange px-3 py-1 rounded inline-block hover:opacity-80 transition-opacity">
+                    And many more...
+                  </a>
+                </li>
+              }
+            </ul>
+          </div>
         </div>
       </div>
     </div>

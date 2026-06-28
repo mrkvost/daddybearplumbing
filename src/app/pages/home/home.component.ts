@@ -1,21 +1,24 @@
 /*
  * HomeComponent — the "/" route
  *
- * This is a "page" component. It does not contain UI of its own;
- * it composes the reusable section components into the home page layout.
- * AppComponent renders this inside <router-outlet> when the URL is "/".
+ * Composes reusable section components plus an inline "Need Plumbing Help?"
+ * call banner at the bottom (small enough that a dedicated component would be
+ * overhead — the rest of the page lives in section components).
  */
 import { Component } from '@angular/core';
 import { HeroComponent } from '../../components/hero/hero.component';
 import { TrustStatsComponent } from '../../components/trust-stats/trust-stats.component';
 import { ServicesGridComponent } from '../../components/services-grid/services-grid.component';
 import { ServiceAreaComponent } from '../../components/service-area/service-area.component';
+import { BUSINESS } from '../../globals';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  // Each component used in the template must be listed here.
   imports: [HeroComponent, TrustStatsComponent, ServicesGridComponent, ServiceAreaComponent],
   templateUrl: './home.component.html',
 })
-export class HomeComponent {}
+export class HomeComponent {
+  phone = BUSINESS.phone;
+  phoneDisplay = BUSINESS.phoneDisplay;
+}

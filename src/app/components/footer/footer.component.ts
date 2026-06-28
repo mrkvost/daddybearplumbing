@@ -14,6 +14,7 @@ export class FooterComponent {
   phoneDisplay = BUSINESS.phoneDisplay;
   email = BUSINESS.email;
   address = BUSINESS.address;
+  social = BUSINESS.social;
   mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
     `${BUSINESS.address.line1}, ${BUSINESS.address.city}, ${BUSINESS.address.state} ${BUSINESS.address.zip}`
   )}`;

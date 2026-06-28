@@ -11,6 +11,17 @@ module.exports = {
         'nav': '890px',
       },
       colors: {
+        // ---- Public-site "Industrial Navy + Safety Orange" palette ----
+        // Scoped names so they don't collide with the legacy admin tokens below.
+        'navy':                   '#0D2B6B',
+        'navy-medium':            '#445c9d',  // design's "secondary" — used for muted-navy accents
+        'primary-blue':           '#1E6FEA',
+        'primary-orange':         '#FF5A1F',
+        'light-blue':             '#5FAEFF',
+        'background-light-blue':  '#F4F9FF',
+        'light-orange':           '#FF8A4D',
+        'soft-orange':            '#FFF2EA',
+        // ---- Legacy palette (used by admin + currently every other page) ----
         'primary':                '#000000',
         'primary-fixed':          '#b02f00',
         'primary-fixed-dim':      '#862200',
@@ -59,15 +70,25 @@ module.exports = {
         'error-container':        '#ffdad6',
         'on-error-container':     '#410002',
       },
+      // Public-site "Industrial Navy" design uses Hanken Grotesk (display) +
+      // Work Sans (body). Public Sans + Inter remain in the fallback stack so the
+      // admin (which has its own typography rhythm) still degrades gracefully.
       fontFamily: {
-        headline: ['Public Sans', 'sans-serif'],
-        body:     ['Inter', 'sans-serif'],
-        label:    ['Inter', 'sans-serif'],
+        headline: ['Hanken Grotesk', 'Public Sans', 'sans-serif'],
+        body:     ['Work Sans', 'Inter', 'sans-serif'],
+        label:    ['Hanken Grotesk', 'Inter', 'sans-serif'],
       },
+      // Restored to match the public-site "Soft-Industrial" design.
+      // (Legacy admin / non-home pages don't use any non-`full` rounded classes,
+      //  so re-enabling these values doesn't affect them.)
       borderRadius: {
-        DEFAULT: '0px',
-        lg:      '0px',
-        xl:      '0px',
+        sm:      '0.125rem',
+        DEFAULT: '0.25rem',
+        md:      '0.375rem',
+        lg:      '0.5rem',
+        xl:      '0.75rem',
+        '2xl':   '1rem',
+        '3xl':   '1.5rem',
         full:    '9999px',
       },
     },

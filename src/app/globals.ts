@@ -9,4 +9,12 @@ export const BUSINESS = {
     state: 'IL',
     zip: '60513',
   },
+  // Social profiles — leave empty/undefined to render the icon greyed-out (non-clickable).
+  // Add a URL here when a profile goes live and the icon becomes a working link.
+  social: {
+    facebook:  'https://www.facebook.com/profile.php?id=61590762127242',
+    instagram: '',
+    linkedin:  '',
+    google:    '',
+  },
 };

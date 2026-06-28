@@ -356,3 +356,19 @@ admin user creation, gallery photo convention, project structure.
 - should we refactor (make parts that repeat re-usable)?
 - rebuilder and metrics as one (with possible parameters?)
 - og-placeholder can be removed (og-<hash> is enough)
+
+- on the home page fix text in the need plumbing help
+- on the home page divider on the bottom does not match
+- logo for the footer needs rework (white background)
+- footer text should be updated
+- footer IDPH add slightly more white around it
+- ask about the "About our team" in the footer
+- ask about the address in the footer
+- ask about the accessibility in the footer
+- ask about the navigate links in the footer
+- ask about the social media icons and links to web-pages
+
+- privacy design
+- faq desing
+- terms desing
+- cookies desing

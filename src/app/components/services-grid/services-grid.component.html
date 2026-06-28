@@ -1,49 +1,47 @@
-<section class="bg-surface py-24 px-6">
-  <div class="max-w-7xl mx-auto">
-    <div class="flex justify-between items-end mb-16 border-b border-outline-variant/20 pb-8">
-      <div>
-        <p class="text-secondary text-[0.7rem] font-bold tracking-[0.3em] uppercase mb-4">What We Do</p>
-        <h2 class="font-headline font-black text-4xl tracking-tighter uppercase">Our Services</h2>
-      </div>
-      <div class="hidden md:block text-right">
-        <p class="text-secondary font-body text-[0.7rem]">LICENSED, INSURED, BONDED</p>
-        <p class="text-secondary font-body text-[0.7rem]">ALL WORK GUARANTEED</p>
-      </div>
+<!-- "Professional Services" section: two large bold cards for Residential + Commercial. -->
+<section class="py-20 bg-white relative overflow-hidden">
+  <div class="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
+    <div class="text-center mb-16">
+      <p class="text-navy-medium font-black tracking-[0.3em] uppercase text-xs mb-3">Our Expertise</p>
+      <h2 class="font-headline text-4xl md:text-5xl font-black text-navy uppercase">Professional Services</h2>
+      <div class="w-20 h-1.5 bg-primary-orange mx-auto mt-6 rounded-full shadow-lg"></div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-0 ghost-border">
+    <div class="grid lg:grid-cols-2 gap-8 lg:gap-12">
+      <!-- Residential -->
       <a routerLink="/residential"
-        class="group p-10 border-r border-outline-variant/20 bg-surface-container-low hover:bg-surface-container-lowest transition-all">
-        <div class="mb-8">
-          <span class="material-symbols-outlined text-5xl text-primary">home</span>
+        class="bg-background-light-blue/90 backdrop-blur-sm rounded-[40px] p-10 md:p-14 border-2 border-light-blue/40 relative overflow-hidden shadow-2xl group transition-all hover:-translate-y-2 h-full block">
+        <div class="w-16 h-16 bg-navy text-white rounded-2xl flex items-center justify-center mb-8 relative z-10 shadow-lg border-2 border-primary-orange">
+          <span class="material-symbols-outlined text-3xl">home</span>
         </div>
-        <h3 class="font-headline font-bold text-xl mb-4 uppercase tracking-tight">Residential</h3>
-        <p class="text-secondary text-sm leading-relaxed mb-6">
-          Drain cleaning, water heaters, leak repair, frozen pipes, sump pumps, sewer service,
-          and more — for homeowners across Chicago and Suburbs.
+        <h3 class="font-headline text-3xl md:text-4xl font-black text-navy mb-6 leading-none uppercase relative z-10">
+          Residential<br>
+          <span class="text-navy-medium">Plumbing</span>
+        </h3>
+        <p class="text-navy text-lg font-medium leading-relaxed mb-10 max-w-sm relative z-10">
+          Drain cleaning, water heaters, leak repair, frozen pipes, sump pumps, sewer service, and more — for homeowners across Chicago and Suburbs.
         </p>
-        <div class="flex items-center gap-2 text-primary-fixed text-xs font-headline font-bold uppercase tracking-widest">
-          View Services
-          <span class="material-symbols-outlined text-sm">arrow_forward</span>
-        </div>
-        <div class="h-1 w-0 group-hover:w-full bg-primary-fixed transition-all duration-500 mt-6"></div>
+        <span class="inline-flex items-center gap-3 text-navy font-black uppercase tracking-tight group-hover:gap-8 transition-all bg-white px-6 py-3 rounded-full shadow-lg relative z-10 border border-navy/10 text-sm">
+          View Services <span class="material-symbols-outlined text-primary-orange">arrow_forward</span>
+        </span>
       </a>
 
+      <!-- Commercial -->
       <a routerLink="/commercial"
-        class="group p-10 bg-surface-container-low hover:bg-surface-container-lowest transition-all">
-        <div class="mb-8">
-          <span class="material-symbols-outlined text-5xl text-primary">business</span>
+        class="bg-soft-orange/90 backdrop-blur-sm rounded-[40px] p-10 md:p-14 border-2 border-light-orange/40 relative overflow-hidden shadow-2xl group transition-all hover:-translate-y-2 h-full block">
+        <div class="w-16 h-16 bg-navy text-white rounded-2xl flex items-center justify-center mb-8 relative z-10 shadow-lg border-2 border-primary-orange">
+          <span class="material-symbols-outlined text-3xl">corporate_fare</span>
         </div>
-        <h3 class="font-headline font-bold text-xl mb-4 uppercase tracking-tight">Commercial</h3>
-        <p class="text-secondary text-sm leading-relaxed mb-6">
-          Restaurants, offices, apartments, hotels, healthcare, and sports facilities —
-          reliable plumbing to keep your business running.
+        <h3 class="font-headline text-3xl md:text-4xl font-black text-navy mb-6 leading-none uppercase relative z-10">
+          Commercial<br>
+          <span class="text-primary-orange">Plumbing</span>
+        </h3>
+        <p class="text-navy text-lg font-medium leading-relaxed mb-10 max-w-sm relative z-10">
+          Restaurants, offices, apartments, hotels, healthcare, and sports facilities — reliable plumbing to keep your business running.
         </p>
-        <div class="flex items-center gap-2 text-primary-fixed text-xs font-headline font-bold uppercase tracking-widest">
-          View Services
-          <span class="material-symbols-outlined text-sm">arrow_forward</span>
-        </div>
-        <div class="h-1 w-0 group-hover:w-full bg-primary-fixed transition-all duration-500 mt-6"></div>
+        <span class="inline-flex items-center gap-3 text-navy font-black uppercase tracking-tight group-hover:gap-8 transition-all bg-white px-6 py-3 rounded-full shadow-lg relative z-10 border border-primary-orange/10 text-sm">
+          View Services <span class="material-symbols-outlined text-primary-orange">arrow_forward</span>
+        </span>
       </a>
     </div>
   </div>
