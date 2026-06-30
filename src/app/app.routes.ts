@@ -67,7 +67,7 @@ export const routes: Routes = [
     data: {
       title: 'Residential Services',
       description: 'Residential plumbing services in Chicago\'s Western Suburbs. Drain cleaning, water heaters, leak repair, sewer service, and more. Free estimates.',
-      eyebrow: 'For Homeowners',
+      // No `eyebrow` — the redesigned residential page builds its own hero banner.
     },
   },
   {

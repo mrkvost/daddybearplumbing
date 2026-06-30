@@ -1,69 +1,94 @@
-<section class="max-w-6xl mx-auto px-6 py-16">
+<main class="wave-bg">
+  <!-- Intro — large headline, supporting paragraph. -->
+  <section class="pt-16 md:pt-24 pb-12 md:pb-16 px-4 md:px-6 max-w-7xl mx-auto text-center">
+    <h1 class="font-headline font-black text-4xl md:text-5xl text-navy mb-4 leading-tight">Explore Our Expertise</h1>
+    <div class="mx-auto mb-6 w-16 h-1.5 bg-primary-orange rounded-full"></div>
+    <p class="font-body text-lg text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
+      From residential upgrades to massive commercial infrastructure, we deliver precision plumbing that stands the test of time.
+    </p>
+  </section>
 
-  <p class="text-secondary text-sm leading-relaxed mb-16 max-w-3xl">
-    Daddy Bear Plumbing offers reliable residential plumbing services across Chicago and Suburbs.
-    Our licensed and insured plumbers provide solutions for routine maintenance, repairs, and complex
-    installations — from leaky faucets and clogged drains to full bathroom remodels.
-  </p>
+  <!-- Service cards — image-headed grid. Clicking a card opens the detail modal. -->
+  <section class="py-12 px-4 md:px-6 max-w-7xl mx-auto">
+    <div class="mb-8 flex items-center gap-4">
+      <h3 class="font-headline font-bold text-2xl md:text-3xl text-navy uppercase tracking-tight">Our Services</h3>
+      <div class="h-px bg-outline-variant flex-grow"></div>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      @for (card of cards; track card.title) {
+        <button type="button" (click)="openCard(card)"
+          class="bg-white rounded-lg shadow-sm shadow-navy/5 hover:shadow-md hover:-translate-y-1 transition-all overflow-hidden flex flex-col text-left group">
+          <div class="aspect-[4/3] overflow-hidden bg-background-light-blue flex-shrink-0">
+            @if (card.image) {
+              <img [src]="card.image" [alt]="card.title" loading="lazy"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            } @else {
+              <div class="w-full h-full flex items-center justify-center">
+                <span class="material-symbols-outlined text-6xl text-primary-orange">{{ card.icon }}</span>
+              </div>
+            }
+          </div>
+          <div class="p-6 border-t border-surface-container flex flex-col flex-1">
+            <h4 class="font-headline font-bold text-xl text-navy uppercase tracking-tight">{{ card.title }}</h4>
+            <p class="text-on-surface-variant text-sm mt-2 leading-relaxed line-clamp-3 flex-1">{{ card.description }}</p>
+            <p class="text-xs font-headline font-bold uppercase tracking-widest text-primary-orange mt-4 group-hover:underline">Read more →</p>
+          </div>
+        </button>
+      }
+    </div>
+  </section>
 
-  <h2 class="font-headline font-black text-2xl tracking-tighter uppercase mb-8">Our Services</h2>
-
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-    @for (card of cards; track card.title) {
-      <button type="button" (click)="openCard(card)"
-        class="ghost-border bg-surface-container-low flex flex-col text-left h-96 hover:bg-surface-container-high transition-colors group overflow-hidden">
-        <div class="h-40 bg-surface-container-high overflow-hidden flex-shrink-0">
-          @if (card.image) {
-            <img [src]="card.image" [alt]="card.title" loading="lazy"
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-          } @else {
-            <div class="w-full h-full flex items-center justify-center">
-              <span class="material-symbols-outlined text-6xl text-primary-fixed">{{ card.icon }}</span>
+  <!-- Need Plumbing Help? — navy band with orange call CTA. -->
+  <section class="relative bg-navy py-12 mt-16 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+        <div class="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
+          <div class="relative">
+            <div class="absolute inset-0 bg-black/20 rounded-full scale-110 blur-sm"></div>
+            <div class="relative w-16 h-16 bg-primary-orange rounded-full flex items-center justify-center shadow-xl">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor"
+                class="w-8 h-8 text-white" aria-hidden="true">
+                <path d="M798-120q-125 0-247-54.5T329-329Q229-429 174.5-551T120-798q0-18 12-30t30-12h162q14 0 25 9.5t13 22.5l26 140q2 16-1 27t-11 19l-97 98q20 37 47.5 71.5T387-386q31 31 65 57.5t72 48.5l94-94q9-9 23.5-13.5T670-390l138 28q14 4 23 14.5t9 23.5v162q0 18-12 30t-30 12Z"/>
+              </svg>
             </div>
-          }
+          </div>
+          <div class="space-y-1">
+            <h2 class="text-white font-headline text-3xl md:text-4xl font-bold uppercase tracking-tight">Need Plumbing Help?</h2>
+            <p class="text-white/90 font-body text-lg">We're ready to help — fast, reliable, and honest service.</p>
+          </div>
         </div>
-        <div class="p-6 flex flex-col flex-1">
-          <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">{{ card.title }}</h3>
-          <p class="text-secondary text-sm leading-relaxed flex-1 line-clamp-3">{{ card.description }}</p>
-          <p class="text-[0.6rem] uppercase tracking-widest text-primary-fixed font-bold mt-3 group-hover:underline">Read more →</p>
+        <div class="relative group">
+          <div class="absolute inset-0 bg-primary-orange/30 blur-xl rounded-2xl group-hover:bg-primary-orange/50 transition-all"></div>
+          <a [href]="'tel:' + phone"
+            class="relative inline-flex items-center justify-center bg-primary-orange text-white px-8 md:px-10 py-5 rounded-2xl font-bold text-xl md:text-2xl shadow-2xl hover:scale-105 transition-transform whitespace-nowrap">
+            Call {{ phoneDisplay }}
+          </a>
         </div>
-      </button>
-    }
-  </div>
+      </div>
+    </div>
+    <div class="absolute bottom-0 left-0 w-full h-1 bg-white"></div>
+  </section>
+</main>
 
-  <!-- CTA -->
-  <div class="ghost-border bg-surface-container-low p-8 text-center">
-    <h2 class="font-headline font-black text-xl tracking-tighter uppercase mb-3">Call Us Today</h2>
-    <p class="text-secondary text-sm mb-6">We are here for all of your residential plumbing needs.</p>
-    <a
-      [href]="'tel:' + phone"
-      class="inline-flex items-center gap-2 bg-primary-fixed text-white px-8 py-3 font-headline font-bold text-sm uppercase tracking-widest hover:opacity-90 transition-all"
-    >
-      <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">call</span>
-      Call {{ phoneDisplay }}
-    </a>
-  </div>
-
-</section>
-
-<!-- Card detail modal -->
+<!-- Card detail modal — preserved from previous design. -->
 @if (selectedCard) {
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90"
     (click)="closeCard()">
-    <div class="relative ghost-border bg-surface max-w-2xl w-full max-h-[85vh] overflow-y-auto p-10"
+    <div class="relative bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-10"
       (click)="$event.stopPropagation()">
       <button (click)="closeCard()"
-        class="absolute top-4 right-4 text-secondary hover:text-on-surface p-2 transition-colors">
+        class="absolute top-4 right-4 w-10 h-10 rounded-full bg-navy text-white flex items-center justify-center shadow-lg hover:bg-primary-orange hover:scale-110 transition-all"
+        aria-label="Close">
         <span class="material-symbols-outlined">close</span>
       </button>
       @if (selectedCard.image) {
         <img [src]="selectedCard.image" [alt]="selectedCard.title"
-          class="w-full max-h-72 object-cover ghost-border mb-8" />
+          class="w-full max-h-72 object-cover rounded-lg mb-8" />
       } @else {
-        <span class="material-symbols-outlined text-6xl text-primary-fixed block mb-6">{{ selectedCard.icon }}</span>
+        <span class="material-symbols-outlined text-6xl text-primary-orange block mb-6">{{ selectedCard.icon }}</span>
       }
-      <h3 class="font-headline font-black text-2xl tracking-tighter uppercase mb-4">{{ selectedCard.title }}</h3>
-      <p class="text-secondary text-sm leading-relaxed whitespace-pre-line">{{ selectedCard.description }}</p>
+      <h3 class="font-headline font-black text-2xl md:text-3xl tracking-tight uppercase mb-4 text-navy">{{ selectedCard.title }}</h3>
+      <p class="text-on-surface-variant text-base leading-relaxed whitespace-pre-line">{{ selectedCard.description }}</p>
     </div>
   </div>
 }

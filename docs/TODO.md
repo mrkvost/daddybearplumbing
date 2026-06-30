@@ -372,6 +372,7 @@ admin user creation, gallery photo convention, project structure.
 - ask about the animation on hover on the about us page.
 - icons in the about us page in the 'why choose us' can be also changed (since they differ)
 - ask about the image by our history on about us page
+- should there be specific desing for modal picture with text, etc?
 
 - privacy design
 - faq desing
