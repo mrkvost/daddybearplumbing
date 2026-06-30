@@ -1,26 +1,41 @@
-<section class="max-w-4xl mx-auto px-6 py-16">
+<main class="wave-bg">
+  <!-- Subhead — split-color FAQ headline (FA navy + Q orange), orange rail, descriptor. -->
+  <section class="pt-16 md:pt-24 pb-12 px-4 md:px-6 max-w-7xl mx-auto text-center">
+    <h1 class="font-headline font-black leading-none text-6xl md:text-8xl">
+      <span class="text-navy">FA</span><span class="text-primary-orange">Q</span>
+    </h1>
+    <div class="mx-auto mt-6 w-24 h-1.5 bg-primary-orange rounded-full"></div>
+    <p class="mt-8 font-body text-lg text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
+      Everything you need to know about our plumbing services — hours, pricing, warranties, and more.
+    </p>
+  </section>
 
-  <div class="space-y-6">
+  <!-- FAQ list — numbered cards. Orange "N." prefix on every question. -->
+  <section class="pb-16 md:pb-24 px-4 md:px-6">
+    <div class="max-w-4xl mx-auto flex flex-col gap-6">
+      @for (item of items; track $index) {
+        <article class="bg-white p-6 md:p-8 rounded-xl border border-outline-variant/40 shadow-sm shadow-navy/5 hover:shadow-md transition-all">
+          <h2 class="font-headline font-bold text-xl md:text-2xl text-navy mb-3 uppercase">
+            <span class="text-primary-orange">{{ $index + 1 }}.</span> {{ item.question }}
+          </h2>
+          <div class="font-body text-base text-on-surface-variant leading-relaxed">
+            <p [class.mb-4]="item.bullets?.length">{{ item.answer }}</p>
+            @if (item.bullets?.length) {
+              <ul class="space-y-2">
+                @for (bullet of item.bullets; track $index) {
+                  <li class="flex items-start gap-3">
+                    <span class="material-symbols-outlined text-primary-orange text-lg shrink-0 mt-0.5"
+                      style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                    <span>{{ bullet }}</span>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  </section>
 
-    @for (item of items; track $index) {
-      <div class="ghost-border bg-surface-container-low p-6">
-        <h2 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">{{ item.question }}</h2>
-        <div class="text-secondary text-sm leading-relaxed">
-          <p [class.mb-3]="item.bullets?.length">{{ item.answer }}</p>
-          @if (item.bullets?.length) {
-            <ul class="space-y-1.5 ml-4">
-              @for (bullet of item.bullets; track $index) {
-                <li class="flex items-center gap-2">
-                  <span class="material-symbols-outlined text-xs text-primary-fixed">check</span>
-                  {{ bullet }}
-                </li>
-              }
-            </ul>
-          }
-        </div>
-      </div>
-    }
-
-  </div>
-
-</section>
+  <app-call-banner variant="questions" />
+</main>

@@ -1,0 +1,74 @@
+<!-- Shared layout for Privacy / Terms / Cookies pages.
+     Wrapping page just sets `data` — the component owns the visual style. -->
+<main class="wave-bg">
+  <!-- Subhead: split-color title + orange rail + optional intro and last-amended. -->
+  <section class="pt-16 md:pt-24 pb-12 px-4 md:px-6 max-w-7xl mx-auto text-center">
+    <h1 class="font-headline font-black leading-none text-5xl md:text-7xl uppercase tracking-tight">
+      <span class="text-navy">{{ data.title }}</span>
+      @if (data.titleAccent) {
+        <br class="md:hidden">
+        <span class="text-primary-orange md:ml-3">{{ data.titleAccent }}</span>
+      }
+    </h1>
+    <div class="mx-auto mt-6 w-24 h-1.5 bg-primary-orange rounded-full"></div>
+    @if (data.lastAmended) {
+      <p class="mt-6 text-xs font-headline font-bold uppercase tracking-widest text-on-surface-variant/70">
+        {{ data.lastAmended }}
+      </p>
+    }
+    @if (data.intro) {
+      <p class="mt-8 font-body text-lg text-on-surface-variant max-w-3xl mx-auto leading-relaxed">
+        {{ data.intro }}
+      </p>
+    }
+  </section>
+
+  <!-- Section cards. -->
+  <section class="pb-16 md:pb-24 px-4 md:px-6">
+    <div class="max-w-4xl mx-auto flex flex-col gap-6">
+      @for (section of data.sections; track $index) {
+        <article class="bg-white rounded-xl border border-outline-variant/40 shadow-sm shadow-navy/5 hover:shadow-md transition-all p-6 md:p-8 flex flex-col md:flex-row gap-6">
+          <div class="w-14 h-14 bg-soft-orange rounded-lg flex items-center justify-center text-primary-orange shrink-0">
+            <span class="material-symbols-outlined text-3xl">{{ section.icon }}</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h2 class="font-headline font-bold text-xl md:text-2xl text-navy mb-3 uppercase">{{ section.title }}</h2>
+            <div class="font-body text-base text-on-surface-variant leading-relaxed space-y-3">
+              @for (p of section.paragraphs; track $index) {
+                <p>{{ p }}</p>
+              }
+              @if (section.bullets?.length) {
+                <ul class="space-y-2">
+                  @for (bullet of section.bullets; track $index) {
+                    <li class="flex items-start gap-3">
+                      <span class="material-symbols-outlined text-primary-orange text-lg shrink-0 mt-0.5"
+                        style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                      <span>{{ bullet }}</span>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          </div>
+        </article>
+      }
+
+      <!-- Built-in Contact card — always at the end so every legal page has a
+           consistent way for visitors to reach out. -->
+      <article class="bg-white rounded-xl border border-outline-variant/40 shadow-sm shadow-navy/5 hover:shadow-md transition-all p-6 md:p-8 flex flex-col md:flex-row gap-6">
+        <div class="w-14 h-14 bg-soft-orange rounded-lg flex items-center justify-center text-primary-orange shrink-0">
+          <span class="material-symbols-outlined text-3xl">mail</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h2 class="font-headline font-bold text-xl md:text-2xl text-navy mb-3 uppercase">Contact Us</h2>
+          <p class="font-body text-base text-on-surface-variant leading-relaxed">
+            If you have questions about this {{ data.title }}{{ data.titleAccent ? ' ' + data.titleAccent : '' }}, email us at
+            <a [href]="'mailto:' + email" class="text-primary-orange font-bold hover:underline">{{ email }}</a>
+            or visit our
+            <a routerLink="/contact" class="text-primary-orange font-bold hover:underline">contact page</a>.
+          </p>
+        </div>
+      </article>
+    </div>
+  </section>
+</main>

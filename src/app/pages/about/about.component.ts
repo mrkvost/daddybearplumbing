@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angula
 import { CommonModule } from '@angular/common';
 import { BUSINESS } from '../../globals';
 import { SITE_DATA } from '../../../environments/site-data';
+import { CallBannerComponent } from '../../components/call-banner/call-banner.component';
 
 export interface AboutCard {
   icon: string;
@@ -46,7 +47,7 @@ const DEFAULT_PROMISE: string[] = [
 @Component({
   selector: 'app-about',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, CallBannerComponent],
   templateUrl: './about.component.html',
 })
 export class AboutComponent implements OnInit, OnDestroy {

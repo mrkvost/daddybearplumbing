@@ -1,88 +1,98 @@
-<section class="max-w-6xl mx-auto px-6 py-16">
+<main class="wave-bg">
+  <!-- Intro — supporting paragraph on a tinted band. -->
+  <section class="pt-16 md:pt-24 pb-16 md:pb-20 bg-surface-container-low">
+    <div class="max-w-3xl mx-auto px-4 md:px-6 text-center">
+      <p class="font-body text-lg text-on-surface-variant leading-relaxed">
+        Daddy Bear Plumbing provides top-tier plumbing solutions for businesses of all sizes.
+        From restaurants and healthcare facilities to office buildings and industrial complexes,
+        we deliver dependable, efficient, and code-compliant plumbing services. Whether you need
+        routine maintenance, emergency repairs, or new construction plumbing, our team is equipped
+        with the knowledge and technology to get the job done right — on time and on budget.
+      </p>
+    </div>
+  </section>
 
-  <p class="text-secondary text-sm leading-relaxed mb-16 max-w-3xl">
-    Daddy Bear Plumbing provides top-tier plumbing solutions for businesses of all sizes. From routine
-    maintenance to large-scale installations, our expert team delivers reliable, efficient services
-    tailored to your commercial needs. With a focus on minimizing downtime and ensuring long-term
-    functionality, we offer customized plans to keep your business running smoothly.
-  </p>
-
-  <h2 class="font-headline font-black text-2xl tracking-tighter uppercase mb-8">Industries We Serve</h2>
-
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-    @for (card of industries; track card.title) {
-      <button type="button" (click)="openCard(card)"
-        class="ghost-border bg-surface-container-low flex flex-col text-left h-96 hover:bg-surface-container-high transition-colors group overflow-hidden">
-        <div class="h-40 bg-surface-container-high overflow-hidden flex-shrink-0">
-          @if (card.image) {
-            <img [src]="card.image" [alt]="card.title" loading="lazy"
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-          } @else {
-            <div class="w-full h-full flex items-center justify-center">
-              <span class="material-symbols-outlined text-6xl text-primary-fixed">{{ card.icon }}</span>
-            </div>
-          }
-        </div>
-        <div class="p-6 flex flex-col flex-1">
-          <h3 class="font-headline font-bold text-sm uppercase tracking-tight mb-3">{{ card.title }}</h3>
-          <p class="text-secondary text-sm leading-relaxed flex-1 line-clamp-3">{{ card.description }}</p>
-          <p class="text-[0.6rem] uppercase tracking-widest text-primary-fixed font-bold mt-3 group-hover:underline">Read more →</p>
-        </div>
-      </button>
-    }
-  </div>
-
-  <h2 class="font-headline font-black text-2xl tracking-tighter uppercase mb-8">Commercial Services</h2>
-
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-    @for (card of services; track card.title) {
-      <div class="ghost-border bg-surface-container-low p-6 flex flex-col items-center text-center">
-        <div class="w-20 h-20 flex items-center justify-center mb-4 overflow-hidden">
-          @if (card.image) {
-            <img [src]="card.image" [alt]="card.title" loading="lazy"
-              class="w-full h-full object-cover" />
-          } @else {
-            <span class="material-symbols-outlined text-5xl text-primary-fixed">{{ card.icon }}</span>
-          }
-        </div>
-        <h3 class="font-headline font-bold text-xs uppercase tracking-tight">{{ card.title }}</h3>
+  <!-- Industries We Serve — 3-column card grid; each card opens the modal with full description. -->
+  <section class="py-16 md:py-24 bg-surface-container-low relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 md:px-6">
+      <div class="text-center mb-16">
+        <h1 class="font-headline font-bold text-3xl md:text-5xl text-navy uppercase mb-4">Industries We Serve</h1>
+        <div class="w-24 h-1 bg-primary-orange mx-auto rounded-full"></div>
       </div>
-    }
-  </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        @for (card of industries; track card.title) {
+          <button type="button" (click)="openCard(card)"
+            class="bg-white border border-outline-variant p-8 rounded-xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all text-left group">
+            <div class="w-16 h-16 bg-soft-orange rounded-lg flex items-center justify-center mb-6 text-primary-orange overflow-hidden">
+              @if (card.image) {
+                <img [src]="card.image" [alt]="card.title" loading="lazy"
+                  class="w-full h-full object-cover" />
+              } @else {
+                <span class="material-symbols-outlined text-4xl">{{ card.icon }}</span>
+              }
+            </div>
+            <h3 class="font-headline font-bold text-xl md:text-2xl text-navy mb-4 uppercase">{{ card.title }}</h3>
+            <p class="text-on-surface-variant mb-6 font-body line-clamp-4">{{ card.description }}</p>
+            <span class="font-headline font-bold text-sm uppercase tracking-widest flex items-center gap-2 group-hover:gap-4 transition-all text-navy">
+              Read More
+              <span class="material-symbols-outlined text-base text-primary-orange">arrow_forward</span>
+            </span>
+          </button>
+        }
+      </div>
+    </div>
+  </section>
 
-  <!-- CTA -->
-  <div class="ghost-border bg-surface-container-low p-8 text-center">
-    <h2 class="font-headline font-black text-xl tracking-tighter uppercase mb-3">Call Us Today</h2>
-    <p class="text-secondary text-sm mb-6">We are here for all of your commercial plumbing needs.</p>
-    <a
-      [href]="'tel:' + phone"
-      class="inline-flex items-center gap-2 bg-primary-fixed text-white px-8 py-3 font-headline font-bold text-sm uppercase tracking-widest hover:opacity-90 transition-all"
-    >
-      <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">call</span>
-      Call {{ phoneDisplay }}
-    </a>
-  </div>
+  <!-- Commercial Services — chip grid on the page background. -->
+  <section class="py-16 md:py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-4 md:px-6">
+      <div class="text-center mb-16">
+        <h2 class="font-headline font-bold text-3xl md:text-5xl text-navy uppercase mb-4">Commercial Services</h2>
+        <div class="w-24 h-1 bg-primary-orange mx-auto rounded-full"></div>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        @for (card of services; track card.title) {
+          <button type="button"
+            (click)="card.description ? openCard(card) : null"
+            [disabled]="!card.description"
+            class="bg-white p-6 rounded-lg border border-outline-variant shadow-sm text-center transition-all hover:border-navy hover:-translate-y-0.5 group disabled:cursor-default flex flex-col items-center">
+            <div class="w-20 h-20 flex items-center justify-center mb-4 overflow-hidden">
+              @if (card.image) {
+                <img [src]="card.image" [alt]="card.title" loading="lazy"
+                  class="w-full h-full object-cover" />
+              } @else {
+                <span class="material-symbols-outlined text-primary-orange text-5xl group-hover:scale-110 transition-transform">{{ card.icon }}</span>
+              }
+            </div>
+            <p class="font-headline font-bold text-xs uppercase tracking-widest text-navy">{{ card.title }}</p>
+          </button>
+        }
+      </div>
+    </div>
+  </section>
 
-</section>
+  <app-call-banner variant="help" />
+</main>
 
-<!-- Card detail modal -->
+<!-- Card detail modal — shared shape with /residential. -->
 @if (selectedCard) {
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90"
     (click)="closeCard()">
-    <div class="relative ghost-border bg-surface max-w-2xl w-full max-h-[85vh] overflow-y-auto p-10"
+    <div class="relative bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-10"
       (click)="$event.stopPropagation()">
       <button (click)="closeCard()"
-        class="absolute top-4 right-4 text-secondary hover:text-on-surface p-2 transition-colors">
+        class="absolute top-4 right-4 w-10 h-10 rounded-full bg-navy text-white flex items-center justify-center shadow-lg hover:bg-primary-orange hover:scale-110 transition-all"
+        aria-label="Close">
         <span class="material-symbols-outlined">close</span>
       </button>
       @if (selectedCard.image) {
         <img [src]="selectedCard.image" [alt]="selectedCard.title"
-          class="w-full max-h-72 object-cover ghost-border mb-8" />
+          class="w-full max-h-72 object-cover rounded-lg mb-8" />
       } @else {
-        <span class="material-symbols-outlined text-6xl text-primary-fixed block mb-6">{{ selectedCard.icon }}</span>
+        <span class="material-symbols-outlined text-6xl text-primary-orange block mb-6">{{ selectedCard.icon }}</span>
       }
-      <h3 class="font-headline font-black text-2xl tracking-tighter uppercase mb-4">{{ selectedCard.title }}</h3>
-      <p class="text-secondary text-sm leading-relaxed whitespace-pre-line">{{ selectedCard.description }}</p>
+      <h3 class="font-headline font-black text-2xl md:text-3xl tracking-tight uppercase mb-4 text-navy">{{ selectedCard.title }}</h3>
+      <p class="text-on-surface-variant text-base leading-relaxed whitespace-pre-line">{{ selectedCard.description }}</p>
     </div>
   </div>
 }

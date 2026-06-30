@@ -36,7 +36,6 @@ export const routes: Routes = [
     data: {
       title: 'Reviews',
       description: 'Read what our customers say about Daddy Bear Plumbing. Honest reviews from homeowners across La Grange, Villa Park, and the Western Suburbs.',
-      eyebrow: 'Client Feedback',
     },
   },
   {
@@ -46,8 +45,6 @@ export const routes: Routes = [
     data: {
       title: 'Contact',
       description: 'Get in touch with Daddy Bear Plumbing. Call us or send a message for a free estimate. Serving Brookfield, La Grange, Villa Park, and the Western Suburbs.',
-      eyebrow: 'Get In Touch',
-      pageHeaderTitle: 'Contact Us',
     },
   },
   {
@@ -57,7 +54,6 @@ export const routes: Routes = [
     data: {
       title: 'About Us',
       description: 'Learn about Daddy Bear Plumbing — a family-owned plumbing company serving Chicago\'s Western Suburbs. Licensed, insured, and all work guaranteed.',
-      // No `eyebrow` — the redesigned about page builds its own hero banner.
     },
   },
   {
@@ -67,7 +63,6 @@ export const routes: Routes = [
     data: {
       title: 'Residential Services',
       description: 'Residential plumbing services in Chicago\'s Western Suburbs. Drain cleaning, water heaters, leak repair, sewer service, and more. Free estimates.',
-      // No `eyebrow` — the redesigned residential page builds its own hero banner.
     },
   },
   {
@@ -77,7 +72,6 @@ export const routes: Routes = [
     data: {
       title: 'Commercial Services',
       description: 'Commercial plumbing services for restaurants, offices, apartments, hotels, and healthcare facilities across Chicago\'s Western Suburbs.',
-      eyebrow: 'For Businesses',
     },
   },
   {
@@ -88,7 +82,6 @@ export const routes: Routes = [
       mode: 'interior',
       title: 'Interior Construction',
       description: 'Interior new-construction plumbing — water, drains and vents, gas piping, and final fixture installation for homes and commercial properties across Chicago and Suburbs.',
-      eyebrow: 'New Construction',
     },
   },
   {
@@ -99,7 +92,6 @@ export const routes: Routes = [
       mode: 'exterior',
       title: 'Exterior Construction',
       description: 'Exterior new-construction plumbing — main water lines, sewer lines, and storm drainage with full excavation and code-compliant municipal tie-ins.',
-      eyebrow: 'New Construction',
     },
   },
   {
@@ -109,7 +101,6 @@ export const routes: Routes = [
     data: {
       title: 'FAQ',
       description: 'Frequently asked questions about Daddy Bear Plumbing — hours, service areas, pricing, warranties, and more.',
-      eyebrow: 'Common Questions',
     },
   },
   {
@@ -119,7 +110,6 @@ export const routes: Routes = [
     data: {
       title: 'Terms & Conditions',
       description: 'Terms and conditions for plumbing services provided by Daddy Bear Plumbing.',
-      eyebrow: 'Legal',
     },
   },
   {
@@ -129,7 +119,6 @@ export const routes: Routes = [
     data: {
       title: 'Privacy Policy',
       description: 'Privacy policy for Daddy Bear Plumbing — how we collect, use, and protect your personal information.',
-      eyebrow: 'Legal',
     },
   },
   {
@@ -139,7 +128,6 @@ export const routes: Routes = [
     data: {
       title: 'Cookies',
       description: 'Cookie policy for the Daddy Bear Plumbing website — what cookies we use and why.',
-      eyebrow: 'Legal',
     },
   },
   {

@@ -10,15 +10,12 @@ import { HeroComponent } from '../../components/hero/hero.component';
 import { TrustStatsComponent } from '../../components/trust-stats/trust-stats.component';
 import { ServicesGridComponent } from '../../components/services-grid/services-grid.component';
 import { ServiceAreaComponent } from '../../components/service-area/service-area.component';
-import { BUSINESS } from '../../globals';
+import { CallBannerComponent } from '../../components/call-banner/call-banner.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [HeroComponent, TrustStatsComponent, ServicesGridComponent, ServiceAreaComponent],
+  imports: [HeroComponent, TrustStatsComponent, ServicesGridComponent, ServiceAreaComponent, CallBannerComponent],
   templateUrl: './home.component.html',
 })
-export class HomeComponent {
-  phone = BUSINESS.phone;
-  phoneDisplay = BUSINESS.phoneDisplay;
-}
+export class HomeComponent {}

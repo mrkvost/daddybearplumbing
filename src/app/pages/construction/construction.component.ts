@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { BUSINESS } from '../../globals';
+import { CallBannerComponent } from '../../components/call-banner/call-banner.component';
 
 export interface ConstructionCard {
   icon: string;
@@ -69,7 +70,7 @@ const EXTERIOR_INTRO: string[] = [
 @Component({
   selector: 'app-construction',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, CallBannerComponent],
   templateUrl: './construction.component.html',
 })
 export class ConstructionComponent implements OnInit, OnDestroy {

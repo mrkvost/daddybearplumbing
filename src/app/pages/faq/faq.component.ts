@@ -2,6 +2,7 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { BUSINESS } from '../../globals';
+import { CallBannerComponent } from '../../components/call-banner/call-banner.component';
 
 export interface FaqItem {
   question: string;
@@ -38,15 +39,12 @@ const DEFAULT_FAQ: FaqItem[] = [
 @Component({
   selector: 'app-faq',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, CallBannerComponent],
   templateUrl: './faq.component.html',
 })
 export class FaqComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
 
-  phone = BUSINESS.phone;
-  phoneDisplay = BUSINESS.phoneDisplay;
-  email = BUSINESS.email;
   items: FaqItem[] = DEFAULT_FAQ;
 
   async ngOnInit(): Promise<void> {

@@ -5,6 +5,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
 import { BUSINESS } from '../../globals';
 import { SITE_DATA } from '../../../environments/site-data';
+import { CallBannerComponent } from '../../components/call-banner/call-banner.component';
 
 declare global {
   interface Window {
@@ -25,7 +26,7 @@ declare global {
 @Component({
   selector: 'app-contact',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CallBannerComponent],
   templateUrl: './contact.component.html',
 })
 export class ContactComponent implements AfterViewInit, OnDestroy {

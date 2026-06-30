@@ -1,6 +1,7 @@
 import { Component, OnInit, HostListener, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BUSINESS } from '../../globals';
+import { CallBannerComponent } from '../../components/call-banner/call-banner.component';
 
 export interface ServiceCard {
   icon: string;
@@ -39,7 +40,7 @@ const DEFAULT_SERVICES: ServiceCard[] = [
 @Component({
   selector: 'app-commercial',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, CallBannerComponent],
   templateUrl: './commercial.component.html',
 })
 export class CommercialComponent implements OnInit {

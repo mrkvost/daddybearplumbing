@@ -3,8 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { GalleryService, GalleryImage, Album } from '../../services/gallery.service';
-import { BUSINESS } from '../../globals';
-import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { CallBannerComponent } from '../../components/call-banner/call-banner.component';
 
 const BATCH_SIZE = 18;
 
@@ -16,7 +15,7 @@ interface AlbumCard extends Album {
 @Component({
   selector: 'app-gallery',
   standalone: true,
-  imports: [CommonModule, RouterLink, PageHeaderComponent],
+  imports: [CommonModule, RouterLink, CallBannerComponent],
   templateUrl: './gallery.component.html',
 })
 export class GalleryComponent implements OnInit, OnDestroy {
@@ -24,9 +23,6 @@ export class GalleryComponent implements OnInit, OnDestroy {
   private galleryService = inject(GalleryService);
   private route = inject(ActivatedRoute);
   private routeSub?: Subscription;
-
-  phone = BUSINESS.phone;
-  phoneDisplay = BUSINESS.phoneDisplay;
   allImages: GalleryImage[] = [];
   albums: Album[] = [];
   visibleCount = BATCH_SIZE;

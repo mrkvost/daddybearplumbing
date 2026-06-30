@@ -1,9 +1,6 @@
 @if (!isAdminRoute) {
   <app-navbar />
 }
-@if (headerEyebrow) {
-  <app-page-header [eyebrow]="headerEyebrow" [title]="headerTitle" [imageKey]="headerImageKey" />
-}
 <main class="bg-surface text-on-surface min-h-[300px]">
   <router-outlet />
 </main>
