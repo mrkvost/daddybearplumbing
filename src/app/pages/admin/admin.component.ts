@@ -62,7 +62,7 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   /**
    * Set of areas whose latest admin edits haven't been baked into the prerendered
-   * HTML yet (hero/OG/about images, locations). Drives the yellow badge on the
+   * HTML yet (hero/OG images, locations). Drives the yellow badge on the
    * Rebuild icon and the "Changes pending in:" list on the Rebuild tab.
    *
    * Source of truth: `gallery-images/admin-pending.json` on S3 — survives cookie /
@@ -128,7 +128,7 @@ export class AdminComponent implements OnInit, OnDestroy {
    * and add it to / remove it from the pending set accordingly. Falls back to
    * marking pending if the baseline hasn't loaded yet (safe default).
    */
-  private reconcilePendingArea(area: 'Hero image' | 'OG image' | 'About image' | 'Locations'): void {
+  private reconcilePendingArea(area: 'Hero image' | 'OG image' | 'Locations'): void {
     if (!this.baselineLoaded) {
       this.markRebuildNeeded(area);
       return;
@@ -140,9 +140,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         break;
       case 'OG image':
         matches = (this.siteMeta.og ?? null) === (this.baseline.og ?? null);
-        break;
-      case 'About image':
-        matches = (this.siteMeta.about ?? null) === (this.baseline.about ?? null);
         break;
       case 'Locations':
         matches = JSON.stringify(this.locations) === (this.baseline.locations ?? null);
@@ -161,7 +158,6 @@ export class AdminComponent implements OnInit, OnDestroy {
     return {
       hero: this.siteMeta.hero,
       og: this.siteMeta.og,
-      about: this.siteMeta.about,
       locations: JSON.stringify(this.locations),
       updatedAt: new Date().toISOString(),
     };
@@ -895,14 +891,8 @@ export class AdminComponent implements OnInit, OnDestroy {
   ogSuccess = false;
   ogError = '';
 
-  aboutImageUrl: string | null = null;
-  aboutImageUploading = false;
-  aboutImageSuccess = false;
-  aboutImageError = '';
-  aboutImageStagedFile: File | null = null;
-  aboutImageStagedPreview: string | null = null;
 
-  private siteMeta: { hero?: string; og?: string; about?: string } = {};
+  private siteMeta: { hero?: string; og?: string } = {};
   private readonly META_JSON_KEY = 'gallery-images/meta.json';
   private readonly META_PREFIX = '/gallery-images/meta/';
 
@@ -928,7 +918,6 @@ export class AdminComponent implements OnInit, OnDestroy {
     await this.loadMeta();
     this.heroImageUrl = this.siteMeta.hero ? `${this.META_PREFIX}${this.siteMeta.hero}` : null;
     this.ogImageUrl = this.siteMeta.og ? `${this.META_PREFIX}${this.siteMeta.og}` : null;
-    this.aboutImageUrl = this.siteMeta.about ? `${this.META_PREFIX}${this.siteMeta.about}` : null;
     this.cdr.detectChanges();
   }
 
@@ -1001,76 +990,6 @@ export class AdminComponent implements OnInit, OnDestroy {
       await this.loadSiteImages();
     } catch (e: any) {
       this.heroError = e.message || 'Delete failed';
-    }
-    this.cdr.detectChanges();
-  }
-
-  onAboutImageFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (!input.files?.length) return;
-
-    this.aboutImageError = '';
-    this.aboutImageSuccess = false;
-
-    if (this.aboutImageStagedPreview) URL.revokeObjectURL(this.aboutImageStagedPreview);
-
-    this.aboutImageStagedFile = input.files[0];
-    this.aboutImageStagedPreview = URL.createObjectURL(this.aboutImageStagedFile);
-    input.value = '';
-    this.cdr.detectChanges();
-  }
-
-  cancelAboutImageStaged(): void {
-    if (this.aboutImageStagedPreview) URL.revokeObjectURL(this.aboutImageStagedPreview);
-    this.aboutImageStagedFile = null;
-    this.aboutImageStagedPreview = null;
-    this.cdr.detectChanges();
-  }
-
-  async confirmAboutImageUpload(): Promise<void> {
-    if (!this.aboutImageStagedFile) return;
-
-    this.aboutImageUploading = true;
-    this.aboutImageError = '';
-    this.aboutImageSuccess = false;
-    this.cdr.detectChanges();
-
-    try {
-      const ext = this.aboutImageStagedFile.name.split('.').pop()?.toLowerCase() || 'jpg';
-      const newName = `about-${this.randomHash()}.${ext}`;
-      await this.uploadService.upload(this.aboutImageStagedFile, `gallery-images/meta/${newName}`, GALLERY_BUCKET);
-      if (this.siteMeta.about) {
-        await this.uploadService.delete(`gallery-images/meta/${this.siteMeta.about}`, GALLERY_BUCKET).catch(() => {});
-      }
-      this.siteMeta.about = newName;
-      await this.saveMeta();
-      this.reconcilePendingArea('About image');
-      this.aboutImageUrl = `${this.META_PREFIX}${newName}`;
-      this.aboutImageSuccess = true;
-    } catch (e: any) {
-      this.aboutImageError = e.message || 'Upload failed';
-    }
-
-    if (this.aboutImageStagedPreview) URL.revokeObjectURL(this.aboutImageStagedPreview);
-    this.aboutImageStagedFile = null;
-    this.aboutImageStagedPreview = null;
-    this.aboutImageUploading = false;
-    this.cdr.detectChanges();
-  }
-
-  async deleteAboutImage(): Promise<void> {
-    this.aboutImageError = '';
-    this.aboutImageSuccess = false;
-    try {
-      if (this.siteMeta.about) {
-        await this.uploadService.delete(`gallery-images/meta/${this.siteMeta.about}`, GALLERY_BUCKET);
-      }
-      delete this.siteMeta.about;
-      await this.saveMeta();
-      this.reconcilePendingArea('About image');
-      await this.loadSiteImages();
-    } catch (e: any) {
-      this.aboutImageError = e.message || 'Delete failed';
     }
     this.cdr.detectChanges();
   }

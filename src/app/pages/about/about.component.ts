@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BUSINESS } from '../../globals';
-import { SITE_DATA } from '../../../environments/site-data';
 import { CallBannerComponent } from '../../components/call-banner/call-banner.component';
 
 export interface AboutCard {
@@ -55,7 +54,6 @@ export class AboutComponent implements OnInit, OnDestroy {
 
   phone = BUSINESS.phone;
   phoneDisplay = BUSINESS.phoneDisplay;
-  bannerImage = SITE_DATA.aboutImage;
 
   history: string[] = DEFAULT_HISTORY;
   whyChooseUs: AboutCard[] = DEFAULT_WHY_CHOOSE_US;

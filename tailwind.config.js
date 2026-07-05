@@ -9,6 +9,10 @@ module.exports = {
         // Navbar-specific breakpoint — switch to burger menu below 890px.
         // Other components keep the default `md:` (768px) etc.
         'nav': '890px',
+        // Sub-mobile breakpoint used to swap the call CTA between the
+        // full phone number and just the word "Call" — kicks in at 495px so
+        // the CTA doesn't crowd the burger on narrow phones.
+        'xs': '495px',
       },
       colors: {
         // ---- Public-site "Industrial Navy + Safety Orange" palette ----

@@ -13,8 +13,9 @@ export const BUSINESS = {
   // Add a URL here when a profile goes live and the icon becomes a working link.
   social: {
     facebook:  'https://www.facebook.com/profile.php?id=61590762127242',
-    instagram: '',
-    linkedin:  '',
+    instagram: 'https://www.instagram.com/daddybearplumbing',
+    // Temporary personal LinkedIn — swap for the company page URL when it exists.
+    linkedin:  'https://www.linkedin.com/in/matej-rostak-958751417',
     google:    '',
   },
 };

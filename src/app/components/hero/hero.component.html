@@ -89,8 +89,9 @@
               </div>
             </div>
           </div>
-          <!-- Google reviews chip -->
-          <div class="flex items-center gap-4 py-3 px-6 bg-white rounded-full shadow-lg border border-background-light-blue w-fit">
+          <!-- Google reviews chip — clickable, jumps to /reviews. -->
+          <a routerLink="/reviews" aria-label="See our reviews"
+            class="flex items-center gap-4 py-3 px-6 bg-white rounded-full shadow-lg border border-background-light-blue w-fit hover:shadow-xl hover:-translate-y-0.5 transition-all">
             <div class="flex items-center gap-3 flex-wrap">
               <svg class="w-6 h-6 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -108,7 +109,7 @@
               </div>
               <span class="text-navy/80 font-black text-sm border-l border-navy/20 pl-3">100+ Reviews</span>
             </div>
-          </div>
+          </a>
         </div>
       </div>
 

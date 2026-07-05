@@ -1,18 +1,6 @@
-<!-- Hero banner — wide image with a soft fade into the page background.
-     The visible heading is "Our History" in the section below; the h1 here
-     keeps the page accessible for screen readers without competing visually. -->
-<section class="relative flex items-center justify-center overflow-hidden bg-white aspect-[3/1]">
-  <div class="absolute inset-0 z-0">
-    @if (bannerImage) {
-      <img [src]="bannerImage" alt="Daddy Bear Plumbing — about banner"
-        class="w-full h-full object-cover hero-banner-blend"
-        fetchpriority="high" decoding="async" />
-    }
-  </div>
-  <div class="sr-only">
-    <h1>About Us — Daddy Bear Plumbing</h1>
-  </div>
-</section>
+<!-- Screen-reader h1 so the page has a top-level heading even though "Our History"
+     is the first visible headline. -->
+<h1 class="sr-only">About Us — Daddy Bear Plumbing</h1>
 
 <!-- Our History — text + watermark bear logo on the right. -->
 @if (history.length > 0) {
@@ -33,7 +21,7 @@
         <div class="flex justify-center items-center mt-8 md:mt-0">
           <div class="relative w-full max-w-md opacity-20 md:opacity-100">
             <img src="/logo.svg" alt="" aria-hidden="true"
-              class="w-full h-auto object-contain watermark-blend" />
+              class="w-full h-auto object-contain" />
           </div>
         </div>
       </div>

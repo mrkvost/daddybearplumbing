@@ -10,7 +10,7 @@
  *       - Substitutes the `og:image` and `twitter:image` URLs in `src/index.html`
  *         so non-JS crawlers (Facebook, LinkedIn, X) see the real image.
  *
- * If the S3 fetch fails, the build is aborted. Run admin → upload hero / OG / about
+ * If the S3 fetch fails, the build is aborted. Run admin → upload hero / OG
  * images and locations at least once before the first build.
  */
 
@@ -88,7 +88,7 @@ async function main() {
     [meta, locations] = await Promise.all([fetchJson(META_URL), fetchJson(LOCATIONS_URL)]);
   } catch (e) {
     console.error(`Build aborted: ${e.message}`);
-    console.error('Ensure meta.json and locations.json exist on S3 — upload at least one hero/OG/about image and set locations via the admin UI before running the build.');
+    console.error('Ensure meta.json and locations.json exist on S3 — upload at least one hero/OG image and set locations via the admin UI before running the build.');
     process.exit(1);
   }
 
@@ -98,7 +98,6 @@ async function main() {
   }
 
   const heroImage  = meta.hero  ? `/gallery-images/meta/${meta.hero}`  : '/hero.jpg';
-  const aboutImage = meta.about ? `/gallery-images/meta/${meta.about}` : '';
   const ogFilename = meta.og    ? `/gallery-images/meta/${meta.og}`    : '/og-placeholder.jpg';
   const ogImage    = `${baseUrl}${ogFilename}`;
 
@@ -110,14 +109,12 @@ async function main() {
 
 export interface SiteData {
   heroImage: string;
-  aboutImage: string;
   ogImage: string;
   locations: string[];
 }
 
 export const SITE_DATA: SiteData = {
   heroImage: ${JSON.stringify(heroImage)},
-  aboutImage: ${JSON.stringify(aboutImage)},
   ogImage: ${JSON.stringify(ogImage)},
   locations: ${JSON.stringify(locations, null, 2).replace(/^/gm, '  ').trimStart()},
 };

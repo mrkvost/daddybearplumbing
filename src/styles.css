@@ -34,17 +34,6 @@ body {
   }
 }
 
-/* About page — hero banner softly fades into the page background at the bottom. */
-.hero-banner-blend {
-  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-}
-/* About page — watermark bear logo behind Our History (radial fade + multiply blend). */
-.watermark-blend {
-  mix-blend-mode: multiply;
-  mask-image: radial-gradient(circle, black 30%, transparent 70%);
-  -webkit-mask-image: radial-gradient(circle, black 30%, transparent 70%);
-}
 /* About page — soft circular fade around the Our Promise blended graphic. */
 .logo-edge-fade {
   mask-image: radial-gradient(circle at center, black 50%, transparent 90%);
