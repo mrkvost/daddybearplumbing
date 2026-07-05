@@ -8,7 +8,7 @@ export const routes: Routes = [
       import('./pages/home/home.component').then((m) => m.HomeComponent),
     data: {
       title: 'Home',
-      description: 'Professional plumbing services for Chicago\'s Suburbs. Licensed, insured, and locally owned. Emergency service available 24/7.',
+      description: 'Professional plumbing services for Chicago and Suburbs. Licensed, insured, and locally owned. Emergency service available 24/7.',
     },
   },
   {
@@ -17,7 +17,7 @@ export const routes: Routes = [
       import('./pages/gallery/gallery.component').then((m) => m.GalleryComponent),
     data: {
       title: 'Gallery',
-      description: 'Browse photos from our recent plumbing projects across the Suburbs. Emergency repairs, water heaters, drain cleaning, and more.',
+      description: 'Browse photos from our recent plumbing projects across Chicago and Suburbs. Emergency repairs, water heaters, drain cleaning, and more.',
     },
   },
   {
@@ -35,7 +35,7 @@ export const routes: Routes = [
       import('./pages/reviews/reviews.component').then((m) => m.ReviewsComponent),
     data: {
       title: 'Reviews',
-      description: 'Read what our customers say about Daddy Bear Plumbing. Honest reviews from homeowners across Chicago Suburbs.',
+      description: 'Read what our customers say about Daddy Bear Plumbing. Honest reviews from homeowners across Chicago and Suburbs.',
     },
   },
   {
@@ -44,7 +44,7 @@ export const routes: Routes = [
       import('./pages/contact/contact.component').then((m) => m.ContactComponent),
     data: {
       title: 'Contact',
-      description: 'Get in touch with Daddy Bear Plumbing. Call us or send a message for a free estimate. Serving Chicago Suburbs.',
+      description: 'Get in touch with Daddy Bear Plumbing. Call us or send a message for a free estimate. Serving Chicago and Suburbs.',
     },
   },
   {
@@ -53,7 +53,7 @@ export const routes: Routes = [
       import('./pages/about/about.component').then((m) => m.AboutComponent),
     data: {
       title: 'About Us',
-      description: 'Learn about Daddy Bear Plumbing — a family-owned plumbing company serving Chicago Suburbs. Licensed, insured, and all work guaranteed.',
+      description: 'Learn about Daddy Bear Plumbing — a family-owned plumbing company serving Chicago and Suburbs. Licensed, insured, and all work guaranteed.',
     },
   },
   {
@@ -62,7 +62,7 @@ export const routes: Routes = [
       import('./pages/residential/residential.component').then((m) => m.ResidentialComponent),
     data: {
       title: 'Residential Services',
-      description: 'Residential plumbing services in Chicago\'s Suburbs. Drain cleaning, water heaters, leak repair, sewer service, and more. Free estimates.',
+      description: 'Residential plumbing services in Chicago and Suburbs. Drain cleaning, water heaters, leak repair, sewer service, and more. Free estimates.',
     },
   },
   {
@@ -71,7 +71,7 @@ export const routes: Routes = [
       import('./pages/commercial/commercial.component').then((m) => m.CommercialComponent),
     data: {
       title: 'Commercial Services',
-      description: 'Commercial plumbing services for restaurants, offices, apartments, hotels, and healthcare facilities across Chicago Suburbs.',
+      description: 'Commercial plumbing services for restaurants, offices, apartments, hotels, and healthcare facilities across Chicago and Suburbs.',
     },
   },
   {
