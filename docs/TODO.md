@@ -177,10 +177,6 @@ admin user creation, gallery photo convention, project structure.
 - should we refactor (make parts that repeat re-usable)?
 - rebuilder and metrics as one (with possible parameters?)
 
-- logo for the footer needs rework (white background)
-- footer text should be updated
-- footer IDPH add slightly more white around it
-
 - google link in the footer
 - the texts comparison from the before redesign.
 

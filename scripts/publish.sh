@@ -23,7 +23,7 @@ aws s3 cp "$DIST" "$BUCKET" --recursive \
   --exclude "*" \
   --include "chunk-*.js" \
   --include "styles-*.css" \
-  --include "logo.svg" \
+  --include "logo-white.svg" \
   --cache-control "public, max-age=31536000, immutable"
 
 echo "Pass 3: overwrite fonts with 1 month..."

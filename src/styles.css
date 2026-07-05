@@ -24,6 +24,15 @@ body {
   filter: grayscale(100%);
 }
 
+/* Stacked white drop-shadows create a halo that traces the actual logo
+   silhouette. */
+.logo-halo {
+  filter:
+    drop-shadow(0 0 2px #fff) drop-shadow(0 0 2px #fff)
+    drop-shadow(0 0 2px #fff) drop-shadow(0 0 1px #fff);
+
+}
+
 /* Hero photo mask — soft ellipse clip on the right column of the new hero design. */
 .hero-mask {
   clip-path: ellipse(110% 100% at 100% 0%);
