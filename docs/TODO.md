@@ -146,7 +146,6 @@ admin user creation, gallery photo convention, project structure.
       just `selectedCard.title` (e.g., "Drain Cleaning"). Append a service qualifier
       ("Drain Cleaning service" or "Drain Cleaning — residential plumbing") for marginal keyword
       density on the photo. Functional today; minor SEO polish only.
-- [x] Pagination for admin gallery and reviews lists (+ editable position numbers)
 - [x] Session persistence (tokens in sessionStorage + auto-refresh)
 - [ ] Google Business Profile link on map/address
 - [x] Investigated **service worker / PWA** — decided **not worth it** for this site.
@@ -172,25 +171,17 @@ admin user creation, gallery photo convention, project structure.
 
 ## Notes
 
-- Goals 1 and 2 are complete.
-- Goals 3 and 5 can be done in any order (both operate on Angular components).
-- `terraform.tfvars` is gitignored — never commit real AWS account details.
 - For a new deployment: copy `terraform.tfvars.example`, delete `import.tf`, run `bootstrap.sh`.
 
 - should we remove dead code?
 - should we refactor (make parts that repeat re-usable)?
 - rebuilder and metrics as one (with possible parameters?)
-- og-placeholder can be removed (og-<hash> is enough)
 
-- on the home page fix text in the need plumbing help
-- on the home page divider on the bottom does not match, how should the divider on the about us page look like? i do not like current white line
 - logo for the footer needs rework (white background)
 - footer text should be updated
 - footer IDPH add slightly more white around it
 
-- current inconsistent looks of the top parts of the pages
-
-- navigate links in the footer, google, plus youtube link? https://www.youtube.com/@DaddyBearPlumbing
+- google link in the footer
 - the texts comparison from the before redesign.
 
 - my own: 'No reviews if no reviews'?

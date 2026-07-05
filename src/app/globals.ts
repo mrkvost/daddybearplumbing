@@ -16,6 +16,7 @@ export const BUSINESS = {
     instagram: 'https://www.instagram.com/daddybearplumbing',
     // Temporary personal LinkedIn — swap for the company page URL when it exists.
     linkedin:  'https://www.linkedin.com/in/matej-rostak-958751417',
+    youtube:   'https://www.youtube.com/@DaddyBearPlumbing',
     google:    '',
   },
 };
