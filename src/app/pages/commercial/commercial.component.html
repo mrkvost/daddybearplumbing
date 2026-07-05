@@ -1,6 +1,14 @@
 <main class="wave-bg">
+  <!-- Page title — small "Our History"-style with orange rail. -->
+  <section class="pt-16 md:pt-20 pb-8 md:pb-12 px-4 md:px-6 max-w-7xl mx-auto text-center">
+    <h1 class="font-headline text-3xl md:text-5xl text-navy uppercase font-bold leading-tight inline-block relative">
+      Commercial Services
+      <span class="absolute -bottom-4 left-1/2 -translate-x-1/2 w-24 h-1.5 bg-primary-orange rounded-full"></span>
+    </h1>
+  </section>
+
   <!-- Intro — supporting paragraph on a tinted band. -->
-  <section class="pt-16 md:pt-24 pb-16 md:pb-20 bg-surface-container-low">
+  <section class="pt-8 pb-16 md:pb-20 bg-surface-container-low">
     <div class="max-w-3xl mx-auto px-4 md:px-6 text-center">
       <p class="font-body text-lg text-on-surface-variant leading-relaxed">
         Daddy Bear Plumbing provides top-tier plumbing solutions for businesses of all sizes.
@@ -16,8 +24,8 @@
   <section class="py-16 md:py-24 bg-surface-container-low relative overflow-hidden">
     <div class="max-w-7xl mx-auto px-4 md:px-6">
       <div class="text-center mb-16">
-        <h1 class="font-headline font-bold text-3xl md:text-5xl text-navy uppercase mb-4">Industries We Serve</h1>
-        <div class="w-24 h-1 bg-primary-orange mx-auto rounded-full"></div>
+        <h2 class="font-headline font-bold text-2xl md:text-3xl text-navy uppercase mb-4">Industries We Serve</h2>
+        <div class="w-16 h-1 bg-primary-orange mx-auto rounded-full"></div>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         @for (card of industries; track card.title) {

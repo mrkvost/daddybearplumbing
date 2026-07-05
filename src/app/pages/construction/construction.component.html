@@ -1,8 +1,10 @@
 <main class="wave-bg">
-  <!-- Subhead — page title centered with orange rail. Acts as h1 (no hero above). -->
-  <section class="pt-16 md:pt-24 pb-12 px-4 md:px-6 max-w-7xl mx-auto text-center">
-    <h1 class="font-headline font-black text-3xl md:text-5xl text-navy uppercase mb-4 leading-tight">{{ heading }}</h1>
-    <div class="mx-auto w-24 h-1.5 bg-primary-orange rounded-full"></div>
+  <!-- Page title — small "Our History"-style with orange rail. -->
+  <section class="pt-16 md:pt-20 pb-8 md:pb-12 px-4 md:px-6 max-w-7xl mx-auto text-center">
+    <h1 class="font-headline text-3xl md:text-5xl text-navy uppercase font-bold leading-tight inline-block relative">
+      {{ heading }}
+      <span class="absolute -bottom-4 left-1/2 -translate-x-1/2 w-24 h-1.5 bg-primary-orange rounded-full"></span>
+    </h1>
   </section>
 
   <!-- Intro paragraphs -->

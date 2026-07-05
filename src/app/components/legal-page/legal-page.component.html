@@ -1,23 +1,19 @@
 <!-- Shared layout for Privacy / Terms / Cookies pages.
      Wrapping page just sets `data` — the component owns the visual style. -->
 <main class="wave-bg">
-  <!-- Subhead: split-color title + orange rail + optional intro and last-amended. -->
-  <section class="pt-16 md:pt-24 pb-12 px-4 md:px-6 max-w-7xl mx-auto text-center">
-    <h1 class="font-headline font-black leading-none text-5xl md:text-7xl uppercase tracking-tight">
-      <span class="text-navy">{{ data.title }}</span>
-      @if (data.titleAccent) {
-        <br class="md:hidden">
-        <span class="text-primary-orange md:ml-3">{{ data.titleAccent }}</span>
-      }
+  <!-- Page title — small "Our History"-style with orange rail. -->
+  <section class="pt-16 md:pt-20 pb-8 md:pb-12 px-4 md:px-6 max-w-7xl mx-auto text-center">
+    <h1 class="font-headline text-3xl md:text-5xl text-navy uppercase font-bold leading-tight inline-block relative">
+      {{ data.title }}@if (data.titleAccent) { {{ ' ' + data.titleAccent }} }
+      <span class="absolute -bottom-4 left-1/2 -translate-x-1/2 w-24 h-1.5 bg-primary-orange rounded-full"></span>
     </h1>
-    <div class="mx-auto mt-6 w-24 h-1.5 bg-primary-orange rounded-full"></div>
     @if (data.lastAmended) {
-      <p class="mt-6 text-xs font-headline font-bold uppercase tracking-widest text-on-surface-variant/70">
+      <p class="mt-8 text-xs font-headline font-bold uppercase tracking-widest text-on-surface-variant/70">
         {{ data.lastAmended }}
       </p>
     }
     @if (data.intro) {
-      <p class="mt-8 font-body text-lg text-on-surface-variant max-w-3xl mx-auto leading-relaxed">
+      <p class="mt-6 font-body text-base md:text-lg text-on-surface-variant max-w-3xl mx-auto leading-relaxed">
         {{ data.intro }}
       </p>
     }

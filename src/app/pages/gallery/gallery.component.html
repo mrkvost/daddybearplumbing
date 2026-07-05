@@ -1,18 +1,19 @@
 <main class="wave-bg">
-  <!-- Subhead — page title centered + orange rail. Acts as h1; no separate hero. -->
-  <section class="pt-16 md:pt-24 pb-12 px-4 md:px-6 max-w-7xl mx-auto text-center">
+  <!-- Page title — small "Our History"-style with orange rail. -->
+  <section class="pt-16 md:pt-20 pb-8 md:pb-12 px-4 md:px-6 max-w-7xl mx-auto text-center">
     @if (currentAlbum) {
       @if (currentAlbum.location) {
         <p class="font-headline font-black tracking-[0.3em] uppercase text-xs text-navy-medium mb-3">{{ currentAlbum.location }}</p>
       }
-      <h1 class="font-headline font-black text-3xl md:text-5xl text-navy uppercase mb-4 leading-tight">{{ currentAlbum.title }}</h1>
-      <div class="mx-auto w-24 h-1.5 bg-primary-orange rounded-full"></div>
+      <h1 class="font-headline text-3xl md:text-5xl text-navy uppercase font-bold leading-tight inline-block relative">
+        {{ currentAlbum.title }}
+        <span class="absolute -bottom-4 left-1/2 -translate-x-1/2 w-24 h-1.5 bg-primary-orange rounded-full"></span>
+      </h1>
     } @else {
-      <h1 class="font-headline font-black text-3xl md:text-5xl text-navy uppercase mb-4 leading-tight">Project Gallery</h1>
-      <div class="mx-auto w-24 h-1.5 bg-primary-orange rounded-full mb-6"></div>
-      <p class="font-body text-lg text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
-        From residential upgrades to massive commercial infrastructure, we deliver precision plumbing that stands the test of time.
-      </p>
+      <h1 class="font-headline text-3xl md:text-5xl text-navy uppercase font-bold leading-tight inline-block relative">
+        Project Gallery
+        <span class="absolute -bottom-4 left-1/2 -translate-x-1/2 w-24 h-1.5 bg-primary-orange rounded-full"></span>
+      </h1>
     }
   </section>
 
