@@ -1,26 +1,54 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 # Creates the S3 bucket and DynamoDB table for Terraform remote state.
-# Run this once before the first `terraform init`.
-# Safe to run multiple times — skips resources that already exist.
+# Run this once (against the target AWS account's credentials) before the
+# first `terraform init` for a given deployment. Safe to re-run — skips
+# resources that already exist.
 #
-# Usage: ./bootstrap.sh <project-name> [region]
-# Example: ./bootstrap.sh kvaking eu-central-1
-#          ./bootstrap.sh daddybear us-east-1
+# All configuration is read from `backends/<env>.hcl` — the same file
+# `terraform init` uses. That's the single source of truth for bucket name,
+# lock table name, and region.
+#
+# Usage:   ./bootstrap.sh <env>
+# Example: AWS_PROFILE=kvaking   ./bootstrap.sh kvaking
+#          AWS_PROFILE=daddybear ./bootstrap.sh daddybear
 
-if [ -z "$1" ]; then
-  echo "Usage: ./bootstrap.sh <project-name> [region]"
-  echo "Example: ./bootstrap.sh daddybear eu-central-1"
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 <env>"
+  echo "Example: AWS_PROFILE=daddybear $0 daddybear"
+  echo ""
+  echo "Available envs (backends/*.hcl):"
+  ls backends/ 2>/dev/null | sed -E 's/\.hcl$//' | sed 's/^/  /'
   exit 1
 fi
 
-PROJECT="$1"
-REGION="${2:-eu-central-1}"
-STATE_BUCKET="${PROJECT}-terraform-state"
-LOCK_TABLE="${PROJECT}-terraform-locks"
+ENV="$1"
+BACKEND_FILE="backends/${ENV}.hcl"
 
-echo "Project:      $PROJECT"
+if [ ! -f "$BACKEND_FILE" ]; then
+  echo "error: $BACKEND_FILE not found" >&2
+  exit 1
+fi
+
+# Extract quoted values from the .hcl file. Handles the common form
+# `key = "value"` with any amount of whitespace around the =.
+hcl_value() {
+  awk -F'"' -v key="$1" '$0 ~ "^"key"[[:space:]]*=" { print $2; exit }' "$BACKEND_FILE"
+}
+
+STATE_BUCKET=$(hcl_value bucket)
+LOCK_TABLE=$(hcl_value dynamodb_table)
+REGION=$(hcl_value region)
+
+for var in STATE_BUCKET LOCK_TABLE REGION; do
+  if [ -z "${!var}" ]; then
+    echo "error: $BACKEND_FILE is missing '${var,,}' — cannot bootstrap." >&2
+    exit 1
+  fi
+done
+
+echo "Env:          $ENV"
 echo "Region:       $REGION"
 echo "State bucket: $STATE_BUCKET"
 echo "Lock table:   $LOCK_TABLE"
@@ -30,10 +58,18 @@ echo "Creating state bucket: $STATE_BUCKET"
 if aws s3api head-bucket --bucket "$STATE_BUCKET" 2>/dev/null; then
   echo "  Bucket already exists, skipping."
 else
-  aws s3api create-bucket \
-    --bucket "$STATE_BUCKET" \
-    --region "$REGION" \
-    --create-bucket-configuration LocationConstraint="$REGION"
+  # us-east-1 must NOT be passed via LocationConstraint (AWS quirk); every
+  # other region requires it. Branch accordingly.
+  if [ "$REGION" = "us-east-1" ]; then
+    aws s3api create-bucket \
+      --bucket "$STATE_BUCKET" \
+      --region "$REGION"
+  else
+    aws s3api create-bucket \
+      --bucket "$STATE_BUCKET" \
+      --region "$REGION" \
+      --create-bucket-configuration LocationConstraint="$REGION"
+  fi
 
   aws s3api put-bucket-versioning \
     --bucket "$STATE_BUCKET" \
@@ -61,12 +97,7 @@ else
 fi
 
 echo ""
-echo "Done! Update the backend block in main.tf:"
-echo "  bucket         = \"$STATE_BUCKET\""
-echo "  dynamodb_table = \"$LOCK_TABLE\""
-echo "  region         = \"$REGION\""
-echo ""
-echo "Then run:"
-echo "  cd infrastructure"
-echo "  terraform init"
-echo "  terraform plan"
+echo "Done! Next:"
+echo "  cp terraform.tfvars.example terraform.tfvars.$ENV   # if not already"
+echo "  ./tf $ENV init"
+echo "  ./tf $ENV plan"

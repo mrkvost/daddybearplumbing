@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# Wrapper for running terraform against a named deployment.
+#
+# Usage:
+#   ./tf <env> <terraform-subcommand> [args...]
+#
+# Examples:
+#   ./tf kvaking plan
+#   ./tf daddybear apply
+#   ./tf daddybear apply -var="publish_dns=true"
+#   ./tf daddybear import aws_route53_zone.site Z0123456789ABCDEF
+#
+# What it does:
+#   1. Sets AWS_PROFILE=<env> so the AWS CLI + provider use the right creds.
+#      Requires named profiles in ~/.aws/credentials — see README.
+#   2. For `init`, passes `-backend-config=backends/<env>.hcl -reconfigure` so
+#      Terraform points at the right state bucket in the right AWS account.
+#   3. For any other subcommand, passes `-var-file=terraform.tfvars.<env>` so
+#      Terraform reads the right per-environment variables.
+#
+# You still need to re-run `./tf <env> init -reconfigure` any time you switch
+# environments — Terraform can only hold one backend configuration at a time
+# in .terraform/ per checkout.
+
+set -euo pipefail
+
+if [[ $# -lt 2 ]]; then
+    cat >&2 <<EOF
+usage: $0 <env> <terraform-subcommand> [args...]
+
+Available envs: kvaking, daddybear (add a backends/<env>.hcl and
+terraform.tfvars.<env> to support more).
+EOF
+    exit 1
+fi
+
+env="$1"
+subcmd="$2"
+shift 2
+
+backend_file="backends/${env}.hcl"
+tfvars_file="terraform.tfvars.${env}"
+
+if [[ ! -f "$backend_file" ]]; then
+    echo "error: $backend_file not found" >&2
+    exit 1
+fi
+if [[ ! -f "$tfvars_file" ]] && [[ "$subcmd" != "init" ]]; then
+    echo "error: $tfvars_file not found" >&2
+    exit 1
+fi
+
+export AWS_PROFILE="$env"
+
+case "$subcmd" in
+    init)
+        exec terraform init -backend-config="$backend_file" -reconfigure "$@"
+        ;;
+    plan|apply|destroy|refresh|import|console|state|taint|untaint)
+        exec terraform "$subcmd" -var-file="$tfvars_file" "$@"
+        ;;
+    *)
+        # Fall-through for subcommands that don't take -var-file (fmt, validate,
+        # output, providers, workspace, version, …).
+        exec terraform "$subcmd" "$@"
+        ;;
+esac

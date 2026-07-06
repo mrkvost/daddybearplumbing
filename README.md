@@ -57,46 +57,191 @@ and serves the home shell.
 
 ---
 
-## Infrastructure Setup (first time)
+## Multi-Deployment Setup (kvaking, daddybear, …)
+
+This repo can drive multiple independent AWS deployments — each in its own
+AWS account, region, and Terraform state — from a single codebase. The
+current example: `kvaking.com` (staging, eu-central-1) and
+`daddybearplumbing.com` (production, us-east-1).
+
+### File layout
+
+```
+infrastructure/
+├── main.tf                       # backend block is partial — no bucket/key/region
+├── backends/
+│   ├── kvaking.hcl               # state bucket + region for kvaking
+│   └── daddybear.hcl             # state bucket + region for daddybear
+├── terraform.tfvars.kvaking      # per-env variable values (domain, keys, etc.)
+├── terraform.tfvars.daddybear
+├── terraform.tfvars.example      # template — copy to add a new env
+├── bootstrap.sh                  # reads backends/<env>.hcl, creates the state bucket
+└── tf                            # wrapper: ./tf <env> <subcommand>
+```
+
+The single source of truth for each deployment is its pair of files:
+`backends/<env>.hcl` (state location + region) and
+`terraform.tfvars.<env>` (per-env variable values including `domain`,
+`bucket_name`, `region`, feature-flag gates). `main.tf` is shared.
+
+### AWS profile setup
+
+Split credentials + config by env so nothing runs against the wrong account:
+
+`~/.aws/credentials`:
+```ini
+[kvaking]
+aws_access_key_id     = ...
+aws_secret_access_key = ...
+
+[daddybear]
+aws_access_key_id     = ...
+aws_secret_access_key = ...
+```
+
+`~/.aws/config` (note the `profile ` prefix — required for named profiles):
+```ini
+[profile kvaking]
+region = eu-central-1
+output = json
+
+[profile daddybear]
+region = us-east-1
+output = json
+```
+
+Drop `[default]` from both files. Bare `aws` commands will then error out
+loudly instead of silently touching the wrong account. Every command gets
+prefixed with `AWS_PROFILE=<env>` (or run through `./tf`, which sets it).
+
+### The `./tf` wrapper
+
+`./tf <env> <subcommand> [args...]` forwards to `terraform`, adding:
+
+- `AWS_PROFILE=<env>` so the AWS SDK targets the right account.
+- For `init`: `-backend-config=backends/<env>.hcl -reconfigure` so the S3
+  backend points at the right state bucket/region.
+- For `plan|apply|destroy|refresh|import|console|state|taint|untaint`:
+  `-var-file=terraform.tfvars.<env>` so per-env values load.
+
+Examples:
+```bash
+./tf kvaking plan
+./tf daddybear apply
+./tf daddybear apply -var="publish_dns=true" -var="cloudfront_enabled=true"
+./tf daddybear import aws_route53_zone.site Z0123456789ABCDEFGHIJK
+```
+
+Switching envs requires **one `./tf <env> init`** — Terraform holds one
+backend config in `.terraform/` at a time. After that, all subcommands
+against that env "just work".
+
+### Bringing up a fresh deployment (daddybear pattern)
 
 ```bash
 cd infrastructure
 
-# 1. Create Terraform state bucket and DynamoDB lock table
-./bootstrap.sh <project-name> <region>
-# e.g.: ./bootstrap.sh kvaking eu-central-1
+# 1. Populate AWS profile (~/.aws/credentials + ~/.aws/config) as above.
 
-# 2. Update the backend block in main.tf with the state bucket/table names
+# 2. Create backends/<env>.hcl declaring bucket, key, dynamodb_table, region.
+#    (See backends/kvaking.hcl for the shape; conventionally
+#    "<env>-terraform-state" / "<env>-terraform-locks".)
 
-# 3. Copy and fill in the variables
-cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars with your values (domain, bucket_name, project, region)
+# 3. Bootstrap the state bucket + lock table (reads backends/<env>.hcl):
+AWS_PROFILE=<env> ./bootstrap.sh <env>
 
-# 4. For a new deployment, delete import.tf (only needed to adopt existing resources)
+# 4. Copy tfvars template and fill in real values:
+cp terraform.tfvars.example terraform.tfvars.<env>
+# Edit: domain, bucket_name, project, region, contact_email,
+# turnstile_secret, github_repo_url. Keep publish_dns=false and
+# cloudfront_enabled=false for the initial apply — see "Staged rollout" below.
 
-# 5. Initialize and apply
-terraform init
-terraform plan
-terraform apply
+# 5. If the target domain is already registered via Route 53 Domains, its
+#    hosted zone already exists. Import it so Terraform doesn't try to create
+#    a duplicate:
+aws route53 list-hosted-zones \
+  --query "HostedZones[?Name=='<domain>.'].{Id:Id, Name:Name}" \
+  --profile <env>
+./tf <env> init
+./tf <env> import aws_route53_zone.site <ZONE_ID>
 
-# 6. Note the Cognito outputs and update src/environments/environment.ts:
-terraform output cognito_user_pool_id
-terraform output cognito_client_id
-terraform output cognito_identity_pool_id
+#    If the domain is at a third-party registrar, skip the import — Terraform
+#    creates the hosted zone and outputs 4 AWS name servers; point the
+#    registrar's NS at them.
 
-# 7. Create admin users (no self-signup):
-aws cognito-idp admin-create-user \
+# 6. If this is a fresh deployment (not migrating existing resources into
+#    Terraform state), delete import.tf — that file only exists to adopt
+#    the kvaking resources that pre-dated this codebase:
+rm import.tf
+
+# 7. First apply. With publish_dns=false and cloudfront_enabled=false the
+#    stack builds but nothing serves traffic yet:
+./tf <env> plan
+./tf <env> apply
+
+# 8. Note the Cognito outputs and paste into src/environments/environment.ts:
+./tf <env> output cognito_user_pool_id
+./tf <env> output cognito_client_id
+./tf <env> output cognito_identity_pool_id
+./tf <env> output rebuild_trigger_url
+./tf <env> output rebuild_status_url
+
+# 9. Create the first admin user (no self-signup):
+AWS_PROFILE=<env> aws cognito-idp admin-create-user \
   --user-pool-id <USER_POOL_ID> \
   --username <email> \
   --temporary-password <temp-password>
 
-# 8. Build and deploy the Angular app
+# 10. Migrate content into the new deployment's S3 buckets. From the source
+#     account/region (adjust bucket names as needed):
+AWS_PROFILE=<source> aws s3 sync \
+  s3://<source>-gallery/  s3://<env>-gallery/  --exact-timestamps
+AWS_PROFILE=<source> aws s3 sync \
+  s3://<source>-reviews/  s3://<env>-reviews/  --exact-timestamps
+
+# 11. Build + deploy the Angular app with the new env's Cognito IDs baked in:
 cd ..
 ./docker_build.sh
-./deploy.sh
-
-# 9. First login at /admin/login will prompt for a new password
+AWS_PROFILE=<env> BUCKET_NAME=<env-site-bucket> ./deploy.sh
 ```
+
+At this point the whole stack is built but invisible: DNS doesn't resolve to
+the new domain, and CloudFront returns 403 to anyone who somehow finds the
+default `d1a2b3c4.cloudfront.net` hostname. You can preview at the CF default
+hostname by temporarily flipping `cloudfront_enabled` (see below).
+
+### Staged rollout — `publish_dns` and `cloudfront_enabled`
+
+Two independent variables gate visibility. Both default to `true` so
+existing deployments (kvaking) keep serving on every apply — you only set
+them to `false` explicitly during the setup of a new deployment.
+
+| Variable | `false` behaviour | `true` behaviour |
+|---|---|---|
+| `publish_dns` | Route 53 A/AAAA records are *not* created; the domain doesn't resolve. | Records created; the domain aliases to CloudFront. |
+| `cloudfront_enabled` | Distribution exists but returns HTTP 403 to *every* request (including the CF default hostname). | Distribution serves normally. |
+
+Typical launch sequence for a new deployment:
+
+```bash
+# Initial build — invisible from both angles.
+./tf daddybear apply    # tfvars has publish_dns=false, cloudfront_enabled=false
+
+# Preview via the CloudFront default hostname (real cert served by CF's own
+# wildcard on *.cloudfront.net, so no browser cert warnings):
+./tf daddybear output cloudfront_domain
+# → open https://<that-hostname>/
+./tf daddybear apply -var="cloudfront_enabled=true"      # unlock the CF door
+
+# When content + admin flows are verified, flip DNS on. The site goes live.
+./tf daddybear apply -var="publish_dns=true" -var="cloudfront_enabled=true"
+
+# Or set both to true in terraform.tfvars.daddybear once for good.
+```
+
+Rollback is symmetric: flip either variable back to `false` and apply.
+CloudFront's `enabled` change propagates in ~5 minutes; DNS records add/remove
+in seconds.
 
 ---
 
@@ -151,7 +296,7 @@ provides no API for it.
 
 ### Setup
 
-1. Fill in the GitHub variables in `infrastructure/terraform.tfvars`:
+1. Fill in the GitHub variables in `infrastructure/terraform.tfvars.<env>`:
 
    ```hcl
    github_repo_url = "https://github.com/mrkvost/daddybearplumbing"
@@ -163,14 +308,15 @@ provides no API for it.
 
    ```bash
    cd infrastructure
-   terraform apply
+   ./tf <env> apply
    ```
 
 3. Authorise the GitHub connection (one-time, browser-only). Easiest path is to
    search **"CodeConnections"** in the AWS Console top search bar.
    Direct URL: <https://console.aws.amazon.com/codesuite/settings/connections>.
    Alternative path: **CodePipeline** service → left nav → **Settings → Connections**.
-   Make sure the region selector (top-right) is on `eu-central-1`.
+   Make sure the region selector (top-right) matches the deployment's region
+   (`eu-central-1` for kvaking, `us-east-1` for daddybear).
 
    - You should see a connection named `daddybear-github` (or whatever your
      `project` var is) with status **Pending**.
@@ -185,8 +331,8 @@ provides no API for it.
    `src/environments/environment.ts` (`rebuildTriggerUrl` / `rebuildStatusUrl`):
 
    ```bash
-   terraform output rebuild_trigger_url
-   terraform output rebuild_status_url
+   ./tf <env> output rebuild_trigger_url
+   ./tf <env> output rebuild_status_url
    ```
 
 5. Rebuild + deploy once locally so the URLs are baked into the published bundle:

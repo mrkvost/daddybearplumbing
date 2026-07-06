@@ -16,6 +16,8 @@ public/sitemap.xml
 
 # Terraform
 infrastructure/terraform.tfvars
+infrastructure/terraform.tfvars.*
+!infrastructure/terraform.tfvars.example
 infrastructure/.terraform/
 infrastructure/.terraform.lock.hcl
 infrastructure/*.tfstate*

@@ -1,7 +1,19 @@
-# Copy this file to terraform.tfvars and fill in real values
+# Copy this file to `terraform.tfvars.<env>` (e.g. terraform.tfvars.daddybear)
+# and fill in real values. Load it explicitly with
+#   AWS_PROFILE=<env> terraform apply -var-file=terraform.tfvars.<env>
+# so multiple deployments can share one repo without cross-contamination.
+# See the "Switching between AWS accounts" section in README for the full
+# workflow (backends/, wrapper function, etc.).
 domain      = "daddybearplumbing.com"
 bucket_name = "daddybearplumbing-site"
 project     = "daddybear"
+
+# All resources — S3, Lambda, Cognito, CodeBuild — live in us-east-1
+# (N. Virginia), the same region CloudFront requires the ACM cert to live
+# in. Keeping the whole stack in one region simplifies IAM, CloudWatch
+# metric aggregation, and the mental model. Must match the region declared
+# in backends/<env>.hcl (that's where the Terraform state bucket lives).
+region      = "us-east-1"
 
 # For a fresh deployment, start with both `false` so the site is doubly
 # invisible while you upload content:

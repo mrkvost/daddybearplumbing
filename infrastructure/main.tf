@@ -8,12 +8,13 @@ terraform {
     }
   }
 
+  # Partial backend configuration. `bucket`, `key`, `dynamodb_table`, and
+  # `region` are supplied at init time via `-backend-config=backends/<env>.hcl`
+  # so a single main.tf can serve multiple deployments (kvaking in eu-central-1,
+  # daddybear near Chicago, …), each with its own state bucket in its own AWS
+  # account/region.
   backend "s3" {
-    bucket         = "kvaking-terraform-state"
-    key            = "kvaking/terraform.tfstate"
-    region         = "eu-central-1"
-    dynamodb_table = "kvaking-terraform-locks"
-    encrypt        = true
+    encrypt = true
   }
 }
 

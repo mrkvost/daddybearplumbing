@@ -14,9 +14,13 @@ variable "project" {
 }
 
 variable "region" {
-  description = "AWS region for S3 and most resources"
+  description = <<-EOT
+    AWS region for S3 and most resources. Required — no default, so each
+    deployment must declare it explicitly in its terraform.tfvars.<env> file.
+    (kvaking uses eu-central-1; daddybear uses us-east-1 — same region as
+    its CloudFront ACM cert, keeping the entire stack in one region.)
+  EOT
   type        = string
-  default     = "eu-central-1"
 }
 
 variable "contact_email" {
