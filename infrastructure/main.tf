@@ -258,7 +258,7 @@ resource "aws_cloudfront_function" "spa_router" {
 # ---------- CloudFront Distribution ----------
 
 resource "aws_cloudfront_distribution" "site" {
-  enabled             = true
+  enabled             = var.cloudfront_enabled
   is_ipv6_enabled     = true
   default_root_object = "index.html"
   aliases             = [var.domain]
@@ -375,8 +375,13 @@ resource "aws_cloudfront_distribution" "site" {
 }
 
 # ---------- Route53 DNS Records ----------
+# Gated by `var.publish_dns` (default true). Set to false during initial setup
+# of a new deployment so the domain doesn't resolve while content is being
+# migrated — the whole stack still builds and is testable via the CloudFront
+# default hostname (`d1a2b3c4.cloudfront.net`).
 
 resource "aws_route53_record" "a" {
+  count   = var.publish_dns ? 1 : 0
   zone_id = aws_route53_zone.site.zone_id
   name    = var.domain
   type    = "A"
@@ -389,6 +394,7 @@ resource "aws_route53_record" "a" {
 }
 
 resource "aws_route53_record" "aaaa" {
+  count   = var.publish_dns ? 1 : 0
   zone_id = aws_route53_zone.site.zone_id
   name    = var.domain
   type    = "AAAA"
@@ -398,6 +404,20 @@ resource "aws_route53_record" "aaaa" {
     zone_id                = aws_cloudfront_distribution.site.hosted_zone_id
     evaluate_target_health = false
   }
+}
+
+# State migration for the existing kvaking deployment: adding `count` above
+# changes the resource address from `aws_route53_record.a` to
+# `aws_route53_record.a[0]`. Without these `moved` blocks Terraform would try
+# to destroy + recreate the records on the next apply — causing brief DNS
+# downtime on the live site. `moved` migrates state addresses in place.
+moved {
+  from = aws_route53_record.a
+  to   = aws_route53_record.a[0]
+}
+moved {
+  from = aws_route53_record.aaaa
+  to   = aws_route53_record.aaaa[0]
 }
 
 # ---------- Cognito User Pool (Admin Authentication) ----------

@@ -178,6 +178,5 @@ admin user creation, gallery photo convention, project structure.
 - rebuilder and metrics as one (with possible parameters?)
 
 - google link in the footer
-- the texts comparison from the before redesign.
 
 - my own: 'No reviews if no reviews'?

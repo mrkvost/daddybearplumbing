@@ -3,6 +3,15 @@ domain      = "daddybearplumbing.com"
 bucket_name = "daddybearplumbing-site"
 project     = "daddybear"
 
+# For a fresh deployment, start with both `false` so the site is doubly
+# invisible while you upload content:
+#   - publish_dns=false      → the domain doesn't resolve to CloudFront
+#   - cloudfront_enabled=false → CloudFront returns HTTP 403 to every request
+# Flip both to true (a single `terraform apply -var="…=true"`) when ready to
+# launch. CloudFront takes ~5 minutes to propagate the enabled flag globally.
+publish_dns        = false
+cloudfront_enabled = false
+
 # Admin-triggered rebuild (CodeBuild + GitHub via CodeConnections).
 # The connection itself is created by Terraform; you only need to authorise
 # it once in the AWS Console after `terraform apply`. See README
