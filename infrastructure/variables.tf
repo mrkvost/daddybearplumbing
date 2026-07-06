@@ -62,6 +62,28 @@ variable "publish_dns" {
   default     = true
 }
 
+variable "reserve_lambda_concurrency" {
+  description = <<-EOT
+    Whether to set per-function reserved concurrent executions on the app's
+    Lambdas. Set to false on fresh AWS accounts whose regional Lambda
+    "Concurrent executions" quota (L-B99A9384) is only 10 — reserving any
+    positive number on any function would drop unreserved below AWS's
+    10-minimum and Lambda refuses the update.
+
+    When true (default, matches accounts with the standard 1000-slot quota):
+      contact_form   = 10  (spam-surge protection)
+      rebuild_trigger= 2   (limit concurrent rebuild kicks)
+      rebuild_status = 5   (limit concurrent status polls)
+    When false, all three functions run with no reservation (from the
+    account's unreserved pool).
+
+    Flip back to true after the account's Lambda quota has been raised via
+    a service-quotas ticket.
+  EOT
+  type        = bool
+  default     = true
+}
+
 variable "cloudfront_enabled" {
   description = <<-EOT
     Controls the CloudFront distribution's `enabled` flag. When false, the distribution

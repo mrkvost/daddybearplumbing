@@ -84,6 +84,15 @@ The single source of truth for each deployment is its pair of files:
 `terraform.tfvars.<env>` (per-env variable values including `domain`,
 `bucket_name`, `region`, feature-flag gates). `main.tf` is shared.
 
+**Workspace convention: workspace name equals env name.** Each deployment's
+state lives in a **Terraform workspace** matching its env name — env
+`kvaking` uses workspace `kvaking`, env `daddybear` uses workspace
+`daddybear`. Actual state key in the S3 backend for env `<env>`:
+`env:/<env>/<env>/terraform.tfstate`. Terraform's built-in `default`
+workspace is left empty. The `./tf <env> init` wrapper automatically
+selects (or creates) the right workspace, so a fresh clone doesn't
+accidentally land on `default` and try to recreate every resource.
+
 ### AWS profile setup
 
 Split credentials + config by env so nothing runs against the wrong account:
@@ -120,9 +129,13 @@ prefixed with `AWS_PROFILE=<env>` (or run through `./tf`, which sets it).
 
 - `AWS_PROFILE=<env>` so the AWS SDK targets the right account.
 - For `init`: `-backend-config=backends/<env>.hcl -reconfigure` so the S3
-  backend points at the right state bucket/region.
+  backend points at the right state bucket/region, then
+  `terraform workspace select -or-create <env>` to land on the right
+  workspace (see workspace convention above).
 - For `plan|apply|destroy|refresh|import|console|state|taint|untaint`:
-  `-var-file=terraform.tfvars.<env>` so per-env values load.
+  `-var-file=terraform.tfvars.<env>` so per-env values load. Workspace
+  selection persists in `.terraform/environment` (gitignored) between
+  commands, so no re-select is needed after init.
 
 Examples:
 ```bash

@@ -24,6 +24,14 @@ region      = "us-east-1"
 publish_dns        = false
 cloudfront_enabled = false
 
+# Fresh AWS accounts start with a regional Lambda concurrency quota of 10,
+# so no function can reserve any concurrency. Set to false until you request
+# a service-quota increase ("Concurrent executions" / L-B99A9384). Once the
+# quota is raised, remove this line so the code default of `true` kicks
+# back in and gives per-function reservations (contact_form=10,
+# rebuild_trigger=2, rebuild_status=5).
+reserve_lambda_concurrency = false
+
 # Admin-triggered rebuild (CodeBuild + GitHub via CodeConnections).
 # The connection itself is created by Terraform; you only need to authorise
 # it once in the AWS Console after `terraform apply`. See README

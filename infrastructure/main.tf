@@ -625,7 +625,7 @@ resource "aws_lambda_function" "contact_form" {
   handler                        = "contact_form.handler"
   runtime                        = "python3.13"
   timeout                        = 10
-  reserved_concurrent_executions = 10
+  reserved_concurrent_executions = var.reserve_lambda_concurrency ? 10 : -1
   filename         = data.archive_file.contact_form.output_path
   source_code_hash = data.archive_file.contact_form.output_base64sha256
 
@@ -833,7 +833,7 @@ resource "aws_lambda_function" "rebuild_trigger" {
   handler                        = "trigger_rebuild.handler"
   runtime                        = "python3.13"
   timeout                        = 10
-  reserved_concurrent_executions = 2
+  reserved_concurrent_executions = var.reserve_lambda_concurrency ? 2 : -1
   filename                       = data.archive_file.rebuild_trigger.output_path
   source_code_hash               = data.archive_file.rebuild_trigger.output_base64sha256
 
@@ -850,7 +850,7 @@ resource "aws_lambda_function" "rebuild_status" {
   handler                        = "rebuild_status.handler"
   runtime                        = "python3.13"
   timeout                        = 10
-  reserved_concurrent_executions = 5
+  reserved_concurrent_executions = var.reserve_lambda_concurrency ? 5 : -1
   filename                       = data.archive_file.rebuild_status.output_path
   source_code_hash               = data.archive_file.rebuild_status.output_base64sha256
 

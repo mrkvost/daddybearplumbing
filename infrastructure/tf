@@ -14,13 +14,22 @@
 #   1. Sets AWS_PROFILE=<env> so the AWS CLI + provider use the right creds.
 #      Requires named profiles in ~/.aws/credentials — see README.
 #   2. For `init`, passes `-backend-config=backends/<env>.hcl -reconfigure` so
-#      Terraform points at the right state bucket in the right AWS account.
-#   3. For any other subcommand, passes `-var-file=terraform.tfvars.<env>` so
-#      Terraform reads the right per-environment variables.
+#      Terraform points at the right state bucket in the right AWS account,
+#      then selects (or creates) a Terraform workspace named the same as the
+#      env. Workspace-per-env convention: env "kvaking" → workspace "kvaking".
+#      This encodes the workspace selection so a fresh clone doesn't
+#      accidentally land on the empty `default` workspace and try to recreate
+#      every resource.
+#   3. For subcommands that accept -var-file (plan, apply, destroy, refresh,
+#      import, console, validate), passes -var-file=terraform.tfvars.<env>.
+#      For subcommands that don't (state, output, workspace, fmt, show,
+#      providers, graph, version, force-unlock, login, test), passes through
+#      as-is — passing -var-file to those errors out with "Too many command
+#      line arguments" on Terraform 1.7+.
 #
-# You still need to re-run `./tf <env> init -reconfigure` any time you switch
-# environments — Terraform can only hold one backend configuration at a time
-# in .terraform/ per checkout.
+# You still need to re-run `./tf <env> init` any time you switch environments —
+# Terraform can only hold one backend configuration at a time in .terraform/
+# per checkout.
 
 set -euo pipefail
 
@@ -54,14 +63,22 @@ export AWS_PROFILE="$env"
 
 case "$subcmd" in
     init)
-        exec terraform init -backend-config="$backend_file" -reconfigure "$@"
+        terraform init -backend-config="$backend_file" -reconfigure "$@"
+        # Convention: workspace name == env name. `-or-create` (Terraform 1.4+)
+        # makes this idempotent — selects if present, creates if new. Without
+        # this, a fresh clone lands on the empty `default` workspace and plan
+        # wants to create every resource from scratch.
+        terraform workspace select -or-create "$env"
         ;;
-    plan|apply|destroy|refresh|import|console|state|taint|untaint)
+    plan|apply|destroy|refresh|import|console|validate)
+        # Subcommands that accept `-var-file`. Anything else (state, output,
+        # workspace, fmt, show, providers, graph, version, force-unlock,
+        # login, test, …) falls through — passing `-var-file` to those
+        # errors out with "Too many command line arguments" on Terraform 1.7+.
+        # `taint`/`untaint` were removed in 1.7; use `apply -replace=ADDRESS`.
         exec terraform "$subcmd" -var-file="$tfvars_file" "$@"
         ;;
     *)
-        # Fall-through for subcommands that don't take -var-file (fmt, validate,
-        # output, providers, workspace, version, …).
         exec terraform "$subcmd" "$@"
         ;;
 esac
