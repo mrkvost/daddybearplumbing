@@ -956,10 +956,11 @@ export class AdminComponent implements OnInit, OnDestroy {
       const ext = this.heroStagedFile.name.split('.').pop()?.toLowerCase() || 'jpg';
       const newName = `hero-${this.randomHash()}.${ext}`;
       await this.uploadService.upload(this.heroStagedFile, `gallery-images/meta/${newName}`, GALLERY_BUCKET);
-      // Delete old file
-      if (this.siteMeta.hero) {
-        await this.uploadService.delete(`gallery-images/meta/${this.siteMeta.hero}`, GALLERY_BUCKET).catch(() => {});
-      }
+      // Intentionally NOT deleting the old file here — the currently-deployed
+      // bundle still references it (SITE_DATA.heroImage is baked in at build
+      // time). Removing it now would 404 the hero for every visitor until the
+      // next rebuild. cleanup-meta-orphans.sh drops it in the post-build
+      // step once the fresh bundle takes over.
       this.siteMeta.hero = newName;
       await this.saveMeta();
       this.reconcilePendingArea('Hero image');
@@ -1010,9 +1011,8 @@ export class AdminComponent implements OnInit, OnDestroy {
       const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
       const newName = `og-${this.randomHash()}.${ext}`;
       await this.uploadService.upload(file, `gallery-images/meta/${newName}`, GALLERY_BUCKET);
-      if (this.siteMeta.og) {
-        await this.uploadService.delete(`gallery-images/meta/${this.siteMeta.og}`, GALLERY_BUCKET).catch(() => {});
-      }
+      // Old file left in place until cleanup-meta-orphans.sh runs post-build
+      // — see confirmHeroUpload() for the full rationale.
       this.siteMeta.og = newName;
       await this.saveMeta();
       this.reconcilePendingArea('OG image');

@@ -39,9 +39,16 @@ echo "  CLOUDFRONT_DIST_ID=$CLOUDFRONT_DIST_ID"
 
 export BUCKET_NAME
 export CLOUDFRONT_DIST_ID
+export GALLERY_BUCKET
 
 ./scripts/publish.sh
 
 echo "Uploading meta placeholders to gallery bucket (skip if already custom)…"
 aws s3 sync meta/ "s3://$GALLERY_BUCKET/gallery-images/meta/" --no-progress \
   --cache-control "public, max-age=31536000, immutable"
+
+# Post-publish: delete meta/ images no longer referenced by meta.json. The
+# freshly deployed bundle now baked in the NEW hero/OG hashes, so the OLD
+# files are safe to remove — closes the "no image until rebuild finishes"
+# gap that used to happen if the admin deleted the old file on upload.
+./scripts/cleanup-meta-orphans.sh

@@ -717,6 +717,11 @@ resource "aws_iam_role_policy" "codebuild" {
         Resource = [
           aws_s3_bucket.site.arn,
           "${aws_s3_bucket.site.arn}/*",
+          # Cleanup-meta-orphans.sh runs post-build: reads meta.json and
+          # deletes previously-referenced hero/og files under the gallery
+          # bucket's gallery-images/meta/ prefix.
+          aws_s3_bucket.gallery.arn,
+          "${aws_s3_bucket.gallery.arn}/*",
         ]
       },
       {
@@ -754,6 +759,11 @@ resource "aws_codebuild_project" "site" {
     environment_variable {
       name  = "CLOUDFRONT_DIST_ID"
       value = aws_cloudfront_distribution.site.id
+    }
+
+    environment_variable {
+      name  = "GALLERY_BUCKET"
+      value = aws_s3_bucket.gallery.bucket
     }
   }
 
