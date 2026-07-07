@@ -14,17 +14,17 @@
 export const environment = {
   aws: {
     region: 'us-east-1',
-    userPoolId: 'TODO_FROM_TF_OUTPUT_cognito_user_pool_id',
-    cognitoClientId: 'TODO_FROM_TF_OUTPUT_cognito_client_id',
-    identityPoolId: 'TODO_FROM_TF_OUTPUT_cognito_identity_pool_id',
+    userPoolId: 'us-east-1_ZVXECpnQu',
+    cognitoClientId: '3am5q61j2d7ps25o31irfgc42m',
+    identityPoolId: 'us-east-1:afb23c64-710c-49a9-aca2-15ea463064a6',
     bucketName: 'daddybear-site',
     galleryBucket: 'daddybear-site-gallery',
     reviewsBucket: 'daddybear-site-reviews',
   },
-  contactFormUrl: 'TODO_FROM_TF_OUTPUT_contact_form_url',
+  contactFormUrl: 'https://xtatjo566r6lcfz7zcmnhta4x40rvhqi.lambda-url.us-east-1.on.aws/',
   // TODO: register a Turnstile site for daddybearplumbing.com in Cloudflare
   // and paste the site key here (the secret goes in terraform.tfvars.daddybear).
-  turnstileSiteKey: 'TODO_FROM_CLOUDFLARE_TURNSTILE',
-  rebuildTriggerUrl: 'TODO_FROM_TF_OUTPUT_rebuild_trigger_url',
-  rebuildStatusUrl: 'TODO_FROM_TF_OUTPUT_rebuild_status_url',
+  turnstileSiteKey: '0x4AAAAAADxfNT75ByjK OHr',
+  rebuildTriggerUrl: 'https://gmfwmrdjaej7hfnz5e5qkjp42y0sixbm.lambda-url.us-east-1.on.aws/',
+  rebuildStatusUrl: 'https://rdp6a7vlw4hotqayrolmbjnhda0bsgcn.lambda-url.us-east-1.on.aws/',
 };
