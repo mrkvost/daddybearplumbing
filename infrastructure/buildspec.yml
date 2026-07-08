@@ -8,6 +8,10 @@ version: 0.2
 #   BUCKET_NAME          - target S3 bucket for the built site (e.g. "kvaking")
 #   CLOUDFRONT_DIST_ID   - distribution to invalidate after publish
 #   GALLERY_BUCKET       - bucket holding gallery-images/* (for orphan cleanup)
+#   TARGET_ENV           - which deployment env this build is for (kvaking,
+#                          daddybear, …). Selects the right globals.<env>.ts
+#                          in generate-seo.js and the right Angular build
+#                          configuration for env-specific fileReplacements.
 
 phases:
   install:
@@ -23,7 +27,17 @@ phases:
   build:
     commands:
       - npm install
-      - npm run build
+      # Compose --configuration: always production; append the env name if it
+      # matches a build configuration in angular.json (kvaking uses the plain
+      # `production` default; daddybear adds `,daddybear` for fileReplacements).
+      - |
+        if [ -n "$TARGET_ENV" ] && [ "$TARGET_ENV" != "kvaking" ]; then
+          NG_CONFIG="production,$TARGET_ENV"
+        else
+          NG_CONFIG="production"
+        fi
+      - echo "ng build --configuration=$NG_CONFIG"
+      - npx ng build --configuration=$NG_CONFIG
 
   post_build:
     commands:

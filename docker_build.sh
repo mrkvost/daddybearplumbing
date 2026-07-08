@@ -32,8 +32,11 @@ esac
 
 echo "Building for env=$env (ng --configuration=$ng_config)"
 
+# TARGET_ENV is picked up by scripts/generate-seo.js so it reads globals.<env>.ts
+# instead of the default globals.ts (which holds the kvaking values).
 docker run --rm \
   -v "$(pwd)":/app \
   -w /app \
+  -e "TARGET_ENV=$env" \
   node:24-alpine \
   sh -c "node scripts/generate-seo.js && npm install && npx ng build --configuration=$ng_config"

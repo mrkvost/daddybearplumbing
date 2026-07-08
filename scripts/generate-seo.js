@@ -17,10 +17,24 @@
 const fs = require('fs');
 const path = require('path');
 
-const globalsFile = fs.readFileSync(path.join(__dirname, '../src/app/globals.ts'), 'utf8');
+// Env-aware globals lookup — if TARGET_ENV points at a per-env globals file
+// (e.g. src/app/globals.daddybear.ts), read that; else fall back to the
+// default globals.ts. The env-specific file is what Angular's fileReplacements
+// will swap in at build time, so pre-build SEO must match.
+const targetEnv = process.env.TARGET_ENV || '';
+const envGlobalsPath = targetEnv
+  ? path.join(__dirname, `../src/app/globals.${targetEnv}.ts`)
+  : null;
+const globalsPath = envGlobalsPath && fs.existsSync(envGlobalsPath)
+  ? envGlobalsPath
+  : path.join(__dirname, '../src/app/globals.ts');
+
+console.log(`Reading business config from ${path.relative(path.join(__dirname, '..'), globalsPath)} (TARGET_ENV=${targetEnv || '(unset)'})`);
+
+const globalsFile = fs.readFileSync(globalsPath, 'utf8');
 const domainMatch = globalsFile.match(/domain:\s*'([^']+)'/);
 if (!domainMatch) {
-  console.error('Could not find domain in globals.ts');
+  console.error(`Could not find domain in ${globalsPath}`);
   process.exit(1);
 }
 const domain = domainMatch[1];

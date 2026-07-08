@@ -765,6 +765,15 @@ resource "aws_codebuild_project" "site" {
       name  = "GALLERY_BUCKET"
       value = aws_s3_bucket.gallery.bucket
     }
+
+    # Which deployment env this CodeBuild project builds — used by
+    # generate-seo.js (to pick globals.<env>.ts) and buildspec.yml (to append
+    # ",<env>" to ng --configuration for env-specific fileReplacements).
+    # Reuses `var.project` since that's already the env-tag per deployment.
+    environment_variable {
+      name  = "TARGET_ENV"
+      value = var.project
+    }
   }
 
   source {

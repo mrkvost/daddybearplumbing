@@ -57,6 +57,10 @@
                 {
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.daddybear.ts"
+                },
+                {
+                  "replace": "src/app/globals.ts",
+                  "with": "src/app/globals.daddybear.ts"
                 }
               ]
             }
