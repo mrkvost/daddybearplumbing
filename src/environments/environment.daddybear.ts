@@ -24,7 +24,7 @@ export const environment = {
   contactFormUrl: 'https://xtatjo566r6lcfz7zcmnhta4x40rvhqi.lambda-url.us-east-1.on.aws/',
   // TODO: register a Turnstile site for daddybearplumbing.com in Cloudflare
   // and paste the site key here (the secret goes in terraform.tfvars.daddybear).
-  turnstileSiteKey: '0x4AAAAAADxfNT75ByjK OHr',
+  turnstileSiteKey: '0x4AAAAAADxfNT75ByjK_OHr',
   rebuildTriggerUrl: 'https://gmfwmrdjaej7hfnz5e5qkjp42y0sixbm.lambda-url.us-east-1.on.aws/',
   rebuildStatusUrl: 'https://rdp6a7vlw4hotqayrolmbjnhda0bsgcn.lambda-url.us-east-1.on.aws/',
 };
