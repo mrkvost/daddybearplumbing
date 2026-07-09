@@ -15,6 +15,13 @@ project     = "daddybear"
 # in backends/<env>.hcl (that's where the Terraform state bucket lives).
 region      = "us-east-1"
 
+# Google Workspace domain-verification token, if the domain's business inbox
+# is on Google Workspace. Grabbed from the Google Workspace setup wizard
+# (looks like `google-site-verification=IPNT85MrlIU...`). Terraform adds it
+# to the apex TXT record alongside SPF so both coexist without one clobbering
+# the other. Leave empty for envs that don't use Google Workspace.
+google_site_verification = ""
+
 # For a fresh deployment, start with both `false` so the site is doubly
 # invisible while you upload content:
 #   - publish_dns=false      → the domain doesn't resolve to CloudFront

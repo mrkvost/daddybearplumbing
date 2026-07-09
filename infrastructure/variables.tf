@@ -48,6 +48,16 @@ variable "github_branch" {
   default     = "master"
 }
 
+variable "google_site_verification" {
+  description = <<-EOT
+    Google Workspace domain verification token (the `google-site-verification=...`
+    string from the Google Workspace setup wizard). Lives on the apex TXT record
+    alongside SPF. Leave empty for envs that don't use Google Workspace.
+  EOT
+  type        = string
+  default     = ""
+}
+
 variable "publish_dns" {
   description = <<-EOT
     When true, the domain's A/AAAA records are created and point at CloudFront.

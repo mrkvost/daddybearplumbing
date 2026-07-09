@@ -574,6 +574,46 @@ resource "aws_route53_record" "ses_dkim" {
   records = ["${aws_ses_domain_dkim.site.dkim_tokens[count.index]}.dkim.amazonses.com"]
 }
 
+# Apex TXT record set — holds SPF and, optionally, the Google Workspace
+# domain-verification token. Multiple TXT records on the same name must live
+# in a single Route 53 record set (multiple `aws_route53_record` resources
+# with the same name+type collide, and Terraform's default behaviour would
+# overwrite one with the other).
+#
+# SPF authorises both Google Workspace (outbound from info@<domain>) and
+# Amazon SES (outbound from contact@<domain> via the Lambda). `-all` is
+# strict hard-fail — better deliverability reputation than `~all` for
+# domains that don't send from anywhere else.
+resource "aws_route53_record" "apex_txt" {
+  zone_id = aws_route53_zone.site.zone_id
+  name    = var.domain
+  type    = "TXT"
+  ttl     = 600
+  records = concat(
+    ["v=spf1 include:_spf.google.com include:amazonses.com -all"],
+    var.google_site_verification != "" ? ["google-site-verification=${var.google_site_verification}"] : [],
+  )
+  # Allow first-apply to overwrite the existing google-site-verification TXT
+  # that Google Workspace's setup wizard created. Because that value is
+  # included in the concat above, the "overwrite" preserves it while adding
+  # SPF. No data lost. After first apply, this flag is inert.
+  allow_overwrite = true
+}
+
+# DMARC: policy + reporting endpoint. `p=none` starts monitor-only so we can
+# watch aggregate reports (rua) for a couple of weeks and confirm nothing
+# legitimate is failing before tightening to `p=quarantine` or `p=reject`.
+# `fo=1` requests failure reports whenever SPF OR DKIM fails (default only
+# reports both-failures). Reports come to the contact_email tfvar so we don't
+# hard-code an address.
+resource "aws_route53_record" "dmarc" {
+  zone_id = aws_route53_zone.site.zone_id
+  name    = "_dmarc.${var.domain}"
+  type    = "TXT"
+  ttl     = 600
+  records = ["v=DMARC1; p=none; rua=mailto:${var.contact_email}; ruf=mailto:${var.contact_email}; fo=1"]
+}
+
 # ---------- Lambda: Contact Form Handler ----------
 
 data "archive_file" "contact_form" {
