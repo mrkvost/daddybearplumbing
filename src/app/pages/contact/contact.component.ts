@@ -38,7 +38,11 @@ export class ContactComponent implements AfterViewInit, OnDestroy {
   phoneDisplay = BUSINESS.phoneDisplay;
   email = BUSINESS.email;
   address = BUSINESS.address;
-  mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+  // Prefer the Google Business Profile URL when set — lands the visitor
+  // directly on our GBP listing (name, hours, reviews) instead of a generic
+  // address search result. Falls back to an address query when BUSINESS.social.google
+  // isn't populated (envs without a GBP set up).
+  mapsUrl = BUSINESS.social.google || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
     `${BUSINESS.address.line1}, ${BUSINESS.address.city}, ${BUSINESS.address.state} ${BUSINESS.address.zip}`
   )}`;
   safeEmbedUrl: SafeResourceUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
