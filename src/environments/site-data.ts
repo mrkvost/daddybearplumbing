@@ -8,7 +8,7 @@ export interface SiteData {
 }
 
 export const SITE_DATA: SiteData = {
-  heroImage: "/gallery-images/meta/hero-cb1439.jpg",
+  heroImage: "/gallery-images/meta/hero-5f7fd5.jpg",
   ogImage: "https://daddybearplumbing.com/gallery-images/meta/og-c7b3b4.jpg",
   locations: [
     "Burr Ridge, IL",

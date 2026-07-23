@@ -15,6 +15,14 @@ project     = "daddybear"
 # in backends/<env>.hcl (that's where the Terraform state bucket lives).
 region      = "us-east-1"
 
+# If set, this deployment stops serving its own content and instead returns
+# HTTP 301 (permanent redirect) to https://<value>/<same-path>. Used to keep
+# an old domain working as a permanent redirect after moving traffic to a
+# new one (e.g. `redirect_target_domain = "daddybearplumbing.com"` in
+# terraform.tfvars.kvaking after the rename). Leave empty for envs that
+# serve their own content normally.
+redirect_target_domain = ""
+
 # Google Workspace domain-verification token, if the domain's business inbox
 # is on Google Workspace. Grabbed from the Google Workspace setup wizard
 # (looks like `google-site-verification=IPNT85MrlIU...`). Terraform adds it

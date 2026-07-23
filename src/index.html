@@ -14,7 +14,7 @@
     <meta property="og:site_name" content="Daddy Bear Plumbing" />
     <meta property="og:title" content="Daddy Bear Plumbing" />
     <meta property="og:description" content="Professional plumbing services for Chicago and Suburbs. Licensed, insured, and locally owned." />
-    <meta property="og:url" content="https://kvaking.com" />
+    <meta property="og:url" content="https://daddybearplumbing.com" />
     <meta property="og:image" content="https://daddybearplumbing.com/gallery-images/meta/og-c7b3b4.jpg" />
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
@@ -24,6 +24,80 @@
     <meta name="twitter:title" content="Daddy Bear Plumbing" />
     <meta name="twitter:description" content="Professional plumbing services for Chicago and Suburbs. Licensed, insured, and locally owned." />
     <meta name="twitter:image" content="https://daddybearplumbing.com/gallery-images/meta/og-c7b3b4.jpg" />
+
+    <!-- LocalBusiness / Plumber structured data (schema.org).
+         Machine-readable business identity for Google, Bing, and other search
+         engines. Links the site → Google Business Profile → Knowledge Panel.
+         Rich-results-eligible: after deploy, verify with
+         https://search.google.com/test/rich-results (paste the domain URL).
+         Values are hardcoded for daddybearplumbing.com — this file is
+         daddybear-only now that kvaking is being retired. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Plumber",
+      "@id": "https://daddybearplumbing.com/#business",
+      "name": "Daddy Bear Plumbing",
+      "description": "Licensed, insured, and bonded plumbing services for Chicago and Suburbs. Residential, commercial, and construction plumbing. 24/7 emergency service.",
+      "image": "https://daddybearplumbing.com/logo-white.svg",
+      "logo": "https://daddybearplumbing.com/logo-white.svg",
+      "url": "https://daddybearplumbing.com",
+      "telephone": "+1-708-252-3065",
+      "email": "info@daddybearplumbing.com",
+      "priceRange": "$$",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "9100 Plainfield Rd, Unit 3",
+        "addressLocality": "Brookfield",
+        "addressRegion": "IL",
+        "postalCode": "60513",
+        "addressCountry": "US"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 41.806531,
+        "longitude": -87.846257
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "name": "Office Hours",
+          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+          "opens": "08:00",
+          "closes": "17:00"
+        }
+      ],
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Plumbing Services",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "24/7 Emergency Plumbing",
+              "description": "Round-the-clock emergency plumbing dispatch for burst pipes, active leaks, sewer backups, no-water and no-heat situations.",
+              "hoursAvailable": {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+                "opens": "00:00",
+                "closes": "23:59"
+              }
+            }
+          }
+        ]
+      },
+      "areaServed": [
+        { "@type": "City", "name": "Chicago" },
+        { "@type": "AdministrativeArea", "name": "Chicago Suburbs" }
+      ],
+      "sameAs": [
+        "https://www.facebook.com/profile.php?id=61590762127242",
+        "https://www.instagram.com/daddybearplumbing",
+        "https://www.youtube.com/@DaddyBearPlumbing"
+      ]
+    }
+    </script>
 
     <!-- Fonts:
          - Hanken Grotesk + Work Sans from Google Fonts (matches the public-site design).

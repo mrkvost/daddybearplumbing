@@ -92,11 +92,18 @@ async function fetchJson(url) {
   }
 }
 
-const META_URL = `${baseUrl}/gallery-images/meta.json`;
-const LOCATIONS_URL = `${baseUrl}/gallery-images/locations.json`;
+// Where to FETCH meta.json + locations.json from during the build. Defaults
+// to `${baseUrl}` (the domain from globals), but the SITE_DATA_URL env var
+// overrides this — used during a fresh deployment's bootstrap when DNS
+// isn't live yet (fetch via the CloudFront default hostname instead). The
+// sitemap.xml and og:image tags still use baseUrl so the deployed site's
+// URLs are correct.
+const fetchOrigin = (process.env.SITE_DATA_URL || baseUrl).replace(/\/$/, '');
+const META_URL = `${fetchOrigin}/gallery-images/meta.json`;
+const LOCATIONS_URL = `${fetchOrigin}/gallery-images/locations.json`;
 
 async function main() {
-  console.log(`Fetching site data from ${baseUrl}...`);
+  console.log(`Fetching site data from ${fetchOrigin}${fetchOrigin === baseUrl ? '' : ' (SITE_DATA_URL override; baked URLs still use ' + baseUrl + ')'}...`);
   let meta, locations;
   try {
     [meta, locations] = await Promise.all([fetchJson(META_URL), fetchJson(LOCATIONS_URL)]);

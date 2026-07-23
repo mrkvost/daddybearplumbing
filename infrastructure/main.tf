@@ -256,6 +256,48 @@ resource "aws_cloudfront_function" "spa_router" {
   EOT
 }
 
+# Permanent-redirect function — only created for envs where
+# `var.redirect_target_domain` is set. Returns HTTP 301 with the same path
+# + query string against the target domain. Attached to every cache behavior
+# so no path escapes the redirect (default catches SPA routes; ordered
+# behaviors catch gallery images, reviews JSON, etc.).
+resource "aws_cloudfront_function" "redirect" {
+  count   = var.redirect_target_domain != "" ? 1 : 0
+  name    = "${var.project}-redirect"
+  runtime = "cloudfront-js-2.0"
+  publish = true
+  code    = <<-EOT
+    function handler(event) {
+      var request = event.request;
+      var uri = request.uri || '/';
+      var qs = request.querystring || {};
+      var pairs = [];
+      for (var key in qs) {
+        var v = qs[key];
+        if (v && v.value !== undefined) pairs.push(key + '=' + v.value);
+      }
+      var queryString = pairs.length ? '?' + pairs.join('&') : '';
+      return {
+        statusCode: 301,
+        statusDescription: 'Moved Permanently',
+        headers: {
+          'location': { value: 'https://${var.redirect_target_domain}' + uri + queryString },
+          'cache-control': { value: 'public, max-age=3600' }
+        }
+      };
+    }
+  EOT
+}
+
+# Which viewer-request function CloudFront should invoke. Non-redirect envs
+# use the SPA router (rewrites bare paths → path/index.html for prerendered
+# HTML). Redirect envs replace that with the redirect function on every
+# behavior — no origin fetch happens.
+locals {
+  is_redirect_env             = var.redirect_target_domain != ""
+  viewer_request_function_arn = local.is_redirect_env ? aws_cloudfront_function.redirect[0].arn : aws_cloudfront_function.spa_router.arn
+}
+
 # ---------- CloudFront Distribution ----------
 
 resource "aws_cloudfront_distribution" "site" {
@@ -299,7 +341,7 @@ resource "aws_cloudfront_distribution" "site" {
 
     function_association {
       event_type   = "viewer-request"
-      function_arn = aws_cloudfront_function.spa_router.arn
+      function_arn = local.viewer_request_function_arn
     }
   }
 
@@ -312,6 +354,14 @@ resource "aws_cloudfront_distribution" "site" {
     cached_methods         = ["GET", "HEAD"]
     compress               = true
     cache_policy_id        = data.aws_cloudfront_cache_policy.caching_disabled.id
+
+    dynamic "function_association" {
+      for_each = local.is_redirect_env ? [1] : []
+      content {
+        event_type   = "viewer-request"
+        function_arn = aws_cloudfront_function.redirect[0].arn
+      }
+    }
   }
 
   # Reviews manifest: no cache so changes are instant
@@ -323,6 +373,14 @@ resource "aws_cloudfront_distribution" "site" {
     cached_methods         = ["GET", "HEAD"]
     compress               = true
     cache_policy_id        = data.aws_cloudfront_cache_policy.caching_disabled.id
+
+    dynamic "function_association" {
+      for_each = local.is_redirect_env ? [1] : []
+      content {
+        event_type   = "viewer-request"
+        function_arn = aws_cloudfront_function.redirect[0].arn
+      }
+    }
   }
 
   # Gallery images: cached normally (images don't change)
@@ -334,6 +392,14 @@ resource "aws_cloudfront_distribution" "site" {
     cached_methods         = ["GET", "HEAD"]
     compress               = true
     cache_policy_id        = data.aws_cloudfront_cache_policy.caching_optimized.id
+
+    dynamic "function_association" {
+      for_each = local.is_redirect_env ? [1] : []
+      content {
+        event_type   = "viewer-request"
+        function_arn = aws_cloudfront_function.redirect[0].arn
+      }
+    }
   }
 
   # Reviews data: cached normally
@@ -345,6 +411,14 @@ resource "aws_cloudfront_distribution" "site" {
     cached_methods         = ["GET", "HEAD"]
     compress               = true
     cache_policy_id        = data.aws_cloudfront_cache_policy.caching_optimized.id
+
+    dynamic "function_association" {
+      for_each = local.is_redirect_env ? [1] : []
+      content {
+        event_type   = "viewer-request"
+        function_arn = aws_cloudfront_function.redirect[0].arn
+      }
+    }
   }
 
   # SPA routing — serve index.html for 403/404

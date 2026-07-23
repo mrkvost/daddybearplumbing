@@ -34,9 +34,15 @@ echo "Building for env=$env (ng --configuration=$ng_config)"
 
 # TARGET_ENV is picked up by scripts/generate-seo.js so it reads globals.<env>.ts
 # instead of the default globals.ts (which holds the kvaking values).
+# SITE_DATA_URL is an optional override for the fetch origin (meta.json /
+# locations.json) — used during a fresh deployment's bootstrap when DNS
+# isn't live yet, so the build can fetch via the CloudFront default hostname
+# instead of the domain (e.g. SITE_DATA_URL="https://d1a2b3c4.cloudfront.net"
+# ./docker_build.sh). Unset in normal builds.
 docker run --rm \
   -v "$(pwd)":/app \
   -w /app \
   -e "TARGET_ENV=$env" \
+  -e "SITE_DATA_URL=${SITE_DATA_URL:-}" \
   node:24-alpine \
   sh -c "node scripts/generate-seo.js && npm install && npx ng build --configuration=$ng_config"

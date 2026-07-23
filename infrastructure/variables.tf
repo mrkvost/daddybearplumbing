@@ -48,6 +48,23 @@ variable "github_branch" {
   default     = "master"
 }
 
+variable "redirect_target_domain" {
+  description = <<-EOT
+    If set, this deployment stops serving its site and instead returns
+    HTTP 301 (permanent redirect) to `https://<redirect_target_domain>`
+    for every request, preserving path and query string. Used to keep
+    an old domain working as a permanent redirect after moving traffic
+    to a new one — e.g. kvaking.com after the site was renamed to
+    daddybearplumbing.com.
+
+    Applies at CloudFront level via a viewer-request Function — no
+    origin requests are made when redirecting. Leave empty for envs
+    that serve their own content normally.
+  EOT
+  type        = string
+  default     = ""
+}
+
 variable "google_site_verification" {
   description = <<-EOT
     Google Workspace domain verification token (the `google-site-verification=...`
