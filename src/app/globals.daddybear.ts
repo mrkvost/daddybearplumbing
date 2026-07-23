@@ -17,6 +17,6 @@ export const BUSINESS = {
     // Temporary personal LinkedIn — swap for the company page URL when it exists.
     linkedin:  'https://www.linkedin.com/in/matej-rostak-958751417',
     youtube:   'https://www.youtube.com/@DaddyBearPlumbing',
-    google:    '',
+    google:    'https://maps.app.goo.gl/Lp93hRuyNuT87zWy6',
   },
 };
